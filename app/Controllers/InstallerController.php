@@ -93,6 +93,8 @@ class InstallerController extends Controller
         $adminEmail    = filter_var($this->post('admin_email', ''), FILTER_SANITIZE_EMAIL);
         $adminPassword = $this->post('admin_password', '');
         $adminConfirm  = $this->post('admin_password_confirm', '');
+        $appUrl        = rtrim($this->sanitize($this->post('app_url', 'http://localhost')), '/');
+        $appLocale     = in_array($this->post('app_locale'), ['de', 'en'], true) ? $this->post('app_locale') : 'de';
 
         if (empty($adminEmail) || empty($adminPassword)) {
             $this->session->flash('error', 'Bitte alle Felder ausfüllen.');
@@ -115,7 +117,7 @@ class InstallerController extends Controller
         try {
             $pdo = Database::createFromCredentials($db['host'], $db['port'], $db['database'], $db['username'], $db['password']);
             $this->createAdminUser($pdo, $adminName, $adminEmail, $adminPassword);
-            $this->writeEnvFile($db['host'], $db['port'], $db['database'], $db['username'], $db['password']);
+            $this->writeEnvFile($db['host'], $db['port'], $db['database'], $db['username'], $db['password'], $appUrl, $appLocale);
             $this->session->delete('install_db');
             $this->redirect('/install/schritt/4');
         } catch (\Throwable $e) {

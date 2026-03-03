@@ -44,12 +44,21 @@ class Database
 
     public static function createFromCredentials(string $host, int $port, string $database, string $username, string $password): PDO
     {
-        $dsn = "mysql:host={$host};port={$port};dbname={$database};charset=utf8mb4";
-        return new PDO($dsn, $username, $password, [
+        $options = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
             PDO::ATTR_EMULATE_PREPARES   => false,
-        ]);
+        ];
+
+        // Connect without dbname first to allow creating the database
+        $dsnNoDB = "mysql:host={$host};port={$port};charset=utf8mb4";
+        $pdo = new PDO($dsnNoDB, $username, $password, $options);
+
+        $dbQuoted = '`' . str_replace('`', '``', $database) . '`';
+        $pdo->exec("CREATE DATABASE IF NOT EXISTS {$dbQuoted} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        $pdo->exec("USE {$dbQuoted}");
+
+        return $pdo;
     }
 
     public function query(string $sql, array $params = []): PDOStatement
