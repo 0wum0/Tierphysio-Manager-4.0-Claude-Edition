@@ -194,6 +194,39 @@ function updateSidebarToggle() {
 }
 updateSidebarToggle();
 window.addEventListener('resize', updateSidebarToggle);
+
+/* ── Apple-style Ripple + Pulse ── */
+(function() {
+    const RIPPLE_SELECTOR = [
+        '.btn', '.lg-btn', '.cal-nav-btn', '.cal-view-btn',
+        '.header-btn', '.modal-close', '.dropdown-item', '.nav-item'
+    ].join(',');
+
+    function spawnRipple(el, e) {
+        /* Element braucht position:relative für absolute Positionierung */
+        const style = getComputedStyle(el);
+        if (style.position === 'static') el.style.position = 'relative';
+        el.style.overflow = 'hidden';
+
+        const rect   = el.getBoundingClientRect();
+        const x      = (e.clientX ?? rect.left + rect.width  / 2) - rect.left;
+        const y      = (e.clientY ?? rect.top  + rect.height / 2) - rect.top;
+
+        const wave   = document.createElement('span');
+        wave.className = 'lg-ripple-wave';
+        wave.style.left = x + 'px';
+        wave.style.top  = y + 'px';
+        el.appendChild(wave);
+
+        wave.addEventListener('animationend', () => wave.remove(), { once: true });
+    }
+
+    document.addEventListener('pointerdown', function(e) {
+        const el = e.target.closest(RIPPLE_SELECTOR);
+        if (!el || el.disabled || el.hasAttribute('data-no-ripple')) return;
+        spawnRipple(el, e);
+    }, { passive: true });
+})();
 </script>
 </body>
 </html>

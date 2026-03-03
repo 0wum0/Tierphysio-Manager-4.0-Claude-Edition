@@ -9,6 +9,71 @@
    via url(#lg-distort) referenziert.
    ---------------------------------------------------------- */
 
+/* ============================================================
+   Apple-style Click Animations
+   ============================================================ */
+
+/* Scale-pulse beim Klicken — wie iOS */
+.btn,
+.nav-item,
+.lg-btn,
+.cal-nav-btn,
+.cal-view-btn,
+.header-btn,
+.modal-close,
+.dropdown-item,
+button:not([data-no-pulse]) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.btn:active,
+.lg-btn:active,
+.cal-nav-btn:active,
+.cal-view-btn:active,
+.header-btn:active,
+.modal-close:active,
+.dropdown-item:active {
+  transform: scale(0.93) !important;
+  transition: transform 0.10s cubic-bezier(0.4,0,0.2,1) !important;
+}
+
+/* Nav-Items etwas weniger stark */
+.nav-item:active {
+  transform: scale(0.96) !important;
+  transition: transform 0.10s cubic-bezier(0.4,0,0.2,1) !important;
+}
+
+/* Ripple-Welle */
+@keyframes lg-ripple {
+  0%   { transform: scale(0);   opacity: 0.45; }
+  60%  { transform: scale(2.5); opacity: 0.18; }
+  100% { transform: scale(4);   opacity: 0;    }
+}
+
+.lg-ripple-wave {
+  position: absolute;
+  border-radius: 50%;
+  width: 60px;
+  height: 60px;
+  background: rgba(255,255,255,0.35);
+  pointer-events: none;
+  transform: scale(0);
+  animation: lg-ripple 0.55s cubic-bezier(0.4,0,0.2,1) forwards;
+  margin-left: -30px;
+  margin-top:  -30px;
+  z-index: 10;
+}
+
+/* Primary-Button Ripple etwas dunkler */
+.btn-primary .lg-ripple-wave,
+.lg-btn-primary .lg-ripple-wave {
+  background: rgba(255,255,255,0.25);
+}
+
+[data-theme="light"] .lg-ripple-wave {
+  background: rgba(79,124,255,0.20);
+}
+
 /* ── Second background layer — drifts in opposite direction ── */
 body::after {
   content: '';
