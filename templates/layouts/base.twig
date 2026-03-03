@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="{{ current_locale }}" data-theme="{{ theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+    <title>{% block title %}{{ page_title ?? app_name }}{% endblock %} — {{ app_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+<div class="app-layout">
+
+    {# Mobile overlay #}
+    <div id="sidebar-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:200;backdrop-filter:blur(2px);"
+         onclick="Sidebar.close()"></div>
+
+    {# Sidebar #}
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-brand">
+            <div class="sidebar-brand-logo">
+                <div class="sidebar-brand-icon">
+                    <svg width="20" height="20" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <div class="sidebar-brand-text">
+                    <div class="sidebar-brand-name">{{ app_name }}</div>
+                    <div class="sidebar-brand-version">v{{ app_version }}</div>
+                </div>
+            </div>
+        </div>
+
+        <nav class="sidebar-nav">
+            <a href="/dashboard" class="nav-item {{ is_active('/dashboard') }}">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                {{ t('nav.dashboard') }}
+            </a>
+
+            <div class="sidebar-nav-section">{{ t('common.entries') }}</div>
+
+            <a href="/patienten" class="nav-item {{ is_active('/patienten') }}">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+                {{ t('nav.patients') }}
+            </a>
+
+            <a href="/tierhalter" class="nav-item {{ is_active('/tierhalter') }}">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/>
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                {{ t('nav.owners') }}
+            </a>
+
+            <a href="/rechnungen" class="nav-item {{ is_active('/rechnungen') }}">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="10 9 9 9 8 9"/>
+                </svg>
+                {{ t('nav.invoices') }}
+            </a>
+
+            {% if current_user and current_user.role == 'admin' %}
+            <div class="sidebar-nav-section">{{ t('nav.admin') }}</div>
+            <a href="/einstellungen" class="nav-item {{ is_active('/einstellungen') }}">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/>
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                </svg>
+                {{ t('nav.settings') }}
+            </a>
+            {% endif %}
+        </nav>
+
+        <div class="sidebar-footer">
+            <a href="/profil" class="sidebar-user">
+                <div class="user-avatar">{{ current_user.name|initials }}</div>
+                <div class="user-info">
+                    <div class="user-name">{{ current_user.name }}</div>
+                    <div class="user-role">{{ current_user.role == 'admin' ? t('common.role_admin') : t('common.role_mita') }}</div>
+                </div>
+            </a>
+        </div>
+    </aside>
+
+    {# Main content #}
+    <div class="main-content">
+        <header class="top-header">
+            <button class="header-btn" id="sidebar-toggle" style="display:none;" aria-label="Menü">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24">
+                    <line x1="3" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="3" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="3" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+            </button>
+
+            <div class="header-title">{% block header_title %}{{ page_title ?? app_name }}{% endblock %}</div>
+
+            <div class="header-actions">
+                <button class="header-btn" id="theme-toggle" title="Design wechseln" aria-label="Design wechseln">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                        <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                              d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+                    </svg>
+                </button>
+
+                <div class="dropdown">
+                    <button class="header-btn" data-dropdown="user-menu" aria-label="Benutzermenü">
+                        <div class="user-avatar" style="width:28px;height:28px;font-size:0.7rem;">{{ current_user.name|initials }}</div>
+                    </button>
+                    <div class="dropdown-menu" id="user-menu">
+                        <a href="/profil" class="dropdown-item">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+                            {{ t('nav.profile') }}
+                        </a>
+                        <div class="dropdown-divider"></div>
+                        <form action="/logout" method="POST" style="margin:0;">
+                            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                            <button type="submit" class="dropdown-item danger">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+                                {{ t('nav.logout') }}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main class="page-content">
+            {# Flash messages #}
+            {% if flash.success is defined %}
+                <div class="alert alert-success" data-auto-dismiss="5000">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></svg>
+                    <span>{{ flash.success }}</span>
+                </div>
+            {% endif %}
+            {% if flash.error is defined %}
+                <div class="alert alert-error" data-auto-dismiss="8000">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>{{ flash.error }}</span>
+                </div>
+            {% endif %}
+            {% if flash.info is defined %}
+                <div class="alert alert-info" data-auto-dismiss="5000">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>{{ flash.info }}</span>
+                </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </main>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+<script src="/assets/js/app.js"></script>
+{% block scripts %}{% endblock %}
+
+<script>
+// Show sidebar toggle on mobile
+if (window.innerWidth <= 768) {
+    const t = document.getElementById('sidebar-toggle');
+    if (t) t.style.display = 'flex';
+    const overlay = document.getElementById('sidebar-overlay');
+    if (overlay) overlay.style.display = 'block';
+}
+window.addEventListener('resize', () => {
+    const t = document.getElementById('sidebar-toggle');
+    if (!t) return;
+    t.style.display = window.innerWidth <= 768 ? 'flex' : 'none';
+});
+</script>
+</body>
+</html>

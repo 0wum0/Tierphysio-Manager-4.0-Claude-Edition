@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="{{ current_locale ?? 'de' }}" data-theme="{{ theme ?? 'dark' }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 — {{ app_name ?? 'Tierphysio Manager' }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;">
+    <div style="text-align:center;max-width:480px;">
+        <div style="font-size:7rem;font-weight:800;line-height:1;background:linear-gradient(135deg,#4f7cff,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:1rem;">404</div>
+        <h1 style="font-size:1.5rem;font-weight:700;color:var(--text-primary);margin-bottom:0.75rem;">
+            {% if t is defined %}{{ t('errors.404_title') }}{% else %}Seite nicht gefunden{% endif %}
+        </h1>
+        <p style="color:var(--text-muted);margin-bottom:2rem;line-height:1.6;">
+            {% if t is defined %}{{ t('errors.404_message') }}{% else %}Die angeforderte Seite wurde nicht gefunden.{% endif %}
+        </p>
+        <a href="/dashboard" class="btn btn-primary">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            {% if t is defined %}{{ t('errors.back_home') }}{% else %}Zur Startseite{% endif %}
+        </a>
+    </div>
+</div>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

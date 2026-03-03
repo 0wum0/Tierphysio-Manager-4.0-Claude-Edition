@@ -1,0 +1,33 @@
+# Environment
+.env
+
+# Composer
+/vendor/
+
+# Storage (keep structure, ignore contents)
+/storage/cache/
+/storage/logs/*.log
+/storage/patients/*/
+/storage/uploads/*
+!/storage/cache/twig/.gitkeep
+!/storage/uploads/.gitkeep
+!/storage/patients/.gitkeep
+!/storage/logs/.gitkeep
+
+# Plugin enabled list (generated at runtime)
+/plugins/enabled.json
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# PHP
+*.phar
+
+# Node (if ever used for asset building)
+node_modules/
+npm-debug.log

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="{{ current_locale }}" data-theme="{{ theme }}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ t('auth.login_title') }} — {{ app_name }}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+<div class="login-page">
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-logo-icon">
+                <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
+                    <path stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                </svg>
+            </div>
+            <div class="login-title">{{ app_name }}</div>
+            <div class="login-subtitle">{{ t('app.tagline') }}</div>
+        </div>
+
+        {% if flash.error is defined %}
+            <div class="alert alert-error mb-4">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
+                <span>{{ flash.error }}</span>
+            </div>
+        {% endif %}
+
+        <form action="/login" method="POST" autocomplete="on">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+            <div class="form-group mb-4">
+                <label class="form-label" for="email">{{ t('auth.email') }}</label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    class="form-control"
+                    placeholder="name@praxis.de"
+                    autocomplete="email"
+                    required
+                    autofocus
+                >
+            </div>
+
+            <div class="form-group mb-6">
+                <label class="form-label" for="password">{{ t('auth.password') }}</label>
+                <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-control"
+                    placeholder="••••••••"
+                    autocomplete="current-password"
+                    required
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full btn-lg">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
+                </svg>
+                {{ t('auth.login_btn') }}
+            </button>
+        </form>
+
+        <div style="text-align:center;margin-top:1.5rem;">
+            <button id="theme-toggle" class="header-btn" style="margin:0 auto;" title="Design wechseln">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
+                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

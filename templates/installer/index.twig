@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Installation — Tierphysio Manager 3.0</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+</head>
+<body>
+<div class="installer-page">
+    <div class="installer-card">
+        <div class="installer-header">
+            <div style="width:56px;height:56px;background:linear-gradient(135deg,#4f7cff,#a855f7);border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;box-shadow:0 0 40px rgba(79,124,255,0.4);">
+                <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+            <h1 style="font-size:1.5rem;font-weight:800;color:var(--text-primary);margin-bottom:0.25rem;">Tierphysio Manager 3.0</h1>
+            <p style="color:var(--text-muted);font-size:0.875rem;">Installationsassistent</p>
+        </div>
+
+        <div class="installer-body">
+
+            {# Step indicator #}
+            <div style="display:flex;align-items:center;justify-content:center;gap:0.5rem;margin-bottom:2rem;">
+                {% for i in 1..4 %}
+                    <div style="width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:0.8rem;font-weight:700;
+                        background:{{ step >= i ? 'linear-gradient(135deg,#4f7cff,#a855f7)' : 'var(--glass-bg)' }};
+                        border:1px solid {{ step >= i ? 'transparent' : 'var(--glass-border)' }};
+                        color:{{ step >= i ? 'white' : 'var(--text-muted)' }};">
+                        {{ i }}
+                    </div>
+                    {% if i < 4 %}
+                        <div style="width:40px;height:1px;background:{{ step > i ? 'var(--accent)' : 'var(--glass-border)' }};"></div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {# Flash messages #}
+            {% if flash.error is defined %}
+                <div class="alert alert-error mb-4">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <span>{{ flash.error }}</span>
+                </div>
+            {% endif %}
+
+            {# Step 1: Requirements #}
+            {% if step == 1 %}
+                <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:1.25rem;">Schritt 1: Systemvoraussetzungen</h2>
+
+                {% set all_ok = true %}
+                <div class="glass-card" style="margin-bottom:1.5rem;">
+                    {% for req in requirements %}
+                        <div class="req-item">
+                            <span class="text-sm">{{ req.label }}</span>
+                            {% if req.ok %}
+                                <span class="req-ok">
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></svg>
+                                </span>
+                            {% else %}
+                                {% set all_ok = false %}
+                                <span class="req-fail">
+                                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+                                </span>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+
+                {% if all_ok %}
+                    <a href="/install/schritt/2" class="btn btn-primary w-full btn-lg">
+                        Weiter zu Datenbankeinrichtung
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
+                    </a>
+                {% else %}
+                    <div class="alert alert-error">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        <span>Bitte beheben Sie die fehlgeschlagenen Voraussetzungen vor der Installation.</span>
+                    </div>
+                {% endif %}
+
+            {# Step 2: Database #}
+            {% elseif step == 2 %}
+                <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:1.25rem;">Schritt 2: Datenbankverbindung</h2>
+
+                <form action="/install/schritt/2" method="POST" id="install-form">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Datenbank-Host</label>
+                        <input type="text" name="db_host" class="form-control" value="localhost" required>
+                    </div>
+                    <div class="form-grid form-grid-2" style="margin-bottom:0.75rem;">
+                        <div class="form-group">
+                            <label class="form-label">Port</label>
+                            <input type="number" name="db_port" class="form-control" value="3306">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Datenbankname</label>
+                            <input type="text" name="db_name" class="form-control" value="tierphysio" required>
+                        </div>
+                    </div>
+                    <div class="form-grid form-grid-2" style="margin-bottom:1rem;">
+                        <div class="form-group">
+                            <label class="form-label">Benutzername</label>
+                            <input type="text" name="db_user" class="form-control" value="root" required autocomplete="off">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Passwort</label>
+                            <input type="password" name="db_password" class="form-control" autocomplete="new-password">
+                        </div>
+                    </div>
+
+                    <div class="flex gap-2 mb-4">
+                        <button type="button" id="test-db-btn" class="btn btn-secondary" style="flex:1;">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                            Verbindung testen
+                        </button>
+                    </div>
+                    <div id="db-test-result" class="text-sm mb-4"></div>
+
+                    <button type="submit" class="btn btn-primary w-full btn-lg">
+                        Datenbank einrichten &amp; Weiter
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </form>
+
+            {# Step 3: Admin Account #}
+            {% elseif step == 3 %}
+                <h2 style="font-size:1.1rem;font-weight:700;color:var(--text-primary);margin-bottom:1.25rem;">Schritt 3: Administrator-Konto</h2>
+
+                <form action="/install/schritt/3" method="POST">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    <div class="form-group mb-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" name="admin_name" class="form-control" value="Administrator" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">E-Mail-Adresse</label>
+                        <input type="email" name="admin_email" class="form-control" placeholder="admin@praxis.de" required>
+                    </div>
+                    <div class="form-group mb-3">
+                        <label class="form-label">Passwort <span class="form-hint">(min. 8 Zeichen)</span></label>
+                        <input type="password" name="admin_password" class="form-control" minlength="8" required autocomplete="new-password">
+                    </div>
+                    <div class="form-group mb-4">
+                        <label class="form-label">Passwort bestätigen</label>
+                        <input type="password" name="admin_password_confirm" class="form-control" minlength="8" required autocomplete="new-password">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-full btn-lg">
+                        Konto erstellen &amp; Weiter
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
+                    </button>
+                </form>
+
+            {# Step 4: Done #}
+            {% elseif step == 4 %}
+                <div style="text-align:center;padding:1rem 0;">
+                    <div style="width:64px;height:64px;background:rgba(34,197,94,0.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1.5rem;border:2px solid rgba(34,197,94,0.3);">
+                        <svg width="32" height="32" fill="none" viewBox="0 0 24 24"><path stroke="#22c55e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" d="M20 6 9 17l-5-5"/></svg>
+                    </div>
+                    <h2 style="font-size:1.25rem;font-weight:800;color:var(--text-primary);margin-bottom:0.75rem;">Installation erfolgreich!</h2>
+                    <p style="color:var(--text-muted);font-size:0.875rem;margin-bottom:2rem;line-height:1.6;">
+                        Tierphysio Manager 3.0 wurde erfolgreich installiert.<br>
+                        Bitte löschen Sie den <code style="color:var(--accent);">/install</code>-Ordner oder setzen Sie <code style="color:var(--accent);">INSTALLED=true</code> in Ihrer <code style="color:var(--accent);">.env</code> Datei.
+                    </p>
+                    <a href="/login" class="btn btn-primary btn-lg w-full">
+                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+                        Zur Anmeldung
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </div>
+</div>
+<script src="/assets/js/app.js"></script>
+</body>
+</html>

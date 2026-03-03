@@ -1,0 +1,204 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ t('dashboard.welcome') }}, {{ current_user.name|split(' ')|first }}!</h1>
+        <p class="page-subtitle">{{ 'now'|date('l, d. F Y') }}</p>
+    </div>
+    <div class="flex gap-2">
+        <a href="/rechnungen/erstellen" class="btn btn-primary">
+            <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            {{ t('dashboard.new_invoice') }}
+        </a>
+    </div>
+</div>
+
+{# Revenue Stats #}
+<div class="stats-grid">
+    <div class="stat-card" style="--stat-color: #4f7cff; --stat-color-rgb: 79,124,255;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.revenue_week') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.revenue_week|money }}</div>
+        <div class="stat-card-meta">
+            <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 6 23 6 23 12"/></svg>
+            <span>{{ t('dashboard.revenue_week') }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #a855f7; --stat-color-rgb: 168,85,247;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.revenue_month') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.revenue_month|money }}</div>
+        <div class="stat-card-meta">
+            {% if stats.month_change > 0 %}
+                <span class="trend-up">▲ {{ stats.month_change }}%</span>
+            {% elseif stats.month_change < 0 %}
+                <span class="trend-down">▼ {{ stats.month_change|abs }}%</span>
+            {% else %}
+                <span class="trend-flat">—</span>
+            {% endif %}
+            <span>{{ t('dashboard.vs_last_month') }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #06b6d4; --stat-color-rgb: 6,182,212;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.revenue_year') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.revenue_year|money }}</div>
+        <div class="stat-card-meta">
+            {% if stats.year_change > 0 %}
+                <span class="trend-up">▲ {{ stats.year_change }}%</span>
+            {% elseif stats.year_change < 0 %}
+                <span class="trend-down">▼ {{ stats.year_change|abs }}%</span>
+            {% else %}
+                <span class="trend-flat">—</span>
+            {% endif %}
+            <span>{{ t('dashboard.vs_last_year') }}</span>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #22c55e; --stat-color-rgb: 34,197,94;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.revenue_total') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.revenue_total|money }}</div>
+        <div class="stat-card-meta">
+            <span>{{ t('dashboard.revenue_total') }}</span>
+        </div>
+    </div>
+</div>
+
+{# Second row stats #}
+<div class="stats-grid" style="grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));">
+    <div class="stat-card" style="--stat-color: #06b6d4; --stat-color-rgb: 6,182,212;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.open_invoices') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14 2 14 8 20 8"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.open_count }}</div>
+        <div class="stat-card-meta">
+            <a href="/rechnungen?status=open" style="color:var(--info);font-size:0.75rem;">{{ t('common.details') }}</a>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #ef4444; --stat-color-rgb: 239,68,68;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.overdue_invoices') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.overdue_count }}</div>
+        <div class="stat-card-meta">
+            <a href="/rechnungen?status=overdue" style="color:var(--danger);font-size:0.75rem;">{{ t('common.details') }}</a>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #f59e0b; --stat-color-rgb: 245,158,11;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.new_patients') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.new_patients }}</div>
+        <div class="stat-card-meta"><span>letzte 30 Tage</span></div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #4f7cff; --stat-color-rgb: 79,124,255;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.total_patients') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.total_patients }}</div>
+        <div class="stat-card-meta">
+            <a href="/patienten" style="color:var(--accent);font-size:0.75rem;">{{ t('common.details') }}</a>
+        </div>
+    </div>
+
+    <div class="stat-card" style="--stat-color: #a855f7; --stat-color-rgb: 168,85,247;">
+        <div class="stat-card-header">
+            <span class="stat-card-label">{{ t('dashboard.total_owners') }}</span>
+            <div class="stat-card-icon">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+        </div>
+        <div class="stat-card-value">{{ stats.total_owners }}</div>
+        <div class="stat-card-meta">
+            <a href="/tierhalter" style="color:var(--accent-2);font-size:0.75rem;">{{ t('common.details') }}</a>
+        </div>
+    </div>
+</div>
+
+{# Chart + Quick Actions #}
+<div class="flex gap-4" style="flex-wrap:wrap;align-items:flex-start;">
+
+    {# Revenue Chart #}
+    <div class="glass-card" style="flex:1;min-width:300px;">
+        <div class="flex items-center justify-between mb-4">
+            <h2 class="font-semibold" style="font-size:1rem;">{{ t('dashboard.chart_title') }}</h2>
+            <div class="flex gap-2">
+                <button class="btn btn-sm btn-secondary active" data-chart-type="weekly">{{ t('dashboard.weekly') }}</button>
+                <button class="btn btn-sm btn-secondary" data-chart-type="monthly">{{ t('dashboard.monthly') }}</button>
+            </div>
+        </div>
+        <div class="chart-container">
+            <canvas id="revenue-chart"></canvas>
+        </div>
+    </div>
+
+    {# Quick Actions #}
+    <div class="glass-card" style="width:220px;flex-shrink:0;">
+        <h2 class="font-semibold mb-4" style="font-size:1rem;">{{ t('dashboard.quick_actions') }}</h2>
+        <div class="flex flex-col gap-2">
+            <a href="/patienten" class="btn btn-secondary" data-modal-open="modal-new-patient">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                {{ t('dashboard.new_patient') }}
+            </a>
+            <a href="/tierhalter" class="btn btn-secondary">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                {{ t('dashboard.new_owner') }}
+            </a>
+            <a href="/rechnungen/erstellen" class="btn btn-secondary">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14 2 14 8 20 8"/></svg>
+                {{ t('dashboard.new_invoice') }}
+            </a>
+            {% if stats.overdue_count > 0 %}
+            <a href="/rechnungen?status=overdue" class="btn btn-danger">
+                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                {{ stats.overdue_count }} {{ t('dashboard.overdue_invoices') }}
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Plugin Widgets #}
+{% if plugin_widgets %}
+    <div class="stats-grid">
+        {% for widget in plugin_widgets %}
+            <div class="glass-card">{{ widget|raw }}</div>
+        {% endfor %}
+    </div>
+{% endif %}
+{% endblock %}

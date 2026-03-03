@@ -1,0 +1,184 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ t('owners.title') }}</h1>
+        <p class="page-subtitle">{{ pagination.total }} {{ t('common.entries') }}</p>
+    </div>
+    <button class="btn btn-primary" data-modal-open="modal-new-owner">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        {{ t('owners.new_owner') }}
+    </button>
+</div>
+
+<form method="GET" action="/tierhalter">
+    <div class="glass-card" style="padding:1rem;">
+        <div class="search-bar">
+            <div class="search-input-wrapper" style="flex:1;">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" name="search" class="form-control" placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
+            </div>
+            <button type="submit" class="btn btn-secondary">{{ t('common.search') }}</button>
+            {% if search %}<a href="/tierhalter" class="btn btn-secondary">{{ t('common.reset') }}</a>{% endif %}
+        </div>
+    </div>
+</form>
+
+{% if owners %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>{{ t('owners.last_name') }}, {{ t('owners.first_name') }}</th>
+                    <th>{{ t('owners.email') }}</th>
+                    <th>{{ t('owners.phone') }}</th>
+                    <th>{{ t('owners.city') }}</th>
+                    <th>{{ t('owners.animal_count') }}</th>
+                    <th style="text-align:right;">{{ t('common.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for owner in owners %}
+                <tr>
+                    <td>
+                        <a href="/tierhalter/{{ owner.id }}" class="flex items-center gap-3" style="text-decoration:none;color:var(--text-primary);">
+                            <div class="avatar-placeholder" style="width:34px;height:34px;font-size:0.75rem;flex-shrink:0;">{{ owner.first_name|first ~ owner.last_name|first }}</div>
+                            <div>
+                                <div class="font-semibold">{{ owner.last_name }}, {{ owner.first_name }}</div>
+                                {% if owner.street %}<div class="text-xs text-muted">{{ owner.street }}</div>{% endif %}
+                            </div>
+                        </a>
+                    </td>
+                    <td>
+                        {% if owner.email %}
+                            <a href="mailto:{{ owner.email }}" style="color:var(--accent);">{{ owner.email }}</a>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ owner.phone ?: '—' }}</td>
+                    <td>{{ owner.zip ? owner.zip ~ ' ' ~ owner.city : (owner.city ?: '—') }}</td>
+                    <td>
+                        <span class="badge badge-primary">{{ owner.animal_count ?? 0 }}</span>
+                    </td>
+                    <td>
+                        <div class="flex gap-2" style="justify-content:flex-end;">
+                            <a href="/tierhalter/{{ owner.id }}" class="btn btn-secondary btn-sm">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                            </a>
+                            <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-secondary btn-sm">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination.last_page > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}<a href="?page={{ pagination.page - 1 }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg></a>{% endif %}
+            {% for p in 1..pagination.last_page %}
+                {% if p == pagination.page %}<span class="page-link active">{{ p }}</span>
+                {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}<a href="?page={{ p }}&search={{ search }}" class="page-link">{{ p }}</a>
+                {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}<span class="page-link disabled">…</span>{% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}<a href="?page={{ pagination.page + 1 }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg></a>{% endif %}
+        </div>
+    {% endif %}
+
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></div>
+        <div class="empty-state-title">{{ t('owners.no_owners') }}</div>
+        <div class="empty-state-text mb-4">{{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}</div>
+        <button class="btn btn-primary" data-modal-open="modal-new-owner">{{ t('owners.new_owner') }}</button>
+    </div>
+{% endif %}
+
+{# New Owner Modal #}
+<div class="modal-overlay" id="modal-new-owner">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title">{{ t('owners.new_owner') }}</h3>
+            <button class="modal-close" data-modal-close="modal-new-owner" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
+        </div>
+        <form action="/tierhalter" method="POST" class="modal-body">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="form-grid form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">{{ t('owners.first_name') }} *</label>
+                    <input type="text" name="first_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ t('owners.last_name') }} *</label>
+                    <input type="text" name="last_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ t('owners.email') }}</label>
+                    <input type="email" name="email" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ t('owners.phone') }}</label>
+                    <input type="tel" name="phone" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">{{ t('owners.street') }}</label>
+                    <input type="text" name="street" class="form-control">
+                </div>
+                <div class="form-group">
+                    <div class="form-grid form-grid-2" style="gap:0.5rem;">
+                        <div class="form-group">
+                            <label class="form-label">{{ t('owners.zip') }}</label>
+                            <input type="text" name="zip" class="form-control" maxlength="10">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ t('owners.city') }}</label>
+                            <input type="text" name="city" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="form-group mt-3">
+                <label class="form-label">{{ t('owners.notes') }}</label>
+                <textarea name="notes" class="form-control" rows="2"></textarea>
+            </div>
+            <div style="border-top:1px solid var(--glass-border);margin-top:1rem;padding-top:1rem;">
+                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;color:var(--text-secondary);">
+                    <input type="checkbox" name="create_animal" value="1" id="create-animal-cb" style="width:16px;height:16px;">
+                    {{ t('owners.create_animal') }}
+                </label>
+                <div id="animal-fields" style="display:none;margin-top:1rem;">
+                    <div class="form-grid form-grid-3">
+                        <div class="form-group">
+                            <label class="form-label">{{ t('owners.animal_name') }}</label>
+                            <input type="text" name="animal_name" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ t('owners.animal_species') }}</label>
+                            <input type="text" name="animal_species" class="form-control">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">{{ t('owners.animal_breed') }}</label>
+                            <input type="text" name="animal_breed" class="form-control">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding:1rem 0 0;margin-top:1rem;border-top:1px solid var(--glass-border);">
+                <button type="button" class="btn btn-secondary" data-modal-close="modal-new-owner">{{ t('common.cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ t('common.create') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('create-animal-cb')?.addEventListener('change', function() {
+    document.getElementById('animal-fields').style.display = this.checked ? 'block' : 'none';
+});
+</script>
+{% endblock %}

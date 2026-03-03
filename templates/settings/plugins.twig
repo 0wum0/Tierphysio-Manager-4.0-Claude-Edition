@@ -1,0 +1,88 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a href="/einstellungen" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            {{ t('common.back') }}
+        </a>
+        <h1 class="page-title">{{ t('settings.plugins') }}</h1>
+    </div>
+</div>
+
+{% if plugins %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>{{ t('settings.plugin_name') }}</th>
+                    <th>{{ t('settings.plugin_version') }}</th>
+                    <th>{{ t('settings.plugin_author') }}</th>
+                    <th>{{ t('settings.plugin_enabled') }}</th>
+                    <th style="text-align:right;">{{ t('common.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for slug, plugin in plugins %}
+                <tr>
+                    <td>
+                        <div class="font-semibold">{{ plugin.manifest.name }}</div>
+                        {% if plugin.manifest.description %}
+                            <div class="text-xs text-muted">{{ plugin.manifest.description }}</div>
+                        {% endif %}
+                    </td>
+                    <td><span class="badge badge-primary">v{{ plugin.manifest.version ?? '1.0.0' }}</span></td>
+                    <td class="text-sm text-muted">{{ plugin.manifest.author ?? '—' }}</td>
+                    <td>
+                        {% if plugin.enabled %}
+                            <span class="badge badge-aktiv">Aktiv</span>
+                        {% else %}
+                            <span class="badge badge-inaktiv">Inaktiv</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="flex gap-2" style="justify-content:flex-end;">
+                            {% if plugin.enabled %}
+                                <form action="/einstellungen/plugins/{{ slug }}/deaktivieren" method="POST" style="margin:0;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="btn btn-warning btn-sm">
+                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                        {{ t('settings.plugin_deactivate') }}
+                                    </button>
+                                </form>
+                            {% else %}
+                                <form action="/einstellungen/plugins/{{ slug }}/aktivieren" method="POST" style="margin:0;">
+                                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                                    <button type="submit" class="btn btn-success btn-sm">
+                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="12" x2="16" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                                        {{ t('settings.plugin_activate') }}
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon">
+            <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <div class="empty-state-title">Keine Plugins installiert</div>
+        <div class="empty-state-text">Legen Sie Plugin-Ordner unter <code>/plugins/</code> an.</div>
+    </div>
+{% endif %}
+
+<div class="glass-card mt-4">
+    <h3 class="font-semibold mb-2" style="font-size:0.9rem;">Plugin-Entwicklung</h3>
+    <p class="text-sm text-muted" style="line-height:1.6;">
+        Plugins werden als Unterordner in <code style="color:var(--accent);">/plugins/[slug]/</code> abgelegt.<br>
+        Jedes Plugin benötigt eine <code style="color:var(--accent);">manifest.json</code> sowie eine optionale <code style="color:var(--accent);">ServiceProvider.php</code>.<br>
+        Verfügbare Hooks: <code>beforeRender</code>, <code>afterRender</code>, <code>beforeSave</code>, <code>afterSave</code>, <code>dashboardWidgets</code>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ t('invoices.title') }}</h1>
+        <p class="page-subtitle">{{ pagination.total }} {{ t('common.entries') }}</p>
+    </div>
+    <a href="/rechnungen/erstellen" class="btn btn-primary">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        {{ t('invoices.new_invoice') }}
+    </a>
+</div>
+
+{# Stats #}
+<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+    <div class="stat-card" style="--stat-color:#4f7cff;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('invoices.revenue_week') }}</span></div>
+        <div class="stat-card-value">{{ stats.revenue_week|money }}</div>
+    </div>
+    <div class="stat-card" style="--stat-color:#a855f7;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('invoices.revenue_month') }}</span></div>
+        <div class="stat-card-value">{{ stats.revenue_month|money }}</div>
+        <div class="stat-card-meta">
+            {% if stats.month_change > 0 %}<span class="trend-up">▲ {{ stats.month_change }}%</span>
+            {% elseif stats.month_change < 0 %}<span class="trend-down">▼ {{ stats.month_change|abs }}%</span>
+            {% else %}<span class="trend-flat">—</span>{% endif %}
+            <span>{{ t('dashboard.vs_last_month') }}</span>
+        </div>
+    </div>
+    <div class="stat-card" style="--stat-color:#06b6d4;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('invoices.revenue_year') }}</span></div>
+        <div class="stat-card-value">{{ stats.revenue_year|money }}</div>
+    </div>
+    <div class="stat-card" style="--stat-color:#22c55e;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('invoices.revenue_total') }}</span></div>
+        <div class="stat-card-value">{{ stats.revenue_total|money }}</div>
+    </div>
+    <div class="stat-card" style="--stat-color:#06b6d4;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('dashboard.open_invoices') }}</span></div>
+        <div class="stat-card-value">{{ stats.open_count }}</div>
+    </div>
+    <div class="stat-card" style="--stat-color:#ef4444;">
+        <div class="stat-card-header"><span class="stat-card-label">{{ t('dashboard.overdue_invoices') }}</span></div>
+        <div class="stat-card-value">{{ stats.overdue_count }}</div>
+    </div>
+</div>
+
+{# Filter #}
+<form method="GET" action="/rechnungen">
+    <div class="glass-card" style="padding:1rem;">
+        <div class="search-bar">
+            <div class="search-input-wrapper" style="flex:1;">
+                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                <input type="text" name="search" class="form-control" placeholder="Suche nach Rechnungsnummer, Tierhalter..." value="{{ search }}">
+            </div>
+            <select name="status" class="form-control" style="width:180px;">
+                <option value="">{{ t('invoices.all_status') }}</option>
+                <option value="draft"   {{ status == 'draft'   ? 'selected' : '' }}>{{ t('invoices.status_draft') }}</option>
+                <option value="open"    {{ status == 'open'    ? 'selected' : '' }}>{{ t('invoices.status_open') }}</option>
+                <option value="paid"    {{ status == 'paid'    ? 'selected' : '' }}>{{ t('invoices.status_paid') }}</option>
+                <option value="overdue" {{ status == 'overdue' ? 'selected' : '' }}>{{ t('invoices.status_overdue') }}</option>
+            </select>
+            <button type="submit" class="btn btn-secondary">{{ t('common.filter') }}</button>
+            {% if search or status %}<a href="/rechnungen" class="btn btn-secondary">{{ t('common.reset') }}</a>{% endif %}
+        </div>
+    </div>
+</form>
+
+{% if invoices %}
+    <div class="table-container">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>{{ t('invoices.invoice_number') }}</th>
+                    <th>{{ t('invoices.owner') }}</th>
+                    <th>{{ t('invoices.patient') }}</th>
+                    <th>{{ t('invoices.issue_date') }}</th>
+                    <th>{{ t('invoices.due_date') }}</th>
+                    <th>{{ t('invoices.total_gross') }}</th>
+                    <th>{{ t('invoices.status') }}</th>
+                    <th style="text-align:right;">{{ t('common.actions') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for invoice in invoices %}
+                <tr>
+                    <td>
+                        <a href="/rechnungen/{{ invoice.id }}" class="font-semibold" style="color:var(--accent);">{{ invoice.invoice_number }}</a>
+                    </td>
+                    <td>{{ invoice.owner_name ?? '—' }}</td>
+                    <td>{{ invoice.patient_name ?? '—' }}</td>
+                    <td>{{ invoice.issue_date|date_de }}</td>
+                    <td>
+                        {% if invoice.due_date %}
+                            <span class="{{ invoice.status == 'overdue' ? 'text-danger' : '' }}">{{ invoice.due_date|date_de }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td class="font-semibold">{{ invoice.total_gross|money }}</td>
+                    <td><span class="badge badge-{{ invoice.status }}">{{ t('invoices.status_' ~ invoice.status) }}</span></td>
+                    <td>
+                        <div class="flex gap-2" style="justify-content:flex-end;">
+                            <a href="/rechnungen/{{ invoice.id }}" class="btn btn-secondary btn-sm" title="Anzeigen">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                            </a>
+                            <a href="/rechnungen/{{ invoice.id }}/pdf" class="btn btn-secondary btn-sm" title="{{ t('invoices.download_pdf') }}">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if pagination.last_page > 1 %}
+        <div class="pagination">
+            {% if pagination.has_prev %}<a href="?page={{ pagination.page - 1 }}&status={{ status }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg></a>{% endif %}
+            {% for p in 1..pagination.last_page %}
+                {% if p == pagination.page %}<span class="page-link active">{{ p }}</span>
+                {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}<a href="?page={{ p }}&status={{ status }}&search={{ search }}" class="page-link">{{ p }}</a>
+                {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}<span class="page-link disabled">…</span>{% endif %}
+            {% endfor %}
+            {% if pagination.has_next %}<a href="?page={{ pagination.page + 1 }}&status={{ status }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg></a>{% endif %}
+        </div>
+    {% endif %}
+{% else %}
+    <div class="empty-state">
+        <div class="empty-state-icon"><svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="1.5" stroke-linecap="round" points="14 2 14 8 20 8"/></svg></div>
+        <div class="empty-state-title">{{ t('invoices.no_invoices') }}</div>
+        <div class="empty-state-text mb-4">{{ search or status ? 'Keine Ergebnisse für diese Filtereinstellungen.' : 'Noch keine Rechnungen erstellt.' }}</div>
+        <a href="/rechnungen/erstellen" class="btn btn-primary">{{ t('invoices.new_invoice') }}</a>
+    </div>
+{% endif %}
+{% endblock %}

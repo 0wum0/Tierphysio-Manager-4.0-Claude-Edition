@@ -1,0 +1,9 @@
+{
+    "name": "Beispiel-Widget",
+    "slug": "example-widget",
+    "version": "1.0.0",
+    "description": "Ein einfaches Dashboard-Widget als Plugin-Vorlage.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "hooks": ["dashboardWidgets", "beforeRender"]
+}

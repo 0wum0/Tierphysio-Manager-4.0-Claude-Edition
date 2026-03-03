@@ -1,0 +1,179 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a href="/rechnungen" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            {{ t('invoices.back_to_list') }}
+        </a>
+        <h1 class="page-title">{{ t('invoices.invoice') }} {{ invoice.invoice_number }}</h1>
+        <span class="badge badge-{{ invoice.status }}">{{ t('invoices.status_' ~ invoice.status) }}</span>
+    </div>
+    <div class="flex gap-2">
+        <a href="/rechnungen/{{ invoice.id }}/pdf" class="btn btn-secondary btn-sm" target="_blank">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            {{ t('invoices.download_pdf') }}
+        </a>
+        {% if owner and owner.email %}
+        <form action="/rechnungen/{{ invoice.id }}/senden" method="POST" style="margin:0;">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <button type="submit" class="btn btn-secondary btn-sm">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                {{ t('invoices.send_email') }}
+            </button>
+        </form>
+        {% endif %}
+        {% if invoice.status != 'paid' %}
+        <a href="/rechnungen/{{ invoice.id }}/bearbeiten" class="btn btn-primary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            {{ t('common.edit') }}
+        </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="flex gap-4" style="align-items:flex-start;flex-wrap:wrap;">
+
+    {# Left: Invoice Details #}
+    <div style="flex:1;min-width:300px;display:flex;flex-direction:column;gap:1rem;">
+
+        {# Invoice header info #}
+        <div class="glass-card">
+            <div class="form-grid form-grid-2">
+                <div>
+                    <div class="text-xs text-muted mb-1">{{ t('invoices.issue_date') }}</div>
+                    <div class="font-semibold">{{ invoice.issue_date|date_de }}</div>
+                </div>
+                <div>
+                    <div class="text-xs text-muted mb-1">{{ t('invoices.due_date') }}</div>
+                    <div class="font-semibold {{ invoice.status == 'overdue' ? 'text-danger' : '' }}">
+                        {{ invoice.due_date ? invoice.due_date|date_de : '—' }}
+                    </div>
+                </div>
+                {% if owner %}
+                <div>
+                    <div class="text-xs text-muted mb-1">{{ t('invoices.owner') }}</div>
+                    <a href="/tierhalter/{{ owner.id }}" class="font-semibold" style="color:var(--accent);">{{ owner.first_name }} {{ owner.last_name }}</a>
+                    {% if owner.email %}<div class="text-xs text-muted">{{ owner.email }}</div>{% endif %}
+                </div>
+                {% endif %}
+                {% if patient %}
+                <div>
+                    <div class="text-xs text-muted mb-1">{{ t('invoices.patient') }}</div>
+                    <a href="/patienten/{{ patient.id }}" class="font-semibold" style="color:var(--accent);">{{ patient.name }}</a>
+                    <div class="text-xs text-muted">{{ patient.species }}</div>
+                </div>
+                {% endif %}
+            </div>
+            {% if invoice.email_sent_at %}
+                <div class="alert alert-info mt-3" style="padding:0.5rem 0.875rem;font-size:0.8rem;">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22,6 12,13 2,6"/></svg>
+                    E-Mail gesendet am {{ invoice.email_sent_at|datetime_de }}
+                </div>
+            {% endif %}
+        </div>
+
+        {# Positions Table #}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>{{ t('invoices.description') }}</th>
+                        <th style="text-align:right;width:80px;">{{ t('invoices.quantity') }}</th>
+                        <th style="text-align:right;width:110px;">{{ t('invoices.unit_price') }}</th>
+                        <th style="text-align:right;width:70px;">{{ t('invoices.tax_rate') }}</th>
+                        <th style="text-align:right;width:120px;">{{ t('invoices.total') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for pos in positions %}
+                    <tr>
+                        <td>{{ pos.description }}</td>
+                        <td style="text-align:right;">{{ pos.quantity|number_format(2, ',', '.') }}</td>
+                        <td style="text-align:right;">{{ pos.unit_price|money }}</td>
+                        <td style="text-align:right;">{{ pos.tax_rate }}%</td>
+                        <td style="text-align:right;" class="font-semibold">{{ (pos.quantity * pos.unit_price)|money }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr style="border-top:2px solid var(--glass-border);">
+                        <td colspan="4" style="text-align:right;color:var(--text-muted);font-size:0.8rem;">{{ t('invoices.total_net') }}</td>
+                        <td style="text-align:right;" class="font-semibold">{{ invoice.total_net|money }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="4" style="text-align:right;color:var(--text-muted);font-size:0.8rem;">{{ t('invoices.total_tax') }}</td>
+                        <td style="text-align:right;" class="font-semibold">{{ invoice.total_tax|money }}</td>
+                    </tr>
+                    <tr style="border-top:2px solid var(--accent);background:rgba(79,124,255,0.05);">
+                        <td colspan="4" style="text-align:right;font-weight:700;color:var(--accent);">{{ t('invoices.total_gross') }}</td>
+                        <td style="text-align:right;font-size:1.15rem;font-weight:800;color:var(--accent);">{{ invoice.total_gross|money }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+
+        {% if invoice.notes %}
+        <div class="glass-card">
+            <div class="text-xs text-muted mb-1">{{ t('invoices.notes') }}</div>
+            <div class="text-sm text-secondary" style="line-height:1.5;">{{ invoice.notes }}</div>
+        </div>
+        {% endif %}
+
+        {% if invoice.payment_terms %}
+        <div class="glass-card" style="border-color:rgba(79,124,255,0.15);">
+            <div class="text-xs text-muted mb-1">{{ t('invoices.payment_terms') }}</div>
+            <div class="text-sm text-secondary" style="line-height:1.5;font-style:italic;">{{ invoice.payment_terms }}</div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Right: Actions #}
+    <div style="width:240px;flex-shrink:0;">
+        <div class="glass-card" style="display:flex;flex-direction:column;gap:0.75rem;">
+            <h3 class="font-semibold" style="font-size:0.9rem;">Status ändern</h3>
+
+            {% if invoice.status != 'draft' or true %}
+            <form action="/rechnungen/{{ invoice.id }}/status" method="POST" style="margin:0;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <select name="status" class="form-control mb-2">
+                    <option value="draft"   {{ invoice.status == 'draft'   ? 'selected' : '' }}>{{ t('invoices.status_draft') }}</option>
+                    <option value="open"    {{ invoice.status == 'open'    ? 'selected' : '' }}>{{ t('invoices.status_open') }}</option>
+                    <option value="paid"    {{ invoice.status == 'paid'    ? 'selected' : '' }}>{{ t('invoices.status_paid') }}</option>
+                    <option value="overdue" {{ invoice.status == 'overdue' ? 'selected' : '' }}>{{ t('invoices.status_overdue') }}</option>
+                </select>
+                <button type="submit" class="btn btn-primary btn-sm w-full">{{ t('common.save') }}</button>
+            </form>
+            {% endif %}
+
+            <div class="divider"></div>
+
+            <a href="/rechnungen/{{ invoice.id }}/pdf" class="btn btn-secondary btn-sm w-full" target="_blank">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                {{ t('invoices.download_pdf') }}
+            </a>
+
+            {% if owner and owner.email %}
+            <form action="/rechnungen/{{ invoice.id }}/senden" method="POST" style="margin:0;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-secondary btn-sm w-full">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    {{ t('invoices.send_email') }}
+                </button>
+            </form>
+            {% endif %}
+
+            <div class="divider"></div>
+
+            <form action="/rechnungen/{{ invoice.id }}/loeschen" method="POST" style="margin:0;">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <button type="submit" class="btn btn-danger btn-sm w-full" data-confirm="{{ t('common.confirm_delete') }}">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                    {{ t('common.delete') }}
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

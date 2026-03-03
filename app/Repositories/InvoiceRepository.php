@@ -1,0 +1,222 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Repositories;
+
+use App\Core\Database;
+use App\Core\Repository;
+
+class InvoiceRepository extends Repository
+{
+    protected string $table = 'invoices';
+
+    public function __construct(Database $db)
+    {
+        parent::__construct($db);
+    }
+
+    public function getPaginated(int $page, int $perPage, string $status = '', string $search = ''): array
+    {
+        $conditions = [];
+        $params     = [];
+
+        if (!empty($status)) {
+            $conditions[] = "i.status = ?";
+            $params[]     = $status;
+        }
+
+        if (!empty($search)) {
+            $conditions[] = "(i.invoice_number LIKE ? OR CONCAT(o.first_name, ' ', o.last_name) LIKE ? OR p.name LIKE ?)";
+            $params = array_merge($params, ["%{$search}%", "%{$search}%", "%{$search}%"]);
+        }
+
+        $where  = $conditions ? 'WHERE ' . implode(' AND ', $conditions) : '';
+        $offset = ($page - 1) * $perPage;
+
+        $total = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices i
+             LEFT JOIN owners o ON i.owner_id = o.id
+             LEFT JOIN patients p ON i.patient_id = p.id
+             {$where}",
+            $params
+        );
+
+        $items = $this->db->fetchAll(
+            "SELECT i.*,
+                    CONCAT(o.first_name, ' ', o.last_name) AS owner_name,
+                    p.name AS patient_name
+             FROM invoices i
+             LEFT JOIN owners o ON i.owner_id = o.id
+             LEFT JOIN patients p ON i.patient_id = p.id
+             {$where}
+             ORDER BY i.created_at DESC
+             LIMIT ? OFFSET ?",
+            [...$params, $perPage, $offset]
+        );
+
+        return [
+            'items'     => $items,
+            'total'     => $total,
+            'page'      => $page,
+            'per_page'  => $perPage,
+            'last_page' => (int)ceil($total / $perPage),
+            'has_next'  => ($page * $perPage) < $total,
+            'has_prev'  => $page > 1,
+        ];
+    }
+
+    public function getPositions(int $invoiceId): array
+    {
+        return $this->db->fetchAll(
+            "SELECT * FROM invoice_positions WHERE invoice_id = ? ORDER BY sort_order ASC",
+            [$invoiceId]
+        );
+    }
+
+    public function deletePositions(int $invoiceId): void
+    {
+        $this->db->execute("DELETE FROM invoice_positions WHERE invoice_id = ?", [$invoiceId]);
+    }
+
+    public function addPosition(int $invoiceId, array $pos, int $sortOrder): void
+    {
+        $this->db->execute(
+            "INSERT INTO invoice_positions (invoice_id, description, quantity, unit_price, tax_rate, total, sort_order)
+             VALUES (?, ?, ?, ?, ?, ?, ?)",
+            [
+                $invoiceId,
+                $pos['description'],
+                $pos['quantity'],
+                $pos['unit_price'],
+                $pos['tax_rate'],
+                $pos['total'],
+                $sortOrder,
+            ]
+        );
+    }
+
+    public function getStats(): array
+    {
+        $now   = date('Y-m-d');
+        $week  = date('Y-m-d', strtotime('-7 days'));
+        $month = date('Y-m-01');
+        $year  = date('Y-01-01');
+        $prevMonth = date('Y-m-d', strtotime('-1 month'));
+        $prevYear  = date('Y-01-01', strtotime('-1 year'));
+
+        $revenueWeek = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            [$week]
+        );
+
+        $revenueMonth = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            [$month]
+        );
+
+        $revenueYear = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            [$year]
+        );
+
+        $revenueTotal = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid'"
+        );
+
+        $prevMonthRevenue = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
+            [$prevMonth, $month]
+        );
+
+        $prevYearRevenue = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
+            [$prevYear, $year]
+        );
+
+        $openCount = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices WHERE status = 'open'"
+        );
+
+        $overdueCount = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
+            [$now]
+        );
+
+        return [
+            'revenue_week'        => $revenueWeek,
+            'revenue_month'       => $revenueMonth,
+            'revenue_year'        => $revenueYear,
+            'revenue_total'       => $revenueTotal,
+            'prev_month_revenue'  => $prevMonthRevenue,
+            'prev_year_revenue'   => $prevYearRevenue,
+            'open_count'          => $openCount,
+            'overdue_count'       => $overdueCount,
+            'month_change'        => $prevMonthRevenue > 0
+                ? round((($revenueMonth - $prevMonthRevenue) / $prevMonthRevenue) * 100, 1)
+                : 0,
+            'year_change'         => $prevYearRevenue > 0
+                ? round((($revenueYear - $prevYearRevenue) / $prevYearRevenue) * 100, 1)
+                : 0,
+        ];
+    }
+
+    public function getChartData(string $type): array
+    {
+        if ($type === 'monthly') {
+            $rows = $this->db->fetchAll(
+                "SELECT DATE_FORMAT(issue_date, '%Y-%m') AS period,
+                        COALESCE(SUM(total_gross), 0) AS revenue
+                 FROM invoices
+                 WHERE status = 'paid' AND issue_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+                 GROUP BY period
+                 ORDER BY period ASC"
+            );
+        } else {
+            $rows = $this->db->fetchAll(
+                "SELECT DATE_FORMAT(issue_date, '%Y-%u') AS period,
+                        COALESCE(SUM(total_gross), 0) AS revenue
+                 FROM invoices
+                 WHERE status = 'paid' AND issue_date >= DATE_SUB(NOW(), INTERVAL 12 WEEK)
+                 GROUP BY period
+                 ORDER BY period ASC"
+            );
+        }
+
+        return [
+            'labels' => array_column($rows, 'period'),
+            'data'   => array_map('floatval', array_column($rows, 'revenue')),
+        ];
+    }
+
+    public function getNextInvoiceNumber(string $prefix = 'RE', int $startNumber = 1000): string
+    {
+        $lastNumber = $this->db->fetchColumn(
+            "SELECT invoice_number FROM invoices ORDER BY id DESC LIMIT 1"
+        );
+
+        if (!$lastNumber) {
+            return $prefix . '-' . str_pad((string)$startNumber, 4, '0', STR_PAD_LEFT);
+        }
+
+        preg_match('/(\d+)$/', (string)$lastNumber, $matches);
+        $next = isset($matches[1]) ? (int)$matches[1] + 1 : $startNumber;
+        return $prefix . '-' . str_pad((string)$next, 4, '0', STR_PAD_LEFT);
+    }
+
+    public function updateTotals(int $id, float $totalNet, float $totalTax, float $totalGross): void
+    {
+        $this->db->execute(
+            "UPDATE invoices SET total_net = ?, total_tax = ?, total_gross = ? WHERE id = ?",
+            [$totalNet, $totalTax, $totalGross, $id]
+        );
+    }
+
+    public function markEmailSent(int $id): void
+    {
+        $this->db->execute(
+            "UPDATE invoices SET email_sent_at = NOW() WHERE id = ?",
+            [$id]
+        );
+    }
+}
