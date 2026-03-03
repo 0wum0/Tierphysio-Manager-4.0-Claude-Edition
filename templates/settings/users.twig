@@ -52,6 +52,11 @@
                 <td class="text-sm text-muted">{{ user.last_login ? user.last_login|datetime_de : '—' }}</td>
                 <td>
                     <div class="flex gap-2" style="justify-content:flex-end;">
+                        <button type="button" class="btn btn-secondary btn-sm"
+                            data-modal-open="modal-edit-user-{{ user.id }}">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                            {{ t('common.edit') }}
+                        </button>
                         {% if user.id != current_user.id %}
                         <form action="/einstellungen/benutzer/{{ user.id }}/loeschen" method="POST" style="margin:0;">
                             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
@@ -108,4 +113,47 @@
         </form>
     </div>
 </div>
+{# Edit User Modals (one per user) #}
+{% for user in users %}
+<div class="modal-overlay" id="modal-edit-user-{{ user.id }}">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Benutzer bearbeiten</h3>
+            <button class="modal-close" data-modal-close="modal-edit-user-{{ user.id }}" type="button">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <form action="/einstellungen/benutzer/{{ user.id }}" method="POST" class="modal-body">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="form-group mb-3">
+                <label class="form-label">{{ t('settings.user_name') }} *</label>
+                <input type="text" name="name" class="form-control" required value="{{ user.name }}">
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">{{ t('settings.user_email') }} *</label>
+                <input type="email" name="email" class="form-control" required value="{{ user.email }}">
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">
+                    {{ t('settings.user_password') }}
+                    <span class="form-hint">(leer lassen = unverändert, min. 8 Zeichen)</span>
+                </label>
+                <input type="password" name="password" class="form-control" minlength="8" autocomplete="new-password" placeholder="Neues Passwort (optional)">
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">{{ t('settings.user_role') }}</label>
+                <select name="role" class="form-control">
+                    <option value="mitarbeiter" {{ user.role == 'mitarbeiter' ? 'selected' : '' }}>{{ t('common.role_mita') }}</option>
+                    <option value="admin" {{ user.role == 'admin' ? 'selected' : '' }}>{{ t('common.role_admin') }}</option>
+                </select>
+            </div>
+            <div class="modal-footer" style="padding:1rem 0 0;margin-top:1rem;border-top:1px solid var(--glass-border);">
+                <button type="button" class="btn btn-secondary" data-modal-close="modal-edit-user-{{ user.id }}">{{ t('common.cancel') }}</button>
+                <button type="submit" class="btn btn-primary">{{ t('common.save') }}</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endfor %}
+
 {% endblock %}

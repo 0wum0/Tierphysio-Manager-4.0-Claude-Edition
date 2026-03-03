@@ -63,4 +63,5 @@ $router->post('/einstellungen/updater/run', [SettingsController::class, 'runMigr
 $router->post('/einstellungen/migrationen', [SettingsController::class, 'runMigrations'], ['admin']);
 $router->get('/einstellungen/benutzer', [SettingsController::class, 'users'], ['admin']);
 $router->post('/einstellungen/benutzer', [SettingsController::class, 'createUser'], ['admin']);
+$router->post('/einstellungen/benutzer/{id}', [SettingsController::class, 'updateUser'], ['admin']);
 $router->post('/einstellungen/benutzer/{id}/loeschen', [SettingsController::class, 'deleteUser'], ['admin']);

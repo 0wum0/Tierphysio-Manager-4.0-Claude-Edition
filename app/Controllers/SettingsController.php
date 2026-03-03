@@ -187,6 +187,38 @@ class SettingsController extends Controller
         $this->redirect('/einstellungen/benutzer');
     }
 
+    public function updateUser(array $params = []): void
+    {
+        $this->validateCsrf();
+
+        $id    = (int)$params['id'];
+        $name  = $this->sanitize($this->post('name', ''));
+        $email = $this->sanitize($this->post('email', ''));
+        $role  = in_array($this->post('role'), ['admin', 'mitarbeiter'], true) ? $this->post('role') : 'mitarbeiter';
+
+        if (empty($name) || empty($email)) {
+            $this->session->flash('error', $this->translator->trans('settings.fill_required'));
+            $this->redirect('/einstellungen/benutzer');
+            return;
+        }
+
+        $data = ['name' => $name, 'email' => $email, 'role' => $role];
+
+        $password = $this->post('password', '');
+        if (!empty($password)) {
+            if (strlen($password) < 8) {
+                $this->session->flash('error', $this->translator->trans('profile.password_mismatch'));
+                $this->redirect('/einstellungen/benutzer');
+                return;
+            }
+            $data['password'] = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
+        }
+
+        $this->userRepository->update($id, $data);
+        $this->session->flash('success', $this->translator->trans('settings.user_updated'));
+        $this->redirect('/einstellungen/benutzer');
+    }
+
     public function deleteUser(array $params = []): void
     {
         $this->validateCsrf();

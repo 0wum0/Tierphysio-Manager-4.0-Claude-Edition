@@ -234,6 +234,7 @@ return [
         'user_active'         => 'Active',
         'user_last_login'     => 'Last Login',
         'user_created'        => 'User created successfully.',
+        'user_updated'        => 'User updated successfully.',
         'user_deleted'        => 'User deleted successfully.',
         'cannot_delete_self'  => 'You cannot delete yourself.',
         'fill_required'       => 'Please fill in all required fields.',

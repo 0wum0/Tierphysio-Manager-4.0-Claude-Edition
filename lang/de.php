@@ -236,6 +236,7 @@ return [
         'user_active'        => 'Aktiv',
         'user_last_login'    => 'Letzter Login',
         'user_created'       => 'Benutzer erfolgreich erstellt.',
+        'user_updated'       => 'Benutzer erfolgreich aktualisiert.',
         'user_deleted'       => 'Benutzer erfolgreich gelöscht.',
         'cannot_delete_self' => 'Sie können sich nicht selbst löschen.',
         'fill_required'      => 'Bitte alle Pflichtfelder ausfüllen.',
