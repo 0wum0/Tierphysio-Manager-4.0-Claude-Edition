@@ -380,22 +380,68 @@ const CustomSelect = {
         const dropdown = document.createElement('div');
         dropdown.className = 'cs-dropdown';
         dropdown.setAttribute('role', 'listbox');
+        dropdown.style.cssText = 'display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:9999;border-radius:12px;overflow-y:auto;max-height:240px;';
 
         wrapper.appendChild(trigger);
         wrapper.appendChild(dropdown);
         sel.parentNode.insertBefore(wrapper, sel.nextSibling);
 
+        const getVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+
+        const applyDropdownStyle = () => {
+            const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+            const bg     = isDark ? '#141428' : '#ffffff';
+            const border = isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.12)';
+            const shadow = isDark ? '0 8px 32px rgba(0,0,0,0.5)' : '0 8px 32px rgba(0,0,0,0.12)';
+            dropdown.style.background  = bg;
+            dropdown.style.border      = `1px solid ${border}`;
+            dropdown.style.boxShadow   = shadow;
+        };
+
         const syncOptions = () => {
             dropdown.innerHTML = '';
+            applyDropdownStyle();
+            const isDark   = document.documentElement.getAttribute('data-theme') !== 'light';
+            const bgNormal  = isDark ? '#141428' : '#ffffff';
+            const bgHover   = isDark ? 'rgba(79,124,255,0.15)' : '#f0f2f8';
+            const bgSelected = isDark ? 'rgba(79,124,255,0.25)' : 'rgba(59,110,240,0.12)';
+            const colNormal  = isDark ? '#f0f0ff' : '#0f0f1e';
+            const colAccent  = isDark ? '#6b9dff' : '#3b6ef0';
+
             Array.from(sel.options).forEach((opt, i) => {
                 const item = document.createElement('div');
-                item.className = 'cs-option' + (opt.selected ? ' cs-selected' : '') + (opt.disabled ? ' cs-option-disabled' : '');
+                item.className = 'cs-option';
                 item.textContent = opt.textContent;
                 item.dataset.value = opt.value;
                 item.dataset.index = i;
                 item.setAttribute('role', 'option');
                 item.setAttribute('aria-selected', opt.selected ? 'true' : 'false');
-                if (!opt.disabled) {
+
+                const isSelected = opt.selected;
+                const isDisabled = opt.disabled;
+
+                item.style.cssText = `
+                    padding:0.55rem 0.875rem;
+                    font-size:0.875rem;
+                    cursor:${isDisabled ? 'not-allowed' : 'pointer'};
+                    opacity:${isDisabled ? '0.4' : '1'};
+                    background:${isSelected ? bgSelected : bgNormal};
+                    color:${isSelected ? colAccent : colNormal};
+                    font-weight:${isSelected ? '600' : '400'};
+                    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+                    transition:background 0.12s,color 0.12s;
+                `;
+
+                if (!isDisabled) {
+                    item.addEventListener('mouseenter', () => {
+                        item.style.background = bgHover;
+                        item.style.color = colAccent;
+                    });
+                    item.addEventListener('mouseleave', () => {
+                        const sel2 = parseInt(item.dataset.index) === sel.selectedIndex;
+                        item.style.background = sel2 ? bgSelected : bgNormal;
+                        item.style.color = sel2 ? colAccent : colNormal;
+                    });
                     item.addEventListener('click', e => {
                         e.stopPropagation();
                         sel.selectedIndex = i;
@@ -422,9 +468,11 @@ const CustomSelect = {
             document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => {
                 if (w !== wrapper) w.classList.remove('cs-open');
             });
+            /* Re-render options with current theme colors */
+            syncOptions();
             wrapper.classList.add('cs-open');
+            dropdown.style.display = 'block';
             trigger.setAttribute('aria-expanded', 'true');
-            /* Flip up if not enough space below */
             const rect = wrapper.getBoundingClientRect();
             const spaceBelow = window.innerHeight - rect.bottom;
             dropdown.style.maxHeight = Math.min(240, Math.max(spaceBelow - 8, 120)) + 'px';
