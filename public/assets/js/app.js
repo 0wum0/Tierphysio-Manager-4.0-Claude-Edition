@@ -359,6 +359,7 @@ const CustomSelect = {
 
         const wrapper = document.createElement('div');
         wrapper.className = 'cs-wrapper';
+        wrapper.style.cssText = 'position:relative;width:100%;display:inline-block;';
         if (sel.disabled) wrapper.classList.add('cs-disabled');
 
         const trigger = document.createElement('div');
