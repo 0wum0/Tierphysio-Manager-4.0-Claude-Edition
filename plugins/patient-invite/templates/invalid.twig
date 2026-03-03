@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Link ungültig — {{ app_name }}</title>
+    <script>!function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}}();</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/liquid-glass.css">
+    <style>
+        body { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+        .wrapper { max-width:440px; width:100%; text-align:center; }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="lg-card" style="padding:2.5rem 2rem;">
+        <div style="font-size:4rem;margin-bottom:1.25rem;">⚠️</div>
+        <h1 style="font-size:1.5rem;font-weight:800;margin:0 0 0.75rem;">Link ungültig</h1>
+        <p style="color:var(--text-muted);font-size:0.9rem;line-height:1.7;margin:0;">
+            {% if invite and invite.status == 'abgelaufen' %}
+                Dieser Einladungslink ist abgelaufen. Einladungslinks sind 7 Tage gültig.<br>
+                Bitte wenden Sie sich an uns, damit wir Ihnen einen neuen Link zusenden können.
+            {% elseif invite and invite.status == 'angenommen' %}
+                Dieser Einladungslink wurde bereits verwendet.
+            {% else %}
+                Dieser Einladungslink existiert nicht oder ist ungültig.<br>
+                Bitte prüfen Sie den Link und versuchen Sie es erneut.
+            {% endif %}
+        </p>
+        <div style="margin-top:1.75rem;padding-top:1.25rem;border-top:1px solid var(--glass-border);font-size:0.82rem;color:var(--text-muted);">
+            Bei Fragen wenden Sie sich bitte an<br>
+            <strong style="color:var(--text-primary);">{{ app_name }}</strong>
+        </div>
+    </div>
+</div>
+</body>
+</html>

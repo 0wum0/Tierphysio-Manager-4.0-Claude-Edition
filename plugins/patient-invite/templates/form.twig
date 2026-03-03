@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anmeldung — {{ app_name }}</title>
+    <script>!function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}}();</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/liquid-glass.css">
+    <style>
+        body { min-height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:flex-start; padding:2rem 1rem 4rem; }
+        .form-shell { max-width:600px; width:100%; }
+        .form-header { text-align:center; margin-bottom:2rem; }
+        .form-header .logo-icon { font-size:3rem; display:block; margin-bottom:0.75rem; }
+        .form-header h1 { font-size:1.6rem; font-weight:800; margin:0 0 0.4rem; }
+        .form-header p { color:var(--text-muted); font-size:0.9rem; margin:0; }
+        .invite-badge { display:inline-flex;align-items:center;gap:0.5rem;background:rgba(79,124,255,0.12);border:1px solid rgba(79,124,255,0.3);border-radius:100px;padding:0.35rem 1rem;font-size:0.82rem;color:var(--accent);font-weight:600;margin-bottom:1rem; }
+        /* Steps */
+        .steps-nav { display:flex; gap:0; margin-bottom:2rem; background:var(--glass-bg); border:1px solid var(--glass-border); border-radius:14px; overflow:hidden; }
+        .step-tab { flex:1; padding:0.65rem 0.5rem; text-align:center; font-size:0.75rem; font-weight:600; color:var(--text-muted); border-right:1px solid var(--glass-border); cursor:default; transition:all 0.2s; position:relative; }
+        .step-tab:last-child { border-right:none; }
+        .step-tab.active { background:linear-gradient(135deg,rgba(79,124,255,0.18),rgba(139,92,246,0.18)); color:var(--text-primary); }
+        .step-tab.done { color:#22c55e; }
+        .step-tab .step-num { display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--glass-border);font-size:0.7rem;margin-right:0.35rem; }
+        .step-tab.active .step-num { background:var(--accent);color:#fff; }
+        .step-tab.done .step-num { background:#22c55e;color:#fff; }
+        .step-panel { display:none; }
+        .step-panel.active { display:block; animation:fadeIn 0.3s ease; }
+        @keyframes fadeIn { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:translateY(0)} }
+        .form-grid { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+        .form-grid.single { grid-template-columns:1fr; }
+        @media(max-width:500px) { .form-grid { grid-template-columns:1fr; } }
+        /* Photo upload */
+        .photo-zone { border:2px dashed var(--glass-border); border-radius:14px; padding:2rem; text-align:center; cursor:pointer; transition:all 0.2s; position:relative; }
+        .photo-zone:hover, .photo-zone.dragover { border-color:var(--accent); background:rgba(79,124,255,0.06); }
+        .photo-preview { width:120px; height:120px; object-fit:cover; border-radius:12px; margin:0 auto 0.75rem; display:block; }
+        /* Nav buttons */
+        .step-nav { display:flex; justify-content:space-between; align-items:center; margin-top:1.5rem; }
+        .progress-bar { height:3px; background:var(--glass-border); border-radius:100px; margin-bottom:1.5rem; overflow:hidden; }
+        .progress-fill { height:100%; background:linear-gradient(90deg,var(--accent),#8b5cf6); border-radius:100px; transition:width 0.4s ease; }
+    </style>
+</head>
+<body>
+<div class="form-shell">
+    <div class="form-header">
+        <span class="logo-icon">🐾</span>
+        <div class="invite-badge">
+            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Persönliche Einladung von {{ app_name }}
+        </div>
+        <h1>Willkommen!</h1>
+        <p>Bitte füllen Sie das Formular aus, um sich und Ihr Tier anzumelden.<br>Der Vorgang dauert nur wenige Minuten.</p>
+    </div>
+
+    {% if errors is defined and errors|length > 0 %}
+    <div style="background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:1rem 1.25rem;margin-bottom:1.5rem;">
+        {% for e in errors %}<div style="font-size:0.85rem;color:#ef4444;">• {{ e }}</div>{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill" style="width:25%;"></div></div>
+
+    <div class="steps-nav">
+        <div class="step-tab active" data-step="1"><span class="step-num">1</span>Besitzer</div>
+        <div class="step-tab" data-step="2"><span class="step-num">2</span>Tier</div>
+        <div class="step-tab" data-step="3"><span class="step-num">3</span>Foto</div>
+        <div class="step-tab" data-step="4"><span class="step-num">4</span>Fertig</div>
+    </div>
+
+    <form id="invite-form" method="POST" enctype="multipart/form-data" action="/einladung/{{ token }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+        {# STEP 1: Besitzer #}
+        <div class="step-panel active lg-card" id="step-1" style="padding:1.75rem;">
+            <h3 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Ihre Angaben</h3>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Vorname *</label>
+                    <input type="text" name="owner_first_name" class="form-control" value="{{ old.owner_first_name ?? (invite.email|split('@')|first) }}" placeholder="Max" required>
+                </div>
+                <div>
+                    <label class="form-label">Nachname *</label>
+                    <input type="text" name="owner_last_name" class="form-control" value="{{ old.owner_last_name ?? '' }}" placeholder="Mustermann" required>
+                </div>
+            </div>
+            <div style="margin-top:1rem;">
+                <label class="form-label">E-Mail-Adresse *</label>
+                <input type="email" name="owner_email" class="form-control" value="{{ old.owner_email ?? invite.email }}" placeholder="max@beispiel.de" required>
+            </div>
+            <div style="margin-top:1rem;">
+                <label class="form-label">Telefon *</label>
+                <input type="tel" name="owner_phone" class="form-control" value="{{ old.owner_phone ?? invite.phone }}" placeholder="+49 151 12345678" required>
+            </div>
+            <div style="margin-top:1rem;">
+                <label class="form-label">Straße &amp; Hausnummer</label>
+                <input type="text" name="owner_street" class="form-control" value="{{ old.owner_street ?? '' }}" placeholder="Musterstraße 1">
+            </div>
+            <div class="form-grid" style="margin-top:1rem;">
+                <div>
+                    <label class="form-label">PLZ</label>
+                    <input type="text" name="owner_zip" class="form-control" value="{{ old.owner_zip ?? '' }}" placeholder="12345">
+                </div>
+                <div>
+                    <label class="form-label">Ort</label>
+                    <input type="text" name="owner_city" class="form-control" value="{{ old.owner_city ?? '' }}" placeholder="Musterstadt">
+                </div>
+            </div>
+        </div>
+
+        {# STEP 2: Tier #}
+        <div class="step-panel lg-card" id="step-2" style="padding:1.75rem;">
+            <h3 style="margin:0 0 1.25rem;font-size:1rem;font-weight:700;">Angaben zum Tier</h3>
+            <div class="form-grid">
+                <div>
+                    <label class="form-label">Name des Tieres *</label>
+                    <input type="text" name="patient_name" class="form-control" value="{{ old.patient_name ?? '' }}" placeholder="Bello" required>
+                </div>
+                <div>
+                    <label class="form-label">Tierart *</label>
+                    <select name="patient_species" class="form-control" required>
+                        <option value="">Bitte wählen</option>
+                        {% set species = ['Hund','Katze','Pferd','Kaninchen','Vogel','Reptil','Nagetier','Fisch','Sonstige'] %}
+                        {% for s in species %}
+                        <option value="{{ s }}" {% if (old.patient_species ?? '') == s %}selected{% endif %}>{{ s }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid" style="margin-top:1rem;">
+                <div>
+                    <label class="form-label">Rasse</label>
+                    <input type="text" name="patient_breed" class="form-control" value="{{ old.patient_breed ?? '' }}" placeholder="Golden Retriever">
+                </div>
+                <div>
+                    <label class="form-label">Geschlecht</label>
+                    <select name="patient_gender" class="form-control">
+                        <option value="">Unbekannt</option>
+                        <option value="männlich" {% if (old.patient_gender ?? '') == 'männlich' %}selected{% endif %}>Männlich</option>
+                        <option value="weiblich" {% if (old.patient_gender ?? '') == 'weiblich' %}selected{% endif %}>Weiblich</option>
+                        <option value="kastriert" {% if (old.patient_gender ?? '') == 'kastriert' %}selected{% endif %}>Kastriert</option>
+                        <option value="sterilisiert" {% if (old.patient_gender ?? '') == 'sterilisiert' %}selected{% endif %}>Sterilisiert</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-grid" style="margin-top:1rem;">
+                <div>
+                    <label class="form-label">Geburtsdatum</label>
+                    <input type="date" name="patient_birth_date" class="form-control" value="{{ old.patient_birth_date ?? '' }}">
+                </div>
+                <div>
+                    <label class="form-label">Fellfarbe</label>
+                    <input type="text" name="patient_color" class="form-control" value="{{ old.patient_color ?? '' }}" placeholder="Braun-weiß">
+                </div>
+            </div>
+            <div style="margin-top:1rem;">
+                <label class="form-label">Chip-Nummer / Transponder</label>
+                <input type="text" name="patient_chip" class="form-control" value="{{ old.patient_chip ?? '' }}" placeholder="276097202012345">
+            </div>
+        </div>
+
+        {# STEP 3: Foto #}
+        <div class="step-panel lg-card" id="step-3" style="padding:1.75rem;">
+            <h3 style="margin:0 0 0.4rem;font-size:1rem;font-weight:700;">Foto Ihres Tieres</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin:0 0 1.25rem;">Optional — hilft uns, Ihr Tier beim ersten Besuch schnell zu erkennen.</p>
+            <div class="photo-zone" id="photo-zone" onclick="document.getElementById('photo-input').click()">
+                <img id="photo-preview" class="photo-preview" src="" alt="" style="display:none;">
+                <div id="photo-placeholder">
+                    <div style="font-size:2.5rem;margin-bottom:0.75rem;">📷</div>
+                    <div style="font-weight:600;font-size:0.9rem;margin-bottom:0.25rem;">Foto hochladen</div>
+                    <div style="font-size:0.8rem;color:var(--text-muted);">JPG, PNG, WEBP bis 8 MB</div>
+                </div>
+                <input type="file" name="patient_photo" id="photo-input" accept="image/*" style="display:none;">
+            </div>
+            <div style="text-align:center;margin-top:0.75rem;">
+                <button type="button" class="btn btn-secondary btn-sm" id="remove-photo" style="display:none;" onclick="removePhoto()">Foto entfernen</button>
+            </div>
+        </div>
+
+        {# STEP 4: Confirm #}
+        <div class="step-panel lg-card" id="step-4" style="padding:1.75rem;text-align:center;">
+            <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+            <h3 style="margin:0 0 0.75rem;font-size:1.1rem;font-weight:700;">Alles bereit!</h3>
+            <p style="font-size:0.88rem;color:var(--text-muted);margin:0 0 1.5rem;line-height:1.7;">
+                Bitte überprüfen Sie Ihre Angaben und klicken Sie auf <strong>Jetzt registrieren</strong>.<br>
+                Sie werden nach der Registrierung sofort als aktiver Besitzer aufgenommen.
+            </p>
+            <div id="summary" style="text-align:left;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:12px;padding:1rem 1.25rem;font-size:0.85rem;line-height:1.8;"></div>
+        </div>
+
+        {# Navigation #}
+        <div class="step-nav">
+            <button type="button" class="btn btn-secondary" id="btn-prev" style="visibility:hidden;">← Zurück</button>
+            <div style="font-size:0.8rem;color:var(--text-muted);" id="step-indicator">Schritt 1 von 4</div>
+            <button type="button" class="btn btn-primary" id="btn-next">Weiter →</button>
+        </div>
+    </form>
+</div>
+
+<script>
+let currentStep = 1;
+const totalSteps = 4;
+
+function updateStep(step) {
+    document.querySelectorAll('.step-panel').forEach(function (p, i) {
+        p.classList.toggle('active', i + 1 === step);
+    });
+    document.querySelectorAll('.step-tab').forEach(function (t, i) {
+        t.classList.remove('active', 'done');
+        if (i + 1 === step) t.classList.add('active');
+        if (i + 1 < step)  t.classList.add('done');
+    });
+
+    document.getElementById('step-indicator').textContent = 'Schritt ' + step + ' von ' + totalSteps;
+    document.getElementById('btn-prev').style.visibility = step > 1 ? 'visible' : 'hidden';
+    document.getElementById('btn-next').textContent = step === totalSteps ? '🚀 Jetzt registrieren' : 'Weiter →';
+    document.getElementById('progress-fill').style.width = (step / totalSteps * 100) + '%';
+
+    if (step === totalSteps) buildSummary();
+}
+
+function buildSummary() {
+    const g = function (n) { return document.querySelector('[name="' + n + '"]')?.value || '—'; };
+    const sel = function (n) {
+        const el = document.querySelector('[name="' + n + '"]');
+        return el ? (el.options[el.selectedIndex]?.text || '—') : '—';
+    };
+    document.getElementById('summary').innerHTML =
+        '<strong>Besitzer:</strong> ' + g('owner_first_name') + ' ' + g('owner_last_name') + '<br>' +
+        '<strong>E-Mail:</strong> ' + g('owner_email') + '<br>' +
+        '<strong>Telefon:</strong> ' + g('owner_phone') + '<br>' +
+        '<strong>Tier:</strong> ' + g('patient_name') + ' (' + sel('patient_species') + ')' + '<br>' +
+        '<strong>Rasse:</strong> ' + g('patient_breed') + '<br>' +
+        '<strong>Geschlecht:</strong> ' + sel('patient_gender');
+}
+
+function validateStep(step) {
+    if (step === 1) {
+        const fn = document.querySelector('[name="owner_first_name"]').value.trim();
+        const ln = document.querySelector('[name="owner_last_name"]').value.trim();
+        const em = document.querySelector('[name="owner_email"]').value.trim();
+        const ph = document.querySelector('[name="owner_phone"]').value.trim();
+        if (!fn || !ln) { alert('Bitte Vor- und Nachname ausfüllen.'); return false; }
+        if (!em || !em.includes('@')) { alert('Bitte gültige E-Mail-Adresse eingeben.'); return false; }
+        if (!ph) { alert('Bitte Telefonnummer eingeben.'); return false; }
+    }
+    if (step === 2) {
+        const pn = document.querySelector('[name="patient_name"]').value.trim();
+        const ps = document.querySelector('[name="patient_species"]').value;
+        if (!pn) { alert('Bitte Name des Tieres eingeben.'); return false; }
+        if (!ps) { alert('Bitte Tierart auswählen.'); return false; }
+    }
+    return true;
+}
+
+document.getElementById('btn-next').addEventListener('click', function () {
+    if (currentStep === totalSteps) {
+        submitForm();
+        return;
+    }
+    if (!validateStep(currentStep)) return;
+    currentStep++;
+    updateStep(currentStep);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+
+document.getElementById('btn-prev').addEventListener('click', function () {
+    if (currentStep > 1) { currentStep--; updateStep(currentStep); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+});
+
+function submitForm() {
+    const btn = document.getElementById('btn-next');
+    btn.disabled = true;
+    btn.textContent = 'Wird registriert…';
+
+    const form = document.getElementById('invite-form');
+    const fd   = new FormData(form);
+
+    fetch(form.action, {
+        method: 'POST',
+        body: fd,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+    })
+    .then(function (r) { return r.json(); })
+    .then(function (data) {
+        if (data.ok) {
+            window.location.href = data.redirect;
+        } else {
+            const errs = data.errors ? data.errors.join('\n') : (data.error || 'Unbekannter Fehler');
+            alert('Fehler:\n' + errs);
+            btn.disabled = false;
+            btn.textContent = '🚀 Jetzt registrieren';
+        }
+    })
+    .catch(function () {
+        alert('Netzwerkfehler. Bitte erneut versuchen.');
+        btn.disabled = false;
+        btn.textContent = '🚀 Jetzt registrieren';
+    });
+}
+
+/* Photo upload */
+document.getElementById('photo-input').addEventListener('change', function () {
+    const file = this.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        const preview = document.getElementById('photo-preview');
+        preview.src = e.target.result;
+        preview.style.display = 'block';
+        document.getElementById('photo-placeholder').style.display = 'none';
+        document.getElementById('remove-photo').style.display = 'inline-flex';
+    };
+    reader.readAsDataURL(file);
+});
+
+function removePhoto() {
+    document.getElementById('photo-input').value = '';
+    document.getElementById('photo-preview').style.display = 'none';
+    document.getElementById('photo-placeholder').style.display = 'block';
+    document.getElementById('remove-photo').style.display = 'none';
+}
+
+const zone = document.getElementById('photo-zone');
+zone.addEventListener('dragover', function (e) { e.preventDefault(); zone.classList.add('dragover'); });
+zone.addEventListener('dragleave', function () { zone.classList.remove('dragover'); });
+zone.addEventListener('drop', function (e) {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    const file = e.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+        const dt = new DataTransfer();
+        dt.items.add(file);
+        document.getElementById('photo-input').files = dt.files;
+        document.getElementById('photo-input').dispatchEvent(new Event('change'));
+    }
+});
+
+updateStep(1);
+</script>
+</body>
+</html>

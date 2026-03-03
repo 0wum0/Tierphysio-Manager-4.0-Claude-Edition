@@ -1,0 +1,10 @@
+{
+    "name": "Einladungslinks",
+    "slug": "patient-invite",
+    "version": "1.0.0",
+    "description": "Sendet Einladungslinks per E-Mail oder WhatsApp. Der Besitzer klickt den Link, füllt das Anmeldeformular aus und wird sofort als aktiver Besitzer mit Patient angelegt — ohne manuelle Prüfung.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "service_provider": "Plugins\\PatientInvite\\ServiceProvider",
+    "hooks": ["registerRoutes", "dashboardWidgets"]
+}

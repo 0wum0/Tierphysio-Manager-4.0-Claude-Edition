@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Willkommen! — {{ app_name }}</title>
+    <script>!function(){try{var t=localStorage.getItem('theme');document.documentElement.setAttribute('data-theme',t==='light'?'light':'dark');}catch(e){}}();</script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/css/app.css">
+    <link rel="stylesheet" href="/assets/css/liquid-glass.css">
+    <style>
+        body { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:2rem 1rem; }
+        .ty-wrapper { max-width:480px; width:100%; text-align:center; position:relative; z-index:1; }
+        .ty-icon { font-size:5rem; display:block; margin-bottom:1.25rem; animation:popIn 0.6s cubic-bezier(.34,1.56,.64,1); }
+        @keyframes popIn { from{transform:scale(0.3);opacity:0} to{transform:scale(1);opacity:1} }
+        .ty-confetti { position:fixed; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:hidden; z-index:0; }
+        .confetti-piece { position:absolute; top:-10px; border-radius:2px; animation:fall linear forwards; }
+        @keyframes fall { to { transform:translateY(110vh) rotate(720deg); opacity:0; } }
+        .check-list { text-align:left; display:flex; flex-direction:column; gap:0.65rem; margin:1.5rem 0; }
+        .check-item { display:flex; align-items:center; gap:0.75rem; font-size:0.88rem; }
+        .check-icon { width:24px; height:24px; border-radius:50%; background:rgba(34,197,94,0.2); color:#22c55e; display:flex; align-items:center; justify-content:center; flex-shrink:0; font-size:0.75rem; font-weight:700; }
+    </style>
+</head>
+<body>
+<div class="ty-confetti" id="confetti-container"></div>
+<div class="ty-wrapper">
+    <div class="lg-card" style="padding:2.5rem 2rem;">
+        <span class="ty-icon">🎉</span>
+        <h1 style="font-size:1.8rem;font-weight:800;margin:0 0 0.75rem;">Sie sind dabei!</h1>
+        <p style="color:var(--text-muted);font-size:0.92rem;line-height:1.7;margin:0 0 0.5rem;">
+            Ihre Registrierung war erfolgreich. Sie und Ihr Tier sind jetzt als aktive Patienten in unserem System eingetragen.
+        </p>
+
+        <div class="check-list">
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <span><strong>Besitzerprofil</strong> wurde angelegt</span>
+            </div>
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <span><strong>Patientenakte</strong> wurde erstellt</span>
+            </div>
+            <div class="check-item">
+                <div class="check-icon">✓</div>
+                <span>Unser Team wurde <strong>benachrichtigt</strong></span>
+            </div>
+        </div>
+
+        <p style="font-size:0.82rem;color:var(--text-muted);margin:0;">
+            Wir freuen uns auf Ihren ersten Besuch bei<br>
+            <strong style="color:var(--text-primary);">{{ app_name }}</strong>
+        </p>
+    </div>
+</div>
+
+<script>
+(function () {
+    const colors = ['#4f7cff','#8b5cf6','#22c55e','#f59e0b','#ef4444','#06b6d4'];
+    const c = document.getElementById('confetti-container');
+    for (let i = 0; i < 70; i++) {
+        const p = document.createElement('div');
+        p.className = 'confetti-piece';
+        p.style.left            = Math.random() * 100 + 'vw';
+        p.style.background      = colors[Math.floor(Math.random() * colors.length)];
+        p.style.width           = (Math.random() * 8 + 4) + 'px';
+        p.style.height          = (Math.random() * 8 + 4) + 'px';
+        p.style.animationDuration = (Math.random() * 3 + 2) + 's';
+        p.style.animationDelay  = (Math.random() * 2) + 's';
+        p.style.opacity         = Math.random() * 0.8 + 0.2;
+        c.appendChild(p);
+    }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+{% extends "layouts/base.twig" %}
+
+{% block title %}Einladungslinks{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" style="vertical-align:-3px;margin-right:0.4rem;"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.91a16 16 0 0 0 6.29 6.29l.95-.95a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+            Einladungslinks
+        </h1>
+        <p class="page-subtitle">Besitzer per E-Mail oder WhatsApp einladen — direkte Aufnahme ohne manuelle Prüfung</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('invite-modal').classList.add('open')">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+        Einladung senden
+    </button>
+</div>
+
+{# Stats row #}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:1.5rem;">
+    <div class="lg-card" style="padding:1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:#f59e0b;">{{ counts.offen }}</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">Offen</div>
+    </div>
+    <div class="lg-card" style="padding:1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:#22c55e;">{{ counts.angenommen }}</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">Angenommen</div>
+    </div>
+    <div class="lg-card" style="padding:1.25rem;text-align:center;">
+        <div style="font-size:1.8rem;font-weight:800;color:var(--text-muted);">{{ counts.abgelaufen }}</div>
+        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.25rem;">Abgelaufen</div>
+    </div>
+</div>
+
+{% if submissions is empty %}
+<div class="lg-card" style="padding:3rem;text-align:center;">
+    <div style="font-size:3rem;margin-bottom:1rem;">📨</div>
+    <div style="font-weight:600;margin-bottom:0.5rem;">Noch keine Einladungen</div>
+    <div style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.5rem;">Senden Sie Ihren Kunden einen persönlichen Einladungslink.</div>
+    <button class="btn btn-primary" onclick="document.getElementById('invite-modal').classList.add('open')">Erste Einladung senden</button>
+</div>
+{% else %}
+<div class="lg-card" style="padding:0;overflow:hidden;">
+    <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;">
+            <thead>
+                <tr style="border-bottom:1px solid var(--glass-border);">
+                    <th style="padding:0.9rem 1.25rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Status</th>
+                    <th style="padding:0.9rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Empfänger</th>
+                    <th style="padding:0.9rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Versendet via</th>
+                    <th style="padding:0.9rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Erstellt von</th>
+                    <th style="padding:0.9rem 1rem;text-align:left;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Läuft ab</th>
+                    <th style="padding:0.9rem 1.25rem;text-align:right;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);">Aktionen</th>
+                </tr>
+            </thead>
+            <tbody>
+            {% for inv in submissions %}
+            <tr style="border-bottom:1px solid var(--glass-border);transition:background 0.15s;">
+                <td style="padding:0.85rem 1.25rem;">
+                    {% if inv.status == 'offen' %}
+                        <span style="background:rgba(245,158,11,0.15);color:#f59e0b;border:1px solid rgba(245,158,11,0.3);border-radius:100px;padding:0.25rem 0.65rem;font-size:0.75rem;font-weight:600;">
+                            <span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#f59e0b;margin-right:0.35rem;animation:pulse 2s infinite;"></span>Offen
+                        </span>
+                    {% elseif inv.status == 'angenommen' %}
+                        <span style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3);border-radius:100px;padding:0.25rem 0.65rem;font-size:0.75rem;font-weight:600;">✓ Angenommen</span>
+                    {% else %}
+                        <span style="background:var(--glass-bg);color:var(--text-muted);border:1px solid var(--glass-border);border-radius:100px;padding:0.25rem 0.65rem;font-size:0.75rem;font-weight:600;">Abgelaufen</span>
+                    {% endif %}
+                </td>
+                <td style="padding:0.85rem 1rem;">
+                    <div style="font-size:0.88rem;font-weight:500;">{{ inv.email ?: '—' }}</div>
+                    {% if inv.phone %}<div style="font-size:0.75rem;color:var(--text-muted);">{{ inv.phone }}</div>{% endif %}
+                </td>
+                <td style="padding:0.85rem 1rem;">
+                    {% if inv.sent_via == 'email' %}
+                        <span style="font-size:0.82rem;">📧 E-Mail</span>
+                    {% elseif inv.sent_via == 'whatsapp' %}
+                        <span style="font-size:0.82rem;">💬 WhatsApp</span>
+                    {% else %}
+                        <span style="font-size:0.82rem;">📧💬 Beides</span>
+                    {% endif %}
+                </td>
+                <td style="padding:0.85rem 1rem;font-size:0.82rem;color:var(--text-muted);">{{ inv.created_by_name ?: '—' }}</td>
+                <td style="padding:0.85rem 1rem;font-size:0.82rem;color:var(--text-muted);">{{ inv.expires_at|date_de }}</td>
+                <td style="padding:0.85rem 1.25rem;text-align:right;">
+                    <div style="display:flex;gap:0.4rem;justify-content:flex-end;align-items:center;">
+                        {% if inv.status == 'angenommen' and inv.accepted_patient_id %}
+                            <a href="/patienten/{{ inv.accepted_patient_id }}" class="btn btn-sm btn-secondary">Zur Akte</a>
+                        {% endif %}
+                        {% if inv.status == 'offen' %}
+                            <button class="btn btn-sm btn-secondary copy-link-btn" data-id="{{ inv.id }}" title="Link kopieren">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                            </button>
+                            {% if inv.phone %}
+                            <a href="#" class="btn btn-sm btn-secondary wa-btn" data-id="{{ inv.id }}" title="WhatsApp öffnen" style="color:#22c55e;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                            </a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-secondary revoke-btn" data-id="{{ inv.id }}" title="Widerrufen" style="color:#ef4444;">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </button>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pagination.last_page > 1 %}
+<div style="display:flex;justify-content:center;gap:0.5rem;margin-top:1.5rem;">
+    {% for p in 1..pagination.last_page %}
+    <a href="/einladungen?page={{ p }}" class="btn btn-sm {% if p == pagination.current_page %}btn-primary{% else %}btn-secondary{% endif %}">{{ p }}</a>
+    {% endfor %}
+</div>
+{% endif %}
+{% endif %}
+
+{# ── Send Invite Modal ── #}
+<div class="modal-overlay" id="invite-modal" onclick="if(event.target===this)this.classList.remove('open')">
+    <div class="modal" style="max-width:520px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Einladung senden</h3>
+            <button class="modal-close" onclick="document.getElementById('invite-modal').classList.remove('open')">✕</button>
+        </div>
+        <form action="/einladungen/senden" method="POST" id="invite-form">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="modal-body" style="display:flex;flex-direction:column;gap:1.1rem;">
+
+                {# Via selector #}
+                <div>
+                    <label style="font-size:0.8rem;font-weight:600;color:var(--text-muted);display:block;margin-bottom:0.5rem;">SENDEN VIA</label>
+                    <div style="display:flex;gap:0.5rem;" id="via-toggle">
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="via" value="email" checked style="display:none;" class="via-radio">
+                            <div class="via-btn active" data-val="email">📧 E-Mail</div>
+                        </label>
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="via" value="whatsapp" style="display:none;" class="via-radio">
+                            <div class="via-btn" data-val="whatsapp">💬 WhatsApp</div>
+                        </label>
+                        <label style="flex:1;cursor:pointer;">
+                            <input type="radio" name="via" value="both" style="display:none;" class="via-radio">
+                            <div class="via-btn" data-val="both">📧+💬 Beides</div>
+                        </label>
+                    </div>
+                </div>
+
+                <div id="field-email">
+                    <label class="form-label">E-Mail-Adresse</label>
+                    <input type="email" name="email" class="form-control" placeholder="kunde@beispiel.de">
+                </div>
+
+                <div id="field-phone" style="display:none;">
+                    <label class="form-label">WhatsApp-Nummer</label>
+                    <input type="tel" name="phone" class="form-control" placeholder="+49 151 12345678">
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.35rem;">Mit Ländervorwahl, z.B. +49 151 ...</div>
+                </div>
+
+                <div>
+                    <label class="form-label">Persönliche Nachricht <span style="color:var(--text-muted);font-weight:400;">(optional)</span></label>
+                    <textarea name="note" class="form-control" rows="3" placeholder="Hallo! Wir würden uns freuen, Ihr Tier bei uns betreuen zu dürfen..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('invite-modal').classList.remove('open')">Abbrechen</button>
+                <button type="submit" class="btn btn-primary" id="send-btn">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Einladung senden
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<style>
+.via-btn { padding:0.55rem 0.75rem;border-radius:10px;border:1.5px solid var(--glass-border);text-align:center;font-size:0.82rem;font-weight:600;transition:all 0.15s;background:var(--glass-bg); }
+.via-btn.active { border-color:var(--accent);background:rgba(79,124,255,0.12);color:var(--accent); }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+</style>
+<script>
+const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+
+/* Via toggle */
+document.querySelectorAll('.via-radio').forEach(function (radio) {
+    radio.addEventListener('change', function () {
+        document.querySelectorAll('.via-btn').forEach(function (b) { b.classList.remove('active'); });
+        radio.closest('label').querySelector('.via-btn').classList.add('active');
+        const val = radio.value;
+        document.getElementById('field-email').style.display  = (val === 'whatsapp') ? 'none' : '';
+        document.getElementById('field-phone').style.display  = (val === 'email') ? 'none' : '';
+    });
+});
+
+/* Copy link */
+document.querySelectorAll('.copy-link-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        fetch('/einladungen/' + btn.dataset.id + '/link', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok) {
+                navigator.clipboard.writeText(data.url).then(function () {
+                    const orig = btn.innerHTML;
+                    btn.innerHTML = '✓';
+                    btn.style.color = '#22c55e';
+                    setTimeout(function () { btn.innerHTML = orig; btn.style.color = ''; }, 2000);
+                });
+            }
+        });
+    });
+});
+
+/* WhatsApp */
+document.querySelectorAll('.wa-btn').forEach(function (btn) {
+    btn.addEventListener('click', function (e) {
+        e.preventDefault();
+        fetch('/einladungen/' + btn.dataset.id + '/whatsapp', { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok) window.open(data.url, '_blank');
+        });
+    });
+});
+
+/* Revoke */
+document.querySelectorAll('.revoke-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        if (!confirm('Einladungslink widerrufen?')) return;
+        fetch('/einladungen/' + btn.dataset.id + '/widerrufen', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'X-Requested-With': 'XMLHttpRequest' },
+            body: '_csrf_token=' + encodeURIComponent(csrfToken)
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) { if (data.ok) window.location.reload(); });
+    });
+});
+</script>
+{% endblock %}
