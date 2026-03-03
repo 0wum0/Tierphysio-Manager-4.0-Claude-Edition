@@ -1429,6 +1429,19 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   :root { --sidebar-width: 220px; }
 }
 
+/* Sidebar overlay - hidden by default, shown via .open class only */
+#sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 200;
+  backdrop-filter: blur(2px);
+}
+#sidebar-overlay.open {
+  display: block;
+}
+
 @media (max-width: 768px) {
   .sidebar {
     transform: translateX(-100%);
@@ -1452,9 +1465,29 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 
   .top-header { padding: 0 1rem; }
   .page-content { padding: 1rem; }
+
+  /* Search bar: selects and buttons must not overflow */
+  .search-bar { flex-wrap: wrap; }
+  .search-bar .form-control[style*="width"] { width: 100% !important; min-width: 0; }
+  .search-bar select.form-control { width: 100% !important; }
+
+  /* Patient card: prevent overflow on narrow screens */
+  .patient-card { min-width: 0; }
+  .patient-card-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* Table containers: allow horizontal scroll instead of layout break */
+  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+  /* Modal: full width on mobile */
+  .modal { width: 96vw !important; max-width: 96vw !important; margin: 0.5rem; }
+  .modal-xl { width: 96vw !important; max-width: 96vw !important; }
 }
 
 @media (max-width: 480px) {
   .stats-grid   { grid-template-columns: 1fr; }
   .patient-grid { grid-template-columns: 1fr; }
+
+  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
+  .page-header > div:last-child { width: 100%; display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .page-header .btn { flex: 1; justify-content: center; }
 }
