@@ -71,10 +71,26 @@
             <div class="glass-card">
                 <h3 class="font-semibold mb-4" style="font-size:0.95rem;">{{ t('invoices.positions') }}</h3>
 
+                {# Column headers #}
+                <div style="display:grid;grid-template-columns:1fr 140px 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.25rem;">
+                    <span class="text-xs text-muted">{{ t('invoices.description') }}</span>
+                    <span class="text-xs text-muted">Behandlungsart</span>
+                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.quantity') }}</span>
+                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.unit_price') }}</span>
+                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.tax_rate') }}</span>
+                    <span></span>
+                </div>
+
                 <div id="positions-container">
                     {# Row template clone target #}
-                    <div class="position-row" style="display:grid;grid-template-columns:1fr 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
+                    <div class="position-row" style="display:grid;grid-template-columns:1fr 140px 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
                         <input type="text" name="position_description[]" class="form-control" placeholder="{{ t('invoices.description') }}" required>
+                        <select name="position_treatment_type[]" class="form-control" style="font-size:0.85rem;" data-cs-width="140px">
+                            <option value="">— keine —</option>
+                            {% for tt in treatment_types %}
+                                <option value="{{ tt.id }}" data-price="{{ tt.price }}" data-color="{{ tt.color }}">{{ tt.name }}</option>
+                            {% endfor %}
+                        </select>
                         <input type="number" name="position_quantity[]" class="form-control pos-qty" value="1" min="0.01" step="0.01" style="text-align:right;">
                         <input type="number" name="position_price[]" class="form-control pos-price" value="0.00" min="0" step="0.01" style="text-align:right;" placeholder="{{ t('invoices.unit_price') }}">
                         <input type="number" name="position_tax_rate[]" class="form-control pos-tax" value="19" min="0" step="0.01" style="text-align:right;">
@@ -82,15 +98,6 @@
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         </button>
                     </div>
-                </div>
-
-                {# Column headers for reference #}
-                <div style="display:grid;grid-template-columns:1fr 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.25rem;">
-                    <span class="text-xs text-muted">{{ t('invoices.description') }}</span>
-                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.quantity') }}</span>
-                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.unit_price') }}</span>
-                    <span class="text-xs text-muted" style="text-align:right;">{{ t('invoices.tax_rate') }}</span>
-                    <span></span>
                 </div>
 
                 <button type="button" id="add-position" class="btn btn-secondary btn-sm mt-3">
@@ -147,8 +154,14 @@
 
 {# Position Row Template #}
 <template id="position-row-template">
-    <div class="position-row" style="display:grid;grid-template-columns:1fr 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
+    <div class="position-row" style="display:grid;grid-template-columns:1fr 140px 80px 110px 80px auto;gap:0.5rem;margin-bottom:0.5rem;align-items:center;">
         <input type="text" name="position_description[]" class="form-control" placeholder="{{ t('invoices.description') }}" required>
+        <select name="position_treatment_type[]" class="form-control" style="font-size:0.85rem;" data-cs-width="140px">
+            <option value="">— keine —</option>
+            {% for tt in treatment_types %}
+                <option value="{{ tt.id }}" data-price="{{ tt.price }}" data-color="{{ tt.color }}">{{ tt.name }}</option>
+            {% endfor %}
+        </select>
         <input type="number" name="position_quantity[]" class="form-control pos-qty" value="1" min="0.01" step="0.01" style="text-align:right;">
         <input type="number" name="position_price[]" class="form-control pos-price" value="0.00" min="0" step="0.01" style="text-align:right;">
         <input type="number" name="position_tax_rate[]" class="form-control pos-tax" value="19" min="0" step="0.01" style="text-align:right;">

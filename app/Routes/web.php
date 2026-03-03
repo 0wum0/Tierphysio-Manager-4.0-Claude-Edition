@@ -69,3 +69,8 @@ $router->get('/einstellungen/benutzer', [SettingsController::class, 'users'], ['
 $router->post('/einstellungen/benutzer', [SettingsController::class, 'createUser'], ['admin']);
 $router->post('/einstellungen/benutzer/{id}', [SettingsController::class, 'updateUser'], ['admin']);
 $router->post('/einstellungen/benutzer/{id}/loeschen', [SettingsController::class, 'deleteUser'], ['admin']);
+
+$router->post('/einstellungen/behandlungsarten', [SettingsController::class, 'createTreatmentType'], ['admin']);
+$router->post('/einstellungen/behandlungsarten/{id}', [SettingsController::class, 'updateTreatmentType'], ['admin']);
+$router->post('/einstellungen/behandlungsarten/{id}/loeschen', [SettingsController::class, 'deleteTreatmentType'], ['admin']);
+$router->get('/api/behandlungsarten', [SettingsController::class, 'treatmentTypesJson'], ['auth']);

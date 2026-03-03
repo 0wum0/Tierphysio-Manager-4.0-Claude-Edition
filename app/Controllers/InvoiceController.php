@@ -14,6 +14,7 @@ use App\Services\PatientService;
 use App\Services\OwnerService;
 use App\Services\PdfService;
 use App\Services\MailService;
+use App\Repositories\TreatmentTypeRepository;
 
 class InvoiceController extends Controller
 {
@@ -26,7 +27,8 @@ class InvoiceController extends Controller
         private readonly PatientService $patientService,
         private readonly OwnerService $ownerService,
         private readonly PdfService $pdfService,
-        private readonly MailService $mailService
+        private readonly MailService $mailService,
+        private readonly TreatmentTypeRepository $treatmentTypeRepository
     ) {
         parent::__construct($view, $session, $config, $translator);
     }
@@ -57,6 +59,9 @@ class InvoiceController extends Controller
         $preselected_patient = $this->get('patient_id');
         $preselected_owner   = $this->get('owner_id');
 
+        $treatmentTypes = [];
+        try { $treatmentTypes = $this->treatmentTypeRepository->findActive(); } catch (\Throwable) {}
+
         $this->render('invoices/create.twig', [
             'page_title'          => $this->translator->trans('invoices.create'),
             'patients'            => $patients,
@@ -64,6 +69,7 @@ class InvoiceController extends Controller
             'preselected_patient' => $preselected_patient,
             'preselected_owner'   => $preselected_owner,
             'next_number'         => $this->invoiceService->generateInvoiceNumber(),
+            'treatment_types'     => $treatmentTypes,
         ]);
     }
 

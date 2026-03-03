@@ -11,6 +11,7 @@ use App\Core\Translator;
 use App\Core\View;
 use App\Services\PatientService;
 use App\Services\OwnerService;
+use App\Repositories\TreatmentTypeRepository;
 
 class PatientController extends Controller
 {
@@ -20,7 +21,8 @@ class PatientController extends Controller
         Config $config,
         Translator $translator,
         private readonly PatientService $patientService,
-        private readonly OwnerService $ownerService
+        private readonly OwnerService $ownerService,
+        private readonly TreatmentTypeRepository $treatmentTypeRepository
     ) {
         parent::__construct($view, $session, $config, $translator);
     }
@@ -71,14 +73,17 @@ class PatientController extends Controller
             exit;
         }
 
-        $owner    = $this->ownerService->findById((int)$patient['owner_id']);
-        $timeline = $this->patientService->getTimeline((int)$params['id']);
+        $owner          = $this->ownerService->findById((int)$patient['owner_id']);
+        $timeline       = $this->patientService->getTimeline((int)$params['id']);
+        $treatmentTypes = [];
+        try { $treatmentTypes = $this->treatmentTypeRepository->findActive(); } catch (\Throwable) {}
 
         header('Content-Type: application/json');
         echo json_encode([
-            'patient'  => $patient,
-            'owner'    => $owner,
-            'timeline' => $timeline,
+            'patient'         => $patient,
+            'owner'           => $owner,
+            'timeline'        => $timeline,
+            'treatment_types' => $treatmentTypes,
         ]);
         exit;
     }
@@ -222,14 +227,16 @@ class PatientController extends Controller
             exit;
         }
 
+        $ttId = $this->post('treatment_type_id', '');
         $data = [
-            'patient_id'   => (int)$params['id'],
-            'type'         => $this->sanitize($this->post('type', 'note')),
-            'title'        => $this->sanitize($this->post('title', '')),
-            'content'      => $this->post('content', ''),
-            'status_badge' => $this->sanitize($this->post('status_badge', '')),
-            'entry_date'   => $this->post('entry_date') ?: date('Y-m-d H:i:s'),
-            'user_id'      => (int)$this->session->get('user_id'),
+            'patient_id'        => (int)$params['id'],
+            'type'              => $this->sanitize($this->post('type', 'note')),
+            'treatment_type_id' => $ttId !== '' ? (int)$ttId : null,
+            'title'             => $this->sanitize($this->post('title', '')),
+            'content'           => $this->post('content', ''),
+            'status_badge'      => $this->sanitize($this->post('status_badge', '')),
+            'entry_date'        => $this->post('entry_date') ?: date('Y-m-d H:i:s'),
+            'user_id'           => (int)$this->session->get('user_id'),
         ];
 
         if (!empty($_FILES['attachment']['name'])) {

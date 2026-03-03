@@ -35,6 +35,10 @@
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="17.5" y1="15" x2="9" y2="15" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         Plugins
     </button>
+    <button class="settings-tab" data-tab="behandlungsarten">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Behandlungsarten
+    </button>
     <button class="settings-tab" data-tab="updates">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="23 4 23 10 17 10"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="1 20 1 14 7 14"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
         Updates
@@ -545,6 +549,149 @@
 </div>
 
 {# ════════════════════════════════════════════════════
+   TAB: BEHANDLUNGSARTEN
+════════════════════════════════════════════════════ #}
+<div class="settings-tab-content" id="tab-behandlungsarten">
+
+    {# Neue Behandlungsart #}
+    <div class="glass-card mb-4">
+        <h3 class="section-title">Neue Behandlungsart</h3>
+        <form action="/einstellungen/behandlungsarten" method="POST">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="form-grid-2 mb-3">
+                <div class="form-group">
+                    <label class="form-label">Name *</label>
+                    <input type="text" name="name" class="form-control" required placeholder="z.B. Physiotherapie">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Farbe</label>
+                    <div class="flex gap-2 items-center">
+                        <input type="color" name="color" value="#4f7cff" class="form-control" style="width:56px;height:40px;padding:0.2rem;cursor:pointer;">
+                        <span style="font-size:0.8rem;color:var(--text-muted);">Badge-Farbe</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Standardpreis (€)</label>
+                    <input type="number" name="price" class="form-control" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reihenfolge</label>
+                    <input type="number" name="sort_order" class="form-control" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Beschreibung</label>
+                <textarea name="description" class="form-control" rows="2" placeholder="Optionale Beschreibung..."></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary btn-sm">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                Behandlungsart hinzufügen
+            </button>
+        </form>
+    </div>
+
+    {# Liste der Behandlungsarten #}
+    <div class="glass-card">
+        <h3 class="section-title">Vorhandene Behandlungsarten</h3>
+        {% if treatment_types is empty %}
+            <p style="color:var(--text-muted);font-size:0.875rem;">Noch keine Behandlungsarten vorhanden. Migration ausführen falls nötig.</p>
+        {% else %}
+            <div style="display:flex;flex-direction:column;gap:0.75rem;">
+                {% for tt in treatment_types %}
+                <div class="glass-card" style="padding:1rem;background:var(--glass-bg);">
+                    <div class="flex gap-3 items-start" style="flex-wrap:wrap;">
+                        {# Farbvorschau + Badge #}
+                        <div style="flex-shrink:0;margin-top:0.2rem;">
+                            <span style="display:inline-block;padding:0.25rem 0.75rem;border-radius:999px;background:{{ tt.color }}22;color:{{ tt.color }};font-size:0.75rem;font-weight:600;border:1px solid {{ tt.color }}44;">
+                                {{ tt.name }}
+                            </span>
+                        </div>
+                        {# Infos #}
+                        <div style="flex:1;min-width:0;">
+                            <div style="font-size:0.75rem;color:var(--text-muted);">
+                                {% if tt.price %}Preis: {{ tt.price|number_format(2, ',', '.') }} €{% else %}Kein Standardpreis{% endif %}
+                                &nbsp;·&nbsp;
+                                {% if tt.active %}
+                                    <span style="color:var(--success);">Aktiv</span>
+                                {% else %}
+                                    <span style="color:var(--text-muted);">Inaktiv</span>
+                                {% endif %}
+                                &nbsp;·&nbsp; Reihenfolge: {{ tt.sort_order }}
+                            </div>
+                            {% if tt.description %}
+                                <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.2rem;">{{ tt.description }}</div>
+                            {% endif %}
+                        </div>
+                        {# Aktionen #}
+                        <div class="flex gap-2" style="flex-shrink:0;">
+                            <button class="btn btn-secondary btn-sm" onclick="openEditTT({{ tt|json_encode|e('html_attr') }})">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                                Bearbeiten
+                            </button>
+                            <form action="/einstellungen/behandlungsarten/{{ tt.id }}/loeschen" method="POST" style="margin:0;" onsubmit="return confirm('Behandlungsart wirklich löschen?');">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm" style="background:var(--danger-glow);color:var(--danger);border:1px solid var(--danger);">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                                    Löschen
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{# Edit Modal für Behandlungsart #}
+<div class="modal-overlay" id="modal-edit-tt" style="display:none;" onclick="if(event.target===this)this.style.display='none'">
+    <div class="modal">
+        <div class="modal-header">
+            <h2 class="modal-title">Behandlungsart bearbeiten</h2>
+            <button class="modal-close" onclick="document.getElementById('modal-edit-tt').style.display='none'">&times;</button>
+        </div>
+        <div class="modal-body">
+            <form id="form-edit-tt" action="" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <div class="form-grid-2 mb-3">
+                    <div class="form-group">
+                        <label class="form-label">Name *</label>
+                        <input type="text" id="ett-name" name="name" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Farbe</label>
+                        <input type="color" id="ett-color" name="color" class="form-control" style="height:40px;padding:0.2rem;cursor:pointer;">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Standardpreis (€)</label>
+                        <input type="number" id="ett-price" name="price" class="form-control" step="0.01" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Reihenfolge</label>
+                        <input type="number" id="ett-sort" name="sort_order" class="form-control" min="0">
+                    </div>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="form-label">Beschreibung</label>
+                    <textarea id="ett-desc" name="description" class="form-control" rows="2"></textarea>
+                </div>
+                <div class="form-group mb-3">
+                    <label class="flex items-center gap-2" style="cursor:pointer;font-size:0.875rem;">
+                        <input type="checkbox" id="ett-active" name="active" value="1" style="width:16px;height:16px;">
+                        Aktiv (im Dropdown sichtbar)
+                    </label>
+                </div>
+                <div class="flex gap-2 justify-end">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-edit-tt').style.display='none'">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ════════════════════════════════════════════════════
    TAB: UPDATES
 ════════════════════════════════════════════════════ #}
 <div class="settings-tab-content" id="tab-updates">
@@ -785,6 +932,19 @@
 
     updatePreview();
 })();
+</script>
+
+<script>
+function openEditTT(tt) {
+    document.getElementById('form-edit-tt').action = '/einstellungen/behandlungsarten/' + tt.id;
+    document.getElementById('ett-name').value   = tt.name  || '';
+    document.getElementById('ett-color').value  = tt.color || '#4f7cff';
+    document.getElementById('ett-price').value  = tt.price || '';
+    document.getElementById('ett-sort').value   = tt.sort_order || 0;
+    document.getElementById('ett-desc').value   = tt.description || '';
+    document.getElementById('ett-active').checked = tt.active == 1;
+    document.getElementById('modal-edit-tt').style.display = 'flex';
+}
 </script>
 
 {% endblock %}

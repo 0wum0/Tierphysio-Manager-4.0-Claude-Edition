@@ -13,6 +13,7 @@ use App\Core\PluginManager;
 use App\Services\SettingsService;
 use App\Services\MigrationService;
 use App\Repositories\UserRepository;
+use App\Repositories\TreatmentTypeRepository;
 
 class SettingsController extends Controller
 {
@@ -24,7 +25,8 @@ class SettingsController extends Controller
         private readonly SettingsService $settingsService,
         private readonly PluginManager $pluginManager,
         private readonly MigrationService $migrationService,
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly TreatmentTypeRepository $treatmentTypeRepository
     ) {
         parent::__construct($view, $session, $config, $translator);
     }
@@ -38,18 +40,24 @@ class SettingsController extends Controller
         $latestVersion   = $this->migrationService->getLatestVersion();
         $pendingMigrations = $this->migrationService->getPendingMigrations();
 
+        $treatmentTypes = [];
+        try {
+            $treatmentTypes = $this->treatmentTypeRepository->findAll();
+        } catch (\Throwable) {}
+
         $this->render('settings/index.twig', [
-            'page_title'      => $this->translator->trans('nav.settings'),
-            'settings'        => $settings,
-            'users'           => $users,
-            'plugins'         => $plugins,
-            'current_version' => $currentVersion,
-            'latest_version'  => $latestVersion,
-            'pending'         => $pendingMigrations,
-            'up_to_date'      => empty($pendingMigrations),
-            'php_version'     => PHP_VERSION,
-            'app_env'         => $this->config->get('app.env', 'production'),
-            'active_tab'      => $params['tab'] ?? ($_GET['tab'] ?? 'firma'),
+            'page_title'       => $this->translator->trans('nav.settings'),
+            'settings'         => $settings,
+            'users'            => $users,
+            'plugins'          => $plugins,
+            'current_version'  => $currentVersion,
+            'latest_version'   => $latestVersion,
+            'pending'          => $pendingMigrations,
+            'up_to_date'       => empty($pendingMigrations),
+            'php_version'      => PHP_VERSION,
+            'app_env'          => $this->config->get('app.env', 'production'),
+            'active_tab'       => $params['tab'] ?? ($_GET['tab'] ?? 'firma'),
+            'treatment_types'  => $treatmentTypes,
         ]);
     }
 
@@ -234,5 +242,70 @@ class SettingsController extends Controller
         $this->userRepository->delete((int)$params['id']);
         $this->session->flash('success', $this->translator->trans('settings.user_deleted'));
         $this->redirect('/einstellungen#benutzer');
+    }
+
+    public function createTreatmentType(array $params = []): void
+    {
+        $this->validateCsrf();
+
+        $name = $this->sanitize($this->post('name', ''));
+        if (empty($name)) {
+            $this->session->flash('error', 'Name ist erforderlich.');
+            $this->redirect('/einstellungen?tab=behandlungsarten');
+            return;
+        }
+
+        $this->treatmentTypeRepository->create([
+            'name'        => $name,
+            'color'       => $this->post('color', '#4f7cff'),
+            'price'       => $this->post('price', ''),
+            'description' => $this->sanitize($this->post('description', '')),
+            'active'      => (int)(bool)$this->post('active', 1),
+            'sort_order'  => (int)$this->post('sort_order', 0),
+        ]);
+
+        $this->session->flash('success', 'Behandlungsart erstellt.');
+        $this->redirect('/einstellungen?tab=behandlungsarten');
+    }
+
+    public function updateTreatmentType(array $params = []): void
+    {
+        $this->validateCsrf();
+
+        $id   = (int)$params['id'];
+        $name = $this->sanitize($this->post('name', ''));
+        if (empty($name)) {
+            $this->session->flash('error', 'Name ist erforderlich.');
+            $this->redirect('/einstellungen?tab=behandlungsarten');
+            return;
+        }
+
+        $this->treatmentTypeRepository->update($id, [
+            'name'        => $name,
+            'color'       => $this->post('color', '#4f7cff'),
+            'price'       => $this->post('price', ''),
+            'description' => $this->sanitize($this->post('description', '')),
+            'active'      => (int)(bool)$this->post('active', 1),
+            'sort_order'  => (int)$this->post('sort_order', 0),
+        ]);
+
+        $this->session->flash('success', 'Behandlungsart aktualisiert.');
+        $this->redirect('/einstellungen?tab=behandlungsarten');
+    }
+
+    public function deleteTreatmentType(array $params = []): void
+    {
+        $this->validateCsrf();
+        $this->treatmentTypeRepository->delete((int)$params['id']);
+        $this->session->flash('success', 'Behandlungsart gelöscht.');
+        $this->redirect('/einstellungen?tab=behandlungsarten');
+    }
+
+    public function treatmentTypesJson(array $params = []): void
+    {
+        $types = $this->treatmentTypeRepository->findActive();
+        header('Content-Type: application/json');
+        echo json_encode($types);
+        exit;
     }
 }
