@@ -168,6 +168,32 @@ const InvoicePositions = {
                 this.updateTotals();
             }
         });
+        container.addEventListener('change', (e) => {
+            if (e.target.matches('[name="position_treatment_type[]"]')) {
+                this.applyTreatmentType(e.target);
+            }
+        });
+        this.updateTotals();
+    },
+
+    applyTreatmentType(sel) {
+        const row = sel.closest('.position-row');
+        if (!row) return;
+        const opt = sel.options[sel.selectedIndex];
+        if (!opt || !opt.value) return;
+        const price = opt.dataset.price;
+        const name  = opt.textContent.trim();
+        const descEl  = row.querySelector('[name="position_description[]"]');
+        const priceEl = row.querySelector('.pos-price');
+        /* Only overwrite if still empty or previously auto-filled */
+        if (descEl && (!descEl.value || descEl.dataset.autoFilled === '1')) {
+            descEl.value = name;
+            descEl.dataset.autoFilled = '1';
+        }
+        if (priceEl && price && (!priceEl.value || priceEl.value === '0.00' || priceEl.dataset.autoFilled === '1')) {
+            priceEl.value = parseFloat(price).toFixed(2);
+            priceEl.dataset.autoFilled = '1';
+        }
         this.updateTotals();
     },
 
