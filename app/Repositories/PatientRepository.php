@@ -94,35 +94,63 @@ class PatientRepository extends Repository
 
     public function getTimeline(int $patientId): array
     {
-        return $this->db->fetchAll(
-            "SELECT t.*, u.name AS user_name,
-                    tt.name AS treatment_type_name, tt.color AS treatment_type_color
-             FROM patient_timeline t
-             LEFT JOIN users u ON t.user_id = u.id
-             LEFT JOIN treatment_types tt ON t.treatment_type_id = tt.id
-             WHERE t.patient_id = ?
-             ORDER BY t.entry_date DESC",
-            [$patientId]
-        );
+        try {
+            return $this->db->fetchAll(
+                "SELECT t.*, u.name AS user_name,
+                        tt.name AS treatment_type_name, tt.color AS treatment_type_color
+                 FROM patient_timeline t
+                 LEFT JOIN users u ON t.user_id = u.id
+                 LEFT JOIN treatment_types tt ON t.treatment_type_id = tt.id
+                 WHERE t.patient_id = ?
+                 ORDER BY t.entry_date DESC",
+                [$patientId]
+            );
+        } catch (\Throwable) {
+            return $this->db->fetchAll(
+                "SELECT t.*, u.name AS user_name
+                 FROM patient_timeline t
+                 LEFT JOIN users u ON t.user_id = u.id
+                 WHERE t.patient_id = ?
+                 ORDER BY t.entry_date DESC",
+                [$patientId]
+            );
+        }
     }
 
     public function addTimelineEntry(array $data): string
     {
-        return $this->db->insert(
-            "INSERT INTO patient_timeline (patient_id, type, treatment_type_id, title, content, status_badge, attachment, entry_date, user_id, created_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
-            [
-                $data['patient_id'],
-                $data['type'],
-                $data['treatment_type_id'] ?? null,
-                $data['title'],
-                $data['content'],
-                $data['status_badge'] ?? null,
-                $data['attachment'] ?? null,
-                $data['entry_date'],
-                $data['user_id'],
-            ]
-        );
+        try {
+            return $this->db->insert(
+                "INSERT INTO patient_timeline (patient_id, type, treatment_type_id, title, content, status_badge, attachment, entry_date, user_id, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                [
+                    $data['patient_id'],
+                    $data['type'],
+                    $data['treatment_type_id'] ?? null,
+                    $data['title'],
+                    $data['content'],
+                    $data['status_badge'] ?? null,
+                    $data['attachment'] ?? null,
+                    $data['entry_date'],
+                    $data['user_id'],
+                ]
+            );
+        } catch (\Throwable) {
+            return $this->db->insert(
+                "INSERT INTO patient_timeline (patient_id, type, title, content, status_badge, attachment, entry_date, user_id, created_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())",
+                [
+                    $data['patient_id'],
+                    $data['type'],
+                    $data['title'],
+                    $data['content'],
+                    $data['status_badge'] ?? null,
+                    $data['attachment'] ?? null,
+                    $data['entry_date'],
+                    $data['user_id'],
+                ]
+            );
+        }
     }
 
     public function deleteTimelineEntry(int $entryId): void
