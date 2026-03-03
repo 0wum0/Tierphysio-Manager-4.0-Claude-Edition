@@ -717,6 +717,7 @@ function openPatientModal(patientId) {
             /* Show body */
             pdLoading.style.display = 'none';
             pdBody.style.display = 'block';
+            if (typeof CustomSelect !== 'undefined') CustomSelect.refresh(pdBody);
         })
         .catch(function () {
             pdLoading.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;">Fehler beim Laden.</div>';

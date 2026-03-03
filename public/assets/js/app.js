@@ -342,6 +342,126 @@ function formatMoney(amount) {
 }
 
 // ============================================================
+// Custom Select
+// ============================================================
+const CustomSelect = {
+    init(root) {
+        const scope = root || document;
+        scope.querySelectorAll('select.form-control:not([data-cs-init])').forEach(sel => {
+            this.build(sel);
+        });
+    },
+
+    build(sel) {
+        if (sel.dataset.csInit) return;
+        sel.dataset.csInit = '1';
+        sel.style.display = 'none';
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'cs-wrapper';
+        if (sel.disabled) wrapper.classList.add('cs-disabled');
+
+        const trigger = document.createElement('div');
+        trigger.className = 'cs-trigger form-control';
+        trigger.setAttribute('tabindex', sel.disabled ? '-1' : '0');
+        trigger.setAttribute('role', 'combobox');
+        trigger.setAttribute('aria-expanded', 'false');
+
+        const triggerText = document.createElement('span');
+        triggerText.className = 'cs-trigger-text';
+
+        const arrow = document.createElement('span');
+        arrow.className = 'cs-arrow';
+        arrow.innerHTML = '<svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M6 9l6 6 6-6"/></svg>';
+
+        trigger.appendChild(triggerText);
+        trigger.appendChild(arrow);
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'cs-dropdown';
+        dropdown.setAttribute('role', 'listbox');
+
+        wrapper.appendChild(trigger);
+        wrapper.appendChild(dropdown);
+        sel.parentNode.insertBefore(wrapper, sel.nextSibling);
+
+        const syncOptions = () => {
+            dropdown.innerHTML = '';
+            Array.from(sel.options).forEach((opt, i) => {
+                const item = document.createElement('div');
+                item.className = 'cs-option' + (opt.selected ? ' cs-selected' : '') + (opt.disabled ? ' cs-option-disabled' : '');
+                item.textContent = opt.textContent;
+                item.dataset.value = opt.value;
+                item.dataset.index = i;
+                item.setAttribute('role', 'option');
+                item.setAttribute('aria-selected', opt.selected ? 'true' : 'false');
+                if (!opt.disabled) {
+                    item.addEventListener('click', e => {
+                        e.stopPropagation();
+                        sel.selectedIndex = i;
+                        sel.dispatchEvent(new Event('change', { bubbles: true }));
+                        syncSelected();
+                        close();
+                    });
+                }
+                dropdown.appendChild(item);
+            });
+        };
+
+        const syncSelected = () => {
+            const opt = sel.options[sel.selectedIndex];
+            triggerText.textContent = opt ? opt.textContent : '';
+            dropdown.querySelectorAll('.cs-option').forEach((el, i) => {
+                el.classList.toggle('cs-selected', i === sel.selectedIndex);
+                el.setAttribute('aria-selected', i === sel.selectedIndex ? 'true' : 'false');
+            });
+        };
+
+        const open = () => {
+            if (sel.disabled) return;
+            document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => {
+                if (w !== wrapper) w.classList.remove('cs-open');
+            });
+            wrapper.classList.add('cs-open');
+            trigger.setAttribute('aria-expanded', 'true');
+            /* Flip up if not enough space below */
+            const rect = wrapper.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            dropdown.style.maxHeight = Math.min(240, Math.max(spaceBelow - 8, 120)) + 'px';
+        };
+
+        const close = () => {
+            wrapper.classList.remove('cs-open');
+            trigger.setAttribute('aria-expanded', 'false');
+        };
+
+        trigger.addEventListener('click', e => {
+            e.stopPropagation();
+            wrapper.classList.contains('cs-open') ? close() : open();
+        });
+
+        trigger.addEventListener('keydown', e => {
+            if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); wrapper.classList.contains('cs-open') ? close() : open(); }
+            if (e.key === 'Escape') close();
+            if (e.key === 'ArrowDown') { e.preventDefault(); sel.selectedIndex = Math.min(sel.selectedIndex + 1, sel.options.length - 1); sel.dispatchEvent(new Event('change', { bubbles: true })); syncSelected(); }
+            if (e.key === 'ArrowUp')   { e.preventDefault(); sel.selectedIndex = Math.max(sel.selectedIndex - 1, 0); sel.dispatchEvent(new Event('change', { bubbles: true })); syncSelected(); }
+        });
+
+        /* Rebuild when options change (e.g. AJAX populated selects) */
+        const mo = new MutationObserver(() => { syncOptions(); syncSelected(); });
+        mo.observe(sel, { childList: true });
+
+        syncOptions();
+        syncSelected();
+    },
+
+    /* Re-init after dynamic content is added */
+    refresh(root) {
+        this.init(root);
+    }
+};
+
+// ============================================================
 // Init on DOM ready
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
@@ -353,6 +473,12 @@ document.addEventListener('DOMContentLoaded', () => {
     InvoicePositions.init();
     DashboardChart.init();
     InstallerDB.init();
+    CustomSelect.init();
+
+    /* Close all custom selects on outside click */
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => w.classList.remove('cs-open'));
+    });
 
     document.getElementById('theme-toggle')?.addEventListener('click', () => ThemeManager.toggle());
 
