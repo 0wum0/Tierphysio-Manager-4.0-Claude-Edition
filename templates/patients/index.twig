@@ -51,94 +51,90 @@
         {# Modal Body (hidden until loaded) #}
         <div id="pd-body" style="display:none;overflow-y:auto;flex:1;padding:1.25rem;display:flex;flex-direction:column;gap:1.25rem;">
 
-            {# ROW 1: Foto + Patienteninfos + Besitzerinfos nebeneinander #}
+            {# ── ZEILE 1: Foto  |  Patienteninfos  |  Besitzerinfos ── #}
             <div style="display:flex;gap:1.25rem;flex-wrap:wrap;align-items:flex-start;">
-
-                {# Foto #}
                 <div id="pd-photo-full" style="width:120px;height:120px;flex-shrink:0;border-radius:12px;overflow:hidden;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;">
                     <svg width="40" height="40" fill="none" viewBox="0 0 24 24" style="opacity:0.2;"><path stroke="currentColor" stroke-width="1.5" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </div>
-
-                {# Patienteninfos #}
-                <div style="flex:1;min-width:160px;">
+                <div style="flex:1;min-width:150px;">
                     <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Patient</div>
-                    <div id="pd-details" style="display:grid;grid-template-columns:1fr 1fr;gap:0.4rem 1rem;font-size:0.83rem;"></div>
+                    <div id="pd-details" style="display:grid;grid-template-columns:1fr 1fr;gap:0.35rem 1rem;font-size:0.83rem;"></div>
                 </div>
-
-                {# Besitzerinfos #}
-                <div style="flex:1;min-width:160px;">
+                <div style="flex:1;min-width:150px;">
                     <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.5rem;">Besitzer</div>
                     <div id="pd-owner" style="font-size:0.83rem;"></div>
                 </div>
-
             </div>
 
-            {# Divider #}
             <div style="border-top:1px solid var(--glass-border);"></div>
 
-            {# ROW 2: Neuer Timeline-Eintrag (aufklappbar) #}
+            {# ── ZEILE 2: Neuer Eintrag — Titel oben, Felder darunter ── #}
             <div>
-                <button id="pd-toggle-form" type="button" style="width:100%;padding:0.6rem 0;background:none;border:none;color:var(--text-secondary);font-size:0.82rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
-                    <span style="display:flex;align-items:center;gap:0.5rem;">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        Neuer Timeline-Eintrag
-                    </span>
-                    <svg id="pd-toggle-chevron" width="14" height="14" fill="none" viewBox="0 0 24 24" style="transition:transform 0.2s;"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="6 9 12 15 18 9"/></svg>
-                </button>
-                <div id="pd-entry-form" style="display:none;padding-top:0.75rem;">
-                    <form id="pd-timeline-form" method="POST" enctype="multipart/form-data">
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-                        <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.5rem;margin-bottom:0.5rem;">
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Typ</label>
-                                <select name="type" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;">
-                                    <option value="note">📝 Notiz</option>
-                                    <option value="treatment">💊 Behandlung</option>
-                                    <option value="photo">📷 Foto</option>
-                                    <option value="document">📄 Dokument</option>
-                                    <option value="other">📌 Sonstiges</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Datum</label>
-                                <input type="datetime-local" name="entry_date" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;" value="{{ 'now'|date('Y-m-d\\TH:i') }}">
-                            </div>
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Status-Badge</label>
-                                <select name="status_badge" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;">
-                                    <option value="">— Kein Badge —</option>
-                                    <option value="Schmerzfrei">Schmerzfrei</option>
-                                    <option value="In Behandlung">In Behandlung</option>
-                                    <option value="Kontrolltermin">Kontrolltermin</option>
-                                    <option value="Notfall">Notfall</option>
-                                    <option value="Gebessert">Gebessert</option>
-                                    <option value="Entlassen">Entlassen</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Anhang</label>
-                                <input type="file" name="attachment" class="form-control" style="font-size:0.75rem;padding:0.35rem;">
-                            </div>
+                <div style="font-size:0.75rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">
+                    Neuer Timeline-Eintrag
+                </div>
+                <form id="pd-timeline-form" method="POST" enctype="multipart/form-data">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    {# Zeile: Typ | Datum | Status-Badge | Anhang #}
+                    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:0.5rem;margin-bottom:0.5rem;">
+                        <div>
+                            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Typ</label>
+                            <select name="type" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;">
+                                <option value="note">📝 Notiz</option>
+                                <option value="treatment">💊 Behandlung</option>
+                                <option value="photo">📷 Foto</option>
+                                <option value="document">📄 Dokument</option>
+                                <option value="other">📌 Sonstiges</option>
+                            </select>
                         </div>
-                        <div style="display:grid;grid-template-columns:1fr 2fr;gap:0.5rem;margin-bottom:0.5rem;">
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Titel</label>
-                                <input type="text" name="title" class="form-control" placeholder="Kurzer Titel..." style="font-size:0.82rem;padding:0.4rem 0.5rem;">
-                            </div>
-                            <div>
-                                <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Inhalt</label>
-                                <textarea name="content" class="form-control" rows="1" placeholder="Notizen, Befunde..." style="font-size:0.82rem;padding:0.4rem 0.5rem;resize:vertical;"></textarea>
-                            </div>
+                        <div>
+                            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Datum</label>
+                            <input type="datetime-local" name="entry_date" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;" value="{{ 'now'|date('Y-m-d\\TH:i') }}">
                         </div>
-                        <button type="submit" class="btn btn-primary btn-sm">
-                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                            Eintrag speichern
-                        </button>
-                    </form>
+                        <div>
+                            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Status-Badge</label>
+                            <select name="status_badge" class="form-control" style="font-size:0.82rem;padding:0.4rem 0.5rem;">
+                                <option value="">— kein —</option>
+                                <option value="Schmerzfrei">Schmerzfrei</option>
+                                <option value="In Behandlung">In Behandlung</option>
+                                <option value="Kontrolltermin">Kontrolltermin</option>
+                                <option value="Notfall">Notfall</option>
+                                <option value="Gebessert">Gebessert</option>
+                                <option value="Entlassen">Entlassen</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Anhang</label>
+                            <input type="file" name="attachment" class="form-control" style="font-size:0.75rem;padding:0.35rem;">
+                        </div>
+                    </div>
+                    {# Zeile: Titel (oben) dann Inhalt (darunter) #}
+                    <div style="margin-bottom:0.5rem;">
+                        <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Titel</label>
+                        <input type="text" name="title" class="form-control" placeholder="Kurzer Titel..." style="font-size:0.82rem;padding:0.4rem 0.5rem;">
+                    </div>
+                    <div style="margin-bottom:0.75rem;">
+                        <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Inhalt</label>
+                        <textarea name="content" class="form-control" rows="2" placeholder="Notizen, Befunde, Behandlungsschritte..." style="font-size:0.82rem;padding:0.4rem 0.5rem;resize:vertical;"></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                        Eintrag speichern
+                    </button>
+                </form>
+            </div>
+
+            <div style="border-top:1px solid var(--glass-border);"></div>
+
+            {# ── ZEILE 3: Timeline-Suche ── #}
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+                <div style="position:relative;flex:1;">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    <input id="pd-timeline-search" type="text" class="form-control" placeholder="Timeline durchsuchen..." style="padding-left:2.1rem;font-size:0.83rem;">
                 </div>
             </div>
 
-            {# ROW 3: Timeline #}
+            {# ── ZEILE 4: Timeline ── #}
             <div>
                 <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Timeline</div>
                 <div id="pd-timeline" class="timeline"></div>
@@ -444,19 +440,8 @@ const pdOwner      = document.getElementById('pd-owner');
 const pdTimeline   = document.getElementById('pd-timeline');
 const pdInvoiceBtn = document.getElementById('pd-invoice-btn');
 const pdEditBtn    = document.getElementById('pd-edit-btn');
-const pdForm       = document.getElementById('pd-timeline-form');
-const pdToggleBtn  = document.getElementById('pd-toggle-form');
-const pdEntryForm  = document.getElementById('pd-entry-form');
-const pdChevron    = document.getElementById('pd-toggle-chevron');
-
-/* Toggle add-entry form */
-if (pdToggleBtn) {
-    pdToggleBtn.addEventListener('click', function () {
-        const open = pdEntryForm.style.display !== 'none';
-        pdEntryForm.style.display = open ? 'none' : 'block';
-        pdChevron.style.transform = open ? '' : 'rotate(180deg)';
-    });
-}
+const pdForm         = document.getElementById('pd-timeline-form');
+const pdSearchInput  = document.getElementById('pd-timeline-search');
 
 function resetModal() {
     pdLoading.style.display = 'flex';
@@ -469,8 +454,18 @@ function resetModal() {
     pdDetails.innerHTML = '';
     pdOwner.innerHTML = '';
     pdTimeline.innerHTML = '';
-    pdEntryForm.style.display = 'none';
-    pdChevron.style.transform = '';
+    if (pdSearchInput) pdSearchInput.value = '';
+}
+
+/* ── Timeline live search ─────────────────────────────────── */
+if (pdSearchInput) {
+    pdSearchInput.addEventListener('input', function () {
+        const q = pdSearchInput.value.trim().toLowerCase();
+        pdTimeline.querySelectorAll('.timeline-item').forEach(function (item) {
+            const text = item.textContent.toLowerCase();
+            item.style.display = (!q || text.includes(q)) ? '' : 'none';
+        });
+    });
 }
 
 function detail(label, value) {
