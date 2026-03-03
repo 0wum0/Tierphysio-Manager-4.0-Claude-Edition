@@ -129,21 +129,32 @@ class InstallerController extends Controller
             $this->createAdminUser($pdo, $adminName, $adminEmail, $adminPassword);
             $this->writeEnvFile($db['host'], $db['port'], $db['database'], $db['username'], $db['password'], $appUrl, $appLocale);
             $this->session->delete('install_db');
-            $this->redirect('/install/schritt/4');
+            $this->redirect('/install/fertig');
         } catch (\Throwable $e) {
             $this->session->flash('error', 'Fehler beim Erstellen des Kontos: ' . $e->getMessage());
             $this->redirect('/install/schritt/3');
         }
     }
 
-    public function run(array $params = []): void
+    public function fertig(array $params = []): void
     {
-        $this->redirect('/install');
+        $this->render('installer/index.twig', [
+            'page_title'   => 'Installation abgeschlossen — Tierphysio Manager 3.0',
+            'step'         => 4,
+            'detected_url' => $this->detectAppUrl(),
+        ]);
     }
 
-    public function success(array $params = []): void
+    public function finalizeInstall(array $params = []): void
     {
-        $this->redirect('/install/schritt/4');
+        // Mark as installed — after this the app switches to web routes
+        $envPath = ROOT_PATH . '/.env';
+        if (file_exists($envPath)) {
+            $env = file_get_contents($envPath);
+            $env = str_replace('INSTALLED=false', 'INSTALLED=true', $env);
+            file_put_contents($envPath, $env);
+        }
+        $this->redirect('/login');
     }
 
     private function checkRequirements(): array
@@ -232,7 +243,7 @@ MAIL_FROM_NAME="Tierphysio Manager"
 UPLOAD_MAX_SIZE=10485760
 
 APP_LOCALE={$locale}
-INSTALLED=true
+INSTALLED=false
 DB_VERSION=0
 ENV;
 
