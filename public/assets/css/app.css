@@ -657,10 +657,27 @@ img { max-width: 100%; height: auto; }
 
 select.form-control {
   appearance: none;
+  -webkit-appearance: none;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' viewBox='0 0 24 24'%3E%3Cpath stroke='%239090b0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: right 0.75rem center;
   padding-right: 2.5rem;
+  color-scheme: dark;
+}
+
+/* Dark theme: select options */
+select.form-control option {
+  background: #141428;
+  color: #f0f0ff;
+}
+
+/* Light theme overrides */
+[data-theme="light"] select.form-control {
+  color-scheme: light;
+}
+[data-theme="light"] select.form-control option {
+  background: #ffffff;
+  color: #0f0f1e;
 }
 
 textarea.form-control { resize: vertical; min-height: 100px; }
