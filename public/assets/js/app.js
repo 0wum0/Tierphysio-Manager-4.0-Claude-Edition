@@ -603,10 +603,14 @@ const CustomSelect = {
 };
 
 // ============================================================
+// Theme: apply immediately (before DOMContentLoaded) to kill FOUC
+// ============================================================
+ThemeManager.init();
+
+// ============================================================
 // Init on DOM ready
 // ============================================================
 document.addEventListener('DOMContentLoaded', () => {
-    ThemeManager.init();
     Sidebar.init();
     Dropdown.init();
     FlashMessages.init();
