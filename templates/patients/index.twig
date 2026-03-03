@@ -117,17 +117,17 @@
                         <label style="font-size:0.75rem;color:var(--text-muted);display:block;margin-bottom:0.2rem;">Inhalt</label>
                         <textarea name="content" class="form-control" rows="2" placeholder="Notizen, Befunde, Behandlungsschritte..." style="font-size:0.82rem;padding:0.4rem 0.5rem;resize:vertical;"></textarea>
                     </div>
-                    <button type="submit" class="btn btn-primary btn-sm">
+                    <button type="submit" class="btn btn-primary btn-sm" style="margin-top:0.25rem;">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         Eintrag speichern
                     </button>
                 </form>
             </div>
 
-            <div style="border-top:1px solid var(--glass-border);"></div>
+            <div style="border-top:1px solid var(--glass-border);margin-top:0.5rem;"></div>
 
             {# ── ZEILE 3: Timeline-Suche ── #}
-            <div style="display:flex;align-items:center;gap:0.5rem;">
+            <div style="display:flex;align-items:center;gap:0.5rem;margin-top:0.25rem;">
                 <div style="position:relative;flex:1;">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="position:absolute;left:0.65rem;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none;"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                     <input id="pd-timeline-search" type="text" class="form-control" placeholder="Timeline durchsuchen..." style="padding-left:2.1rem;font-size:0.83rem;">
@@ -135,7 +135,7 @@
             </div>
 
             {# ── ZEILE 4: Timeline ── #}
-            <div>
+            <div style="margin-top:0.25rem;">
                 <div style="font-size:0.7rem;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.75rem;">Timeline</div>
                 <div id="pd-timeline" class="timeline"></div>
             </div>
