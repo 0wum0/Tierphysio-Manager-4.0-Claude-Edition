@@ -29,7 +29,8 @@ class CalendarController extends Controller
         private readonly OwnerRepository $ownerRepository,
         private readonly UserRepository $userRepository,
         private readonly MailService $mailService,
-        private readonly SettingsRepository $settingsRepository
+        private readonly SettingsRepository $settingsRepository,
+        private readonly TreatmentTypeRepository $treatmentTypeRepository
     ) {
         parent::__construct($view, $session, $config, $translator);
     }
@@ -38,12 +39,7 @@ class CalendarController extends Controller
     public function index(array $params = []): void
     {
         $treatmentTypes = [];
-        try {
-            $ttRepo = new TreatmentTypeRepository(
-                \App\Core\Application::getInstance()->getContainer()->get(Database::class)
-            );
-            $treatmentTypes = $ttRepo->findActive();
-        } catch (\Throwable) {}
+        try { $treatmentTypes = $this->treatmentTypeRepository->findActive(); } catch (\Throwable) {}
 
         $patients = $this->patientRepository->findAll();
         $owners   = $this->ownerRepository->findAll();
@@ -68,12 +64,7 @@ class CalendarController extends Controller
         $owners   = $this->ownerRepository->findAll();
 
         $treatmentTypes = [];
-        try {
-            $ttRepo = new TreatmentTypeRepository(
-                \App\Core\Application::getInstance()->getContainer()->get(Database::class)
-            );
-            $treatmentTypes = $ttRepo->findActive();
-        } catch (\Throwable) {}
+        try { $treatmentTypes = $this->treatmentTypeRepository->findActive(); } catch (\Throwable) {}
 
         $this->renderPlugin('calendar/waitlist.twig', [
             'page_title'      => 'Warteliste',

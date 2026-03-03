@@ -13,6 +13,10 @@ class ServiceProvider
 {
     public function register(PluginManager $pluginManager): void
     {
+        require_once __DIR__ . '/AppointmentRepository.php';
+        require_once __DIR__ . '/CalendarController.php';
+        require_once __DIR__ . '/ReminderService.php';
+
         /* Run plugin migration if needed */
         $this->runMigrations();
 
