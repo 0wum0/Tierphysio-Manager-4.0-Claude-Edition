@@ -113,6 +113,13 @@ class PluginManager
         return $payload;
     }
 
+    public function registerRoutes(Router $router): void
+    {
+        foreach ($this->hooks['registerRoutes'] ?? [] as $entry) {
+            ($entry['callback'])($router);
+        }
+    }
+
     public function getDashboardWidgets(array $context = []): array
     {
         $widgets = [];

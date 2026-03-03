@@ -1,0 +1,36 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a href="/kalender" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            Zum Kalender
+        </a>
+        <h1 class="page-title">Kalender Statistiken</h1>
+    </div>
+</div>
+
+<div class="flex gap-4" style="flex-wrap:wrap;">
+    <div class="glass-card" style="flex:1;min-width:160px;padding:1.25rem;text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--accent);">{{ stats.total ?? 0 }}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Termine gesamt</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:160px;padding:1.25rem;text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--accent);">{{ stats.today ?? 0 }}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Heute</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:160px;padding:1.25rem;text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--accent);">{{ stats.upcoming ?? 0 }}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Geplant</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:160px;padding:1.25rem;text-align:center;">
+        <div style="font-size:2rem;font-weight:700;" style="color:var(--success);">{{ stats.completed ?? 0 }}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Abgeschlossen</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:160px;padding:1.25rem;text-align:center;">
+        <div style="font-size:2rem;font-weight:700;color:var(--danger);">{{ stats.cancelled ?? 0 }}</div>
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem;">Abgesagt</div>
+    </div>
+</div>
+{% endblock %}

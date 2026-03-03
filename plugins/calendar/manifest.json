@@ -1,0 +1,10 @@
+{
+    "name": "Terminkalender",
+    "slug": "calendar",
+    "version": "1.0.0",
+    "description": "Vollständiger Terminkalender mit Monats-, Wochen- und Tagesansicht, Wiederkehrenden Terminen, iCal-Export/Import, Warteliste und Statistiken.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "service_provider": "Plugins\\Calendar\\ServiceProvider",
+    "hooks": ["registerRoutes", "dashboardWidgets", "navItems"]
+}

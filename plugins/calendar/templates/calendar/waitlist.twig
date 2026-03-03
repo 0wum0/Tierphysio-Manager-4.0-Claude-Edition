@@ -1,0 +1,157 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a href="/kalender" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            Zum Kalender
+        </a>
+        <h1 class="page-title">Warteliste</h1>
+    </div>
+    <button class="btn btn-primary btn-sm" onclick="document.getElementById('modal-waitlist-new').classList.add('open')">
+        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        Zur Warteliste hinzufügen
+    </button>
+</div>
+
+<div class="glass-card">
+    {% if waitlist is empty %}
+        <div style="text-align:center;padding:3rem;color:var(--text-muted);">
+            <svg width="40" height="40" fill="none" viewBox="0 0 24 24" style="margin-bottom:1rem;opacity:0.3;"><line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="6" x2="3.01" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="3.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="18" x2="3.01" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            <div>Warteliste ist leer.</div>
+        </div>
+    {% else %}
+        <div class="table-container">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Patient</th>
+                        <th>Tierhalter</th>
+                        <th>Behandlungsart</th>
+                        <th>Wunschdatum</th>
+                        <th>Notizen</th>
+                        <th>Seit</th>
+                        <th style="width:180px;">Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {% for entry in waitlist %}
+                <tr>
+                    <td>{{ entry.patient_name ?? '—' }}</td>
+                    <td>{{ entry.first_name ?? '' }} {{ entry.last_name ?? '' }}</td>
+                    <td>
+                        {% if entry.treatment_type_name %}
+                            <span class="badge" style="background:var(--accent-glow);color:var(--accent);">{{ entry.treatment_type_name }}</span>
+                        {% else %}—{% endif %}
+                    </td>
+                    <td>{{ entry.preferred_date ? entry.preferred_date|date_de : '—' }}</td>
+                    <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ entry.notes ?? '—' }}</td>
+                    <td>{{ entry.created_at|date_de }}</td>
+                    <td>
+                        <div class="flex gap-1">
+                            <button class="btn btn-primary btn-sm" onclick="openScheduleModal({{ entry.id }})">Einplanen</button>
+                            <form action="/kalender/warteliste/{{ entry.id }}/loeschen" method="POST" style="margin:0;" onsubmit="return confirm('Wirklich entfernen?')">
+                                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                                <button type="submit" class="btn btn-sm" style="background:var(--danger-glow);color:var(--danger);border:1px solid var(--danger);">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+</div>
+
+{# New waitlist entry modal #}
+<div class="modal-overlay" id="modal-waitlist-new">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Zur Warteliste hinzufügen</h3>
+            <button class="modal-close" type="button" onclick="document.getElementById('modal-waitlist-new').classList.remove('open')">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <form action="/kalender/warteliste" method="POST" class="modal-body">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="form-group mb-3">
+                <label class="form-label">Patient</label>
+                <select name="patient_id" class="form-control">
+                    <option value="">— kein Patient —</option>
+                    {% for p in patients %}
+                    <option value="{{ p.id }}">{{ p.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Tierhalter</label>
+                <select name="owner_id" class="form-control">
+                    <option value="">— kein Tierhalter —</option>
+                    {% for o in owners %}
+                    <option value="{{ o.id }}">{{ o.first_name }} {{ o.last_name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Behandlungsart</label>
+                <select name="treatment_type_id" class="form-control">
+                    <option value="">— keine —</option>
+                    {% for tt in treatment_types %}
+                    <option value="{{ tt.id }}">{{ tt.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Wunschdatum</label>
+                <input type="date" name="preferred_date" class="form-control">
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Notizen</label>
+                <textarea name="notes" class="form-control" rows="2"></textarea>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-waitlist-new').classList.remove('open')">Abbrechen</button>
+                <button type="submit" class="btn btn-primary">Hinzufügen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{# Schedule modal #}
+<div class="modal-overlay" id="modal-schedule">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 class="modal-title">Termin einplanen</h3>
+            <button class="modal-close" type="button" onclick="document.getElementById('modal-schedule').classList.remove('open')">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <form id="form-schedule" action="" method="POST" class="modal-body">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <div class="form-group mb-3">
+                <label class="form-label">Start *</label>
+                <input type="datetime-local" name="start_at" class="form-control" required>
+            </div>
+            <div class="form-group mb-3">
+                <label class="form-label">Ende *</label>
+                <input type="datetime-local" name="end_at" class="form-control" required>
+            </div>
+            <div class="flex gap-2 justify-end">
+                <button type="button" class="btn btn-secondary" onclick="document.getElementById('modal-schedule').classList.remove('open')">Abbrechen</button>
+                <button type="submit" class="btn btn-primary">Termin erstellen</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function openScheduleModal(id) {
+    document.getElementById('form-schedule').action = '/kalender/warteliste/' + id + '/einplanen';
+    document.getElementById('modal-schedule').classList.add('open');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,481 @@
+{% extends 'layouts/base.twig' %}
+
+{% block head %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.css">
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.11/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/locales/de.global.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <h1 class="page-title">
+            <svg width="20" height="20" fill="none" viewBox="0 0 24 24" style="margin-right:0.4rem;vertical-align:-3px;"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>
+            Terminkalender
+        </h1>
+    </div>
+    <div class="flex gap-2">
+        <a href="/kalender/statistiken" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Statistiken
+        </a>
+        <a href="/kalender/warteliste" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="18" x2="21" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="6" x2="3.01" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="12" x2="3.01" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="18" x2="3.01" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Warteliste
+        </a>
+        <a href="/kalender/ical-export" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            iCal Export
+        </a>
+        <button class="btn btn-primary btn-sm" id="btn-new-appointment">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            Neuer Termin
+        </button>
+    </div>
+</div>
+
+{# Stats Bar #}
+<div class="flex gap-3 mb-4" style="flex-wrap:wrap;">
+    <div class="glass-card" style="flex:1;min-width:120px;padding:0.75rem 1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--accent);">{{ stats.today ?? 0 }}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Heute</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:120px;padding:0.75rem 1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--accent);">{{ stats.upcoming ?? 0 }}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Geplant</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:120px;padding:0.75rem 1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--success);">{{ stats.completed ?? 0 }}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Abgeschlossen</div>
+    </div>
+    <div class="glass-card" style="flex:1;min-width:120px;padding:0.75rem 1rem;text-align:center;">
+        <div style="font-size:1.5rem;font-weight:700;color:var(--danger);">{{ stats.cancelled ?? 0 }}</div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">Abgesagt</div>
+    </div>
+</div>
+
+{# Calendar Container #}
+<div class="glass-card" style="padding:0;">
+    <div id="cal-toolbar" style="display:flex;align-items:center;gap:0.5rem;padding:0.875rem 1rem;border-bottom:1px solid var(--glass-border);flex-wrap:wrap;">
+        <div class="flex gap-1">
+            <button class="btn btn-secondary btn-sm" id="cal-prev">‹</button>
+            <button class="btn btn-secondary btn-sm" id="cal-today">Heute</button>
+            <button class="btn btn-secondary btn-sm" id="cal-next">›</button>
+        </div>
+        <h2 id="cal-title" style="font-size:1rem;font-weight:600;margin:0 0.5rem;flex:1;"></h2>
+        <div class="flex gap-1">
+            <button class="btn btn-secondary btn-sm cal-view-btn active" data-view="dayGridMonth">Monat</button>
+            <button class="btn btn-secondary btn-sm cal-view-btn" data-view="timeGridWeek">Woche</button>
+            <button class="btn btn-secondary btn-sm cal-view-btn" data-view="timeGridDay">Tag</button>
+            <button class="btn btn-secondary btn-sm cal-view-btn" data-view="listWeek">Liste</button>
+        </div>
+    </div>
+    <div id="calendar" style="padding:0.5rem;min-height:600px;"></div>
+</div>
+
+{# iCal Import Form #}
+<div class="glass-card mt-4" style="padding:1rem;">
+    <details>
+        <summary style="cursor:pointer;font-size:0.875rem;font-weight:600;color:var(--text-muted);">iCal-Datei importieren (.ics)</summary>
+        <form action="/kalender/ical-import" method="POST" enctype="multipart/form-data" class="flex gap-3 mt-3 items-center">
+            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+            <input type="file" name="ical_file" accept=".ics" class="form-control" style="flex:1;">
+            <button type="submit" class="btn btn-primary btn-sm">Importieren</button>
+        </form>
+    </details>
+</div>
+
+{# ── Appointment Modal ── #}
+<div class="modal-overlay" id="modal-appointment">
+    <div class="modal modal-lg">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modal-apt-title">Neuer Termin</h3>
+            <button class="modal-close" id="modal-apt-close" type="button">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form id="form-appointment">
+                <input type="hidden" id="apt-id" value="">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+                <div class="form-grid-2 mb-3">
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label">Titel *</label>
+                        <input type="text" id="apt-title" name="title" class="form-control" required placeholder="Behandlung, Kontrolle...">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start *</label>
+                        <input type="datetime-local" id="apt-start" name="start_at" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Ende *</label>
+                        <input type="datetime-local" id="apt-end" name="end_at" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Patient</label>
+                        <select id="apt-patient" name="patient_id" class="form-control">
+                            <option value="">— kein Patient —</option>
+                            {% for p in patients %}
+                            <option value="{{ p.id }}">{{ p.name }} ({{ p.species }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Tierhalter</label>
+                        <select id="apt-owner" name="owner_id" class="form-control">
+                            <option value="">— kein Tierhalter —</option>
+                            {% for o in owners %}
+                            <option value="{{ o.id }}">{{ o.first_name }} {{ o.last_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Behandlungsart</label>
+                        <select id="apt-treatment" name="treatment_type_id" class="form-control">
+                            <option value="">— keine —</option>
+                            {% for tt in treatment_types %}
+                            <option value="{{ tt.id }}" data-color="{{ tt.color }}">{{ tt.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Status</label>
+                        <select id="apt-status" name="status" class="form-control">
+                            <option value="scheduled">Geplant</option>
+                            <option value="confirmed">Bestätigt</option>
+                            <option value="completed">Abgeschlossen</option>
+                            <option value="cancelled">Abgesagt</option>
+                            <option value="noshow">Nicht erschienen</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Farbe</label>
+                        <input type="color" id="apt-color" name="color" class="form-control" value="#4f7cff" style="height:40px;padding:0.2rem;cursor:pointer;">
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label">Beschreibung</label>
+                        <textarea id="apt-desc" name="description" class="form-control" rows="2" placeholder="Optionale Beschreibung..."></textarea>
+                    </div>
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label">Notizen (intern)</label>
+                        <textarea id="apt-notes" name="notes" class="form-control" rows="2" placeholder="Interne Notizen..."></textarea>
+                    </div>
+
+                    {# Recurrence #}
+                    <div class="form-group" style="grid-column:1/-1;">
+                        <label class="form-label">Wiederholung</label>
+                        <select id="apt-recurrence" name="recurrence_rule" class="form-control">
+                            <option value="">Keine Wiederholung</option>
+                            <option value="FREQ=DAILY;COUNT=30">Täglich (30x)</option>
+                            <option value="FREQ=WEEKLY;COUNT=12">Wöchentlich (12x)</option>
+                            <option value="FREQ=WEEKLY;COUNT=52">Wöchentlich (1 Jahr)</option>
+                            <option value="FREQ=MONTHLY;COUNT=12">Monatlich (1 Jahr)</option>
+                            <option value="custom">Benutzerdefiniert...</option>
+                        </select>
+                        <input type="text" id="apt-recurrence-custom" class="form-control mt-2" placeholder="z.B. FREQ=WEEKLY;BYDAY=MO,WE;COUNT=20" style="display:none;">
+                    </div>
+
+                    {# Reminder #}
+                    <div class="form-group">
+                        <label class="form-label">Erinnerung (Minuten vorher)</label>
+                        <select id="apt-reminder" name="reminder_minutes" class="form-control">
+                            <option value="0">Keine</option>
+                            <option value="15">15 Minuten</option>
+                            <option value="30">30 Minuten</option>
+                            <option value="60" selected>1 Stunde</option>
+                            <option value="120">2 Stunden</option>
+                            <option value="1440">1 Tag</option>
+                        </select>
+                    </div>
+                    <div class="form-group" style="display:flex;align-items:center;padding-top:1.5rem;">
+                        <label style="cursor:pointer;font-size:0.875rem;display:flex;align-items:center;gap:0.5rem;">
+                            <input type="checkbox" id="apt-allday" name="all_day" value="1" style="width:16px;height:16px;">
+                            Ganztägig
+                        </label>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 justify-end" style="padding-top:0.5rem;border-top:1px solid var(--glass-border);">
+                    <div style="flex:1;">
+                        <button type="button" id="btn-apt-invoice" class="btn btn-secondary btn-sm" style="display:none;">
+                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                            Rechnung erstellen
+                        </button>
+                    </div>
+                    <button type="button" id="btn-apt-delete" class="btn btn-sm" style="display:none;background:var(--danger-glow);color:var(--danger);border:1px solid var(--danger);">
+                        Löschen
+                    </button>
+                    <button type="button" id="modal-apt-cancel" class="btn btn-secondary">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Delete confirm modal #}
+<div class="modal-overlay" id="modal-apt-delete">
+    <div class="modal" style="max-width:400px;">
+        <div class="modal-header">
+            <h3 class="modal-title">Termin löschen</h3>
+        </div>
+        <div class="modal-body">
+            <p style="margin-bottom:1rem;">Soll nur dieser Termin oder alle Wiederholungen gelöscht werden?</p>
+            <input type="hidden" id="delete-apt-id" value="">
+            <div class="flex gap-2 justify-end">
+                <button class="btn btn-secondary" id="btn-delete-cancel">Abbrechen</button>
+                <button class="btn btn-secondary" id="btn-delete-single">Nur dieser</button>
+                <button class="btn btn-danger" id="btn-delete-all">Alle löschen</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* FullCalendar theme overrides */
+#calendar { --fc-border-color: var(--glass-border); --fc-today-bg-color: rgba(79,124,255,0.07); --fc-neutral-bg-color: transparent; --fc-list-event-hover-bg-color: rgba(79,124,255,0.1); }
+.fc { color: var(--text-primary); font-family: inherit; }
+.fc .fc-toolbar-title { font-size: 1rem; font-weight: 600; }
+.fc .fc-col-header-cell { font-size: 0.78rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-muted); padding: 0.5rem 0; background: transparent; border: none; }
+.fc .fc-daygrid-day-number { font-size: 0.8rem; color: var(--text-secondary); padding: 0.3rem 0.5rem; }
+.fc .fc-daygrid-day.fc-day-today .fc-daygrid-day-number { background: var(--accent); color: #fff; border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; padding: 0; margin: 0.25rem; }
+.fc .fc-event { border-radius: 6px; font-size: 0.78rem; font-weight: 500; padding: 1px 4px; border: none; cursor: pointer; }
+.fc .fc-event:hover { opacity: 0.85; }
+.fc .fc-timegrid-slot { height: 2.5rem; }
+.fc .fc-timegrid-slot-label { font-size: 0.7rem; color: var(--text-muted); }
+.fc .fc-list-event-title { font-size: 0.85rem; }
+.fc .fc-list-day-cushion { background: var(--glass-bg); }
+.fc .fc-scrollgrid { border: none; }
+.fc .fc-scrollgrid td, .fc .fc-scrollgrid th { border-color: var(--glass-border); }
+.cal-view-btn.active { background: var(--accent) !important; color: #fff !important; border-color: var(--accent) !important; }
+</style>
+
+<script>
+(function() {
+    const CSRF = document.querySelector('[name="_csrf_token"]')?.value || '';
+    let calendar;
+    let currentAptId = null;
+
+    /* ── Init FullCalendar ── */
+    function initCalendar() {
+        const el = document.getElementById('calendar');
+        if (!el || typeof FullCalendar === 'undefined') {
+            setTimeout(initCalendar, 100);
+            return;
+        }
+
+        calendar = new FullCalendar.Calendar(el, {
+            locale: 'de',
+            initialView: 'dayGridMonth',
+            headerToolbar: false,
+            firstDay: 1,
+            height: 'auto',
+            editable: true,
+            selectable: true,
+            nowIndicator: true,
+            eventTimeFormat: { hour: '2-digit', minute: '2-digit', hour12: false },
+            slotMinTime: '07:00:00',
+            slotMaxTime: '20:00:00',
+
+            events: function(info, successCallback, failureCallback) {
+                fetch('/api/kalender/events?start=' + info.startStr + '&end=' + info.endStr)
+                    .then(r => r.json())
+                    .then(successCallback)
+                    .catch(failureCallback);
+            },
+
+            select: function(info) {
+                openNewModal(info.startStr, info.endStr, info.allDay);
+            },
+
+            eventClick: function(info) {
+                openEditModal(info.event);
+            },
+
+            eventDrop: function(info) {
+                reschedule(info.event.id, info.event.startStr, info.event.endStr, info.revert);
+            },
+
+            eventResize: function(info) {
+                reschedule(info.event.id, info.event.startStr, info.event.endStr, info.revert);
+            },
+
+            datesSet: function(info) {
+                document.getElementById('cal-title').textContent = calendar.view.title;
+            },
+        });
+
+        calendar.render();
+        document.getElementById('cal-title').textContent = calendar.view.title;
+    }
+
+    /* ── Toolbar buttons ── */
+    document.getElementById('cal-prev').addEventListener('click', () => { calendar.prev(); });
+    document.getElementById('cal-next').addEventListener('click', () => { calendar.next(); });
+    document.getElementById('cal-today').addEventListener('click', () => { calendar.today(); });
+    document.querySelectorAll('.cal-view-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.cal-view-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            calendar.changeView(btn.dataset.view);
+        });
+    });
+
+    /* ── Modal helpers ── */
+    const modal = document.getElementById('modal-appointment');
+    const form  = document.getElementById('form-appointment');
+
+    function openNewModal(start, end, allDay) {
+        currentAptId = null;
+        form.reset();
+        document.getElementById('apt-id').value = '';
+        document.getElementById('modal-apt-title').textContent = 'Neuer Termin';
+        document.getElementById('btn-apt-delete').style.display = 'none';
+        document.getElementById('btn-apt-invoice').style.display = 'none';
+        if (start) document.getElementById('apt-start').value = start.slice(0,16);
+        if (end)   document.getElementById('apt-end').value   = end.slice(0,16);
+        document.getElementById('apt-allday').checked = !!allDay;
+        modal.classList.add('open');
+        document.getElementById('apt-title').focus();
+    }
+
+    function openEditModal(event) {
+        currentAptId = event.id;
+        const p = event.extendedProps;
+
+        document.getElementById('apt-id').value          = event.id;
+        document.getElementById('modal-apt-title').textContent = 'Termin bearbeiten';
+        document.getElementById('apt-title').value        = event.title || '';
+        document.getElementById('apt-start').value        = event.startStr?.slice(0,16) || '';
+        document.getElementById('apt-end').value          = event.endStr?.slice(0,16) || '';
+        document.getElementById('apt-allday').checked     = event.allDay;
+        document.getElementById('apt-desc').value         = p.description || '';
+        document.getElementById('apt-notes').value        = p.notes || '';
+        document.getElementById('apt-status').value       = p.status || 'scheduled';
+        document.getElementById('apt-color').value        = event.backgroundColor || '#4f7cff';
+        setSelectVal('apt-patient',   p.patient_id);
+        setSelectVal('apt-owner',     p.owner_id);
+        setSelectVal('apt-treatment', p.treatment_type_id);
+        setSelectVal('apt-recurrence', p.recurrence_rule || '');
+        setSelectVal('apt-reminder',  p.reminder_minutes ?? 60);
+
+        document.getElementById('btn-apt-delete').style.display = '';
+        document.getElementById('btn-apt-invoice').style.display = '';
+        modal.classList.add('open');
+    }
+
+    function setSelectVal(id, val) {
+        const sel = document.getElementById(id);
+        if (!sel || val === null || val === undefined) return;
+        sel.value = val;
+        /* Re-init CustomSelect if present */
+        if (typeof CustomSelect !== 'undefined') {
+            delete sel.dataset.csInit;
+            CustomSelect.build(sel);
+        }
+    }
+
+    function closeModal() { modal.classList.remove('open'); currentAptId = null; }
+
+    document.getElementById('modal-apt-close').addEventListener('click', closeModal);
+    document.getElementById('modal-apt-cancel').addEventListener('click', closeModal);
+    document.getElementById('btn-new-appointment').addEventListener('click', () => {
+        const now = new Date();
+        const pad = n => String(n).padStart(2,'0');
+        const fmt = d => `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+        const end = new Date(now.getTime() + 60*60*1000);
+        openNewModal(fmt(now), fmt(end), false);
+    });
+
+    /* Recurrence custom */
+    document.getElementById('apt-recurrence').addEventListener('change', function() {
+        document.getElementById('apt-recurrence-custom').style.display = this.value === 'custom' ? '' : 'none';
+        if (this.value === 'custom') document.getElementById('apt-recurrence-custom').name = 'recurrence_rule';
+        else document.getElementById('apt-recurrence-custom').name = '';
+    });
+
+    /* Treatment type → auto-fill color */
+    document.getElementById('apt-treatment').addEventListener('change', function() {
+        const opt = this.options[this.selectedIndex];
+        if (opt?.dataset.color) document.getElementById('apt-color').value = opt.dataset.color;
+    });
+
+    /* Auto-end 1h after start */
+    document.getElementById('apt-start').addEventListener('change', function() {
+        const start = new Date(this.value);
+        if (!isNaN(start)) {
+            const end = new Date(start.getTime() + 60*60*1000);
+            const pad = n => String(n).padStart(2,'0');
+            document.getElementById('apt-end').value = `${end.getFullYear()}-${pad(end.getMonth()+1)}-${pad(end.getDate())}T${pad(end.getHours())}:${pad(end.getMinutes())}`;
+        }
+    });
+
+    /* ── Form submit ── */
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const data = new FormData(this);
+        if (document.getElementById('apt-allday').checked) data.set('all_day', '1');
+        if (document.getElementById('apt-recurrence').value === 'custom') {
+            data.set('recurrence_rule', document.getElementById('apt-recurrence-custom').value);
+        }
+        const id = document.getElementById('apt-id').value;
+        const url = id ? '/api/kalender/events/' + id : '/api/kalender/events';
+        const res = await fetch(url, { method: 'POST', body: data });
+        const json = await res.json();
+        if (json.success) {
+            calendar.refetchEvents();
+            closeModal();
+        } else {
+            alert(json.error || 'Fehler beim Speichern.');
+        }
+    });
+
+    /* ── Delete ── */
+    const deleteModal = document.getElementById('modal-apt-delete');
+    document.getElementById('btn-apt-delete').addEventListener('click', () => {
+        document.getElementById('delete-apt-id').value = currentAptId;
+        deleteModal.classList.add('open');
+        modal.classList.remove('open');
+    });
+    document.getElementById('btn-delete-cancel').addEventListener('click', () => { deleteModal.classList.remove('open'); modal.classList.add('open'); });
+
+    async function doDelete(mode) {
+        const id   = document.getElementById('delete-apt-id').value;
+        const data = new FormData();
+        data.append('_csrf_token', CSRF);
+        data.append('mode', mode);
+        const res  = await fetch('/api/kalender/events/' + id + '/loeschen', { method: 'POST', body: data });
+        const json = await res.json();
+        if (json.success) { calendar.refetchEvents(); deleteModal.classList.remove('open'); }
+        else alert('Fehler beim Löschen.');
+    }
+    document.getElementById('btn-delete-single').addEventListener('click', () => doDelete('single'));
+    document.getElementById('btn-delete-all').addEventListener('click', () => doDelete('all'));
+
+    /* ── Invoice from appointment ── */
+    document.getElementById('btn-apt-invoice').addEventListener('click', async () => {
+        const id = currentAptId;
+        if (!id) return;
+        const data = new FormData();
+        data.append('_csrf_token', CSRF);
+        await fetch('/kalender/' + id + '/rechnung', { method: 'POST', body: data });
+        window.location.href = '/rechnungen/erstellen';
+    });
+
+    /* ── Drag reschedule ── */
+    async function reschedule(id, start, end, revert) {
+        const body = JSON.stringify({ start_at: start, end_at: end, _csrf_token: CSRF });
+        const res  = await fetch('/api/kalender/events/' + id + '/reschedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body,
+        });
+        const json = await res.json();
+        if (!json.success) { revert(); alert('Fehler beim Verschieben.'); }
+    }
+
+    initCalendar();
+})();
+</script>
+{% endblock %}

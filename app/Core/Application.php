@@ -85,6 +85,9 @@ class Application
         }
 
         $this->router->loadRoutes($this->rootPath . '/app/Routes/web.php');
+
+        $pluginManager = $this->container->get(PluginManager::class);
+        $pluginManager->registerRoutes($this->router);
     }
 
     public function run(): void

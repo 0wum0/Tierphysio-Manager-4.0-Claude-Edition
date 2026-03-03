@@ -129,6 +129,20 @@ class View
         }));
     }
 
+    public function addGlobal(string $name, mixed $value): void
+    {
+        $this->twig->addGlobal($name, $value);
+    }
+
+    public function addTemplatePath(string $path, string $namespace = '__main__'): void
+    {
+        /** @var FilesystemLoader $loader */
+        $loader = $this->twig->getLoader();
+        if ($loader instanceof FilesystemLoader) {
+            $loader->addPath($path, $namespace);
+        }
+    }
+
     public function render(string $template, array $data = []): void
     {
         echo $this->fetch($template, $data);

@@ -80,6 +80,13 @@
                 {{ t('nav.invoices') }}
             </a>
 
+            {% for item in plugin_nav_items ?? [] %}
+            <a href="{{ item.href }}" class="nav-item {{ is_active(item.href) }}">
+                {% if item.icon is defined %}{{ item.icon|raw }}{% endif %}
+                {{ item.label }}
+            </a>
+            {% endfor %}
+
             {% if current_user and current_user.role == 'admin' %}
             <div class="sidebar-nav-section">{{ t('nav.admin') }}</div>
             <a href="/einstellungen" class="nav-item {{ is_active('/einstellungen') }}">
