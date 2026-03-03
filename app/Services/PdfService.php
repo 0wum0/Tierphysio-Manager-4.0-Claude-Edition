@@ -21,11 +21,14 @@ class PdfService
     ): string {
         $settings = $this->settingsRepository->all();
 
+        // Reserve space for footer (extra line if custom footer text set)
+        $footerCustom = $settings['pdf_footer_text'] ?? '';
+        $footerHeight = !empty($footerCustom) ? 14 : 10;
         $pdf = new TCPDF('P', 'mm', 'A4', true, 'UTF-8', false);
         $pdf->setPrintHeader(false);
         $pdf->setPrintFooter(false);
-        $pdf->SetMargins(20, 20, 20);
-        $pdf->SetAutoPageBreak(true, 25);
+        $pdf->SetMargins(20, 15, 20);
+        $pdf->SetAutoPageBreak(true, $footerHeight + 8);
         $pdf->AddPage();
 
         $primaryColor = $this->hexToRgb($settings['pdf_primary_color'] ?? '#2962FF');
@@ -34,11 +37,9 @@ class PdfService
         $grayColor    = [100, 100, 120];
         $lightGray    = [245, 245, 250];
         $font         = $this->resolvePdfFont($settings['pdf_font'] ?? 'helvetica');
-        $layout       = $settings['pdf_layout']      ?? 'classic';
         $headerStyle  = $settings['pdf_header_style'] ?? 'line';
         $showLogo     = ($settings['pdf_show_logo']    ?? '1') === '1';
         $showPatient  = ($settings['pdf_show_patient'] ?? '1') === '1';
-        $footerCustom = $settings['pdf_footer_text']  ?? '';
 
         $companyName   = $settings['company_name']   ?? 'Tierphysio Praxis';
         $companyStreet = $settings['company_street'] ?? '';
@@ -54,178 +55,177 @@ class PdfService
             ? STORAGE_PATH . '/uploads/' . $settings['company_logo']
             : null;
 
-        // Header
+        // ── HEADER BLOCK (Y 15–48) ──────────────────────────────────────
         if ($showLogo && $logoFile && file_exists($logoFile)) {
-            $pdf->Image($logoFile, 20, 15, 40, 0, '', '', '', false, 300);
+            $pdf->Image($logoFile, 20, 15, 35, 0, '', '', '', false, 300);
         }
 
-        $pdf->SetFont($font, 'B', 18);
+        $pdf->SetFont($font, 'B', 16);
         $pdf->SetTextColor(...$darkColor);
-        $pdf->SetXY(110, 15);
-        $pdf->Cell(80, 10, $companyName, 0, 1, 'R');
+        $pdf->SetXY(105, 15);
+        $pdf->Cell(85, 8, $companyName, 0, 1, 'R');
 
-        $pdf->SetFont($font, '', 9);
-        $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY(110, 26);
-        $pdf->Cell(80, 5, $companyStreet, 0, 1, 'R');
-        $pdf->SetXY(110, 31);
-        $pdf->Cell(80, 5, $companyZip . ' ' . $companyCity, 0, 1, 'R');
-        if ($companyPhone) {
-            $pdf->SetXY(110, 36);
-            $pdf->Cell(80, 5, 'Tel: ' . $companyPhone, 0, 1, 'R');
-        }
-        if ($companyEmail) {
-            $pdf->SetXY(110, 41);
-            $pdf->Cell(80, 5, $companyEmail, 0, 1, 'R');
-        }
-
-        // Header divider
-        if ($headerStyle === 'band') {
-            $pdf->SetFillColor(...$primaryColor);
-            $pdf->Rect(20, 53, 170, 4, 'F');
-        } else {
-            $pdf->SetDrawColor(...$primaryColor);
-            $pdf->SetLineWidth(0.8);
-            $pdf->Line(20, 55, 190, 55);
-        }
-
-        // Recipient
         $pdf->SetFont($font, '', 8);
         $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY(20, 60);
-        $pdf->Cell(80, 4, $companyName . ' · ' . $companyStreet . ' · ' . $companyZip . ' ' . $companyCity, 0, 1);
+        $y = 24;
+        foreach (array_filter([
+            $companyStreet,
+            trim($companyZip . ' ' . $companyCity),
+            $companyPhone ? 'Tel: ' . $companyPhone : '',
+            $companyEmail,
+        ]) as $line) {
+            $pdf->SetXY(105, $y);
+            $pdf->Cell(85, 4, $line, 0, 1, 'R');
+            $y += 4;
+        }
 
+        // Header divider at Y=48
+        $divY = 48;
+        if ($headerStyle === 'band') {
+            $pdf->SetFillColor(...$primaryColor);
+            $pdf->Rect(20, $divY, 170, 3, 'F');
+        } else {
+            $pdf->SetDrawColor(...$primaryColor);
+            $pdf->SetLineWidth(0.6);
+            $pdf->Line(20, $divY, 190, $divY);
+        }
+
+        // ── RECIPIENT + META (Y 52–90) ──────────────────────────────────
+        // Small return address line
+        $pdf->SetFont($font, '', 7);
+        $pdf->SetTextColor(...$grayColor);
+        $pdf->SetXY(20, 52);
+        $pdf->Cell(85, 3.5, $companyName . ' · ' . $companyStreet . ' · ' . $companyZip . ' ' . $companyCity, 0, 1);
+
+        // Recipient address
         $pdf->SetFont($font, '', 10);
         $pdf->SetTextColor(...$darkColor);
-        $pdf->SetXY(20, 67);
-
+        $pdf->SetXY(20, 57);
         if ($owner) {
-            $pdf->Cell(80, 6, $owner['first_name'] . ' ' . $owner['last_name'], 0, 1);
+            $pdf->Cell(85, 5.5, $owner['first_name'] . ' ' . $owner['last_name'], 0, 1);
             $pdf->SetX(20);
-            if (!empty($owner['street'])) $pdf->Cell(80, 6, $owner['street'], 0, 1);
-            $pdf->SetX(20);
-            if (!empty($owner['zip'])) $pdf->Cell(80, 6, $owner['zip'] . ' ' . ($owner['city'] ?? ''), 0, 1);
+            if (!empty($owner['street'])) { $pdf->Cell(85, 5, $owner['street'], 0, 1); $pdf->SetX(20); }
+            if (!empty($owner['zip']))    { $pdf->Cell(85, 5, $owner['zip'] . ' ' . ($owner['city'] ?? ''), 0, 1); }
         }
 
-        // Invoice Meta
-        $pdf->SetFont($font, 'B', 14);
+        // Invoice meta (right column, same height band)
+        $pdf->SetFont($font, 'B', 13);
         $pdf->SetTextColor(...$accentColor);
-        $pdf->SetXY(110, 60);
-        $pdf->Cell(80, 10, 'RECHNUNG', 0, 1, 'R');
+        $pdf->SetXY(105, 52);
+        $pdf->Cell(85, 8, 'RECHNUNG', 0, 1, 'R');
 
-        $pdf->SetFont($font, '', 9);
+        $pdf->SetFont($font, '', 8.5);
         $pdf->SetTextColor(...$darkColor);
-        $pdf->SetXY(110, 72);
-        $pdf->Cell(40, 5, 'Rechnungsnummer:', 0, 0, 'R');
-        $pdf->Cell(40, 5, $invoice['invoice_number'], 0, 1, 'R');
-
-        $pdf->SetXY(110, 78);
-        $pdf->Cell(40, 5, 'Rechnungsdatum:', 0, 0, 'R');
-        $issueDate = $invoice['issue_date'] ? date('d.m.Y', strtotime($invoice['issue_date'])) : '-';
-        $pdf->Cell(40, 5, $issueDate, 0, 1, 'R');
-
+        $metaY = 62;
+        $metaRows = [
+            'Rechnungsnummer' => $invoice['invoice_number'],
+            'Datum'           => $invoice['issue_date'] ? date('d.m.Y', strtotime($invoice['issue_date'])) : '-',
+        ];
         if (!empty($invoice['due_date'])) {
-            $pdf->SetXY(110, 84);
-            $pdf->Cell(40, 5, 'Fällig am:', 0, 0, 'R');
-            $pdf->Cell(40, 5, date('d.m.Y', strtotime($invoice['due_date'])), 0, 1, 'R');
+            $metaRows['Fällig am'] = date('d.m.Y', strtotime($invoice['due_date']));
         }
-
         if ($showPatient && $patient) {
-            $pdf->SetXY(110, 90);
-            $pdf->Cell(40, 5, 'Patient:', 0, 0, 'R');
-            $pdf->Cell(40, 5, $patient['name'] . ' (' . ($patient['species'] ?? '') . ')', 0, 1, 'R');
+            $metaRows['Patient'] = $patient['name'] . ' (' . ($patient['species'] ?? '') . ')';
             if (!empty($patient['chip_number'])) {
-                $pdf->SetXY(110, 96);
-                $pdf->Cell(40, 5, 'Chip-Nr.:', 0, 0, 'R');
-                $pdf->Cell(40, 5, $patient['chip_number'], 0, 1, 'R');
+                $metaRows['Chip-Nr.'] = $patient['chip_number'];
             }
         }
+        foreach ($metaRows as $label => $value) {
+            $pdf->SetXY(105, $metaY);
+            $pdf->Cell(50, 4.5, $label . ':', 0, 0, 'R');
+            $pdf->Cell(35, 4.5, $value, 0, 1, 'R');
+            $metaY += 4.5;
+        }
 
-        // Positions Table
-        $tableY = 110;
+        // ── POSITIONS TABLE ─────────────────────────────────────────────
+        // Start table below both columns, with a small gap
+        $tableY = max($pdf->GetY(), $metaY) + 6;
         $pdf->SetFillColor(...$primaryColor);
         $pdf->SetTextColor(255, 255, 255);
-        $pdf->SetFont($font, 'B', 9);
+        $pdf->SetFont($font, 'B', 8.5);
         $pdf->SetXY(20, $tableY);
-        $pdf->Cell(90, 7, 'Beschreibung', 1, 0, 'L', true);
-        $pdf->Cell(20, 7, 'Menge', 1, 0, 'C', true);
-        $pdf->Cell(30, 7, 'Einzelpreis', 1, 0, 'R', true);
-        $pdf->Cell(20, 7, 'MwSt.', 1, 0, 'C', true);
-        $pdf->Cell(30, 7, 'Gesamt', 1, 1, 'R', true);
+        $pdf->Cell(93, 6.5, 'Beschreibung', 1, 0, 'L', true);
+        $pdf->Cell(18, 6.5, 'Menge', 1, 0, 'C', true);
+        $pdf->Cell(27, 6.5, 'Einzelpreis', 1, 0, 'R', true);
+        $pdf->Cell(15, 6.5, 'MwSt.', 1, 0, 'C', true);
+        $pdf->Cell(27, 6.5, 'Gesamt', 1, 1, 'R', true);
 
         $pdf->SetTextColor(...$darkColor);
-        $pdf->SetFont($font, '', 9);
+        $pdf->SetFont($font, '', 8.5);
         $fill = false;
 
         foreach ($positions as $pos) {
             $pdf->SetFillColor(...$lightGray);
             $lineNet = (float)$pos['quantity'] * (float)$pos['unit_price'];
-            $pdf->Cell(90, 6, $pos['description'], 1, 0, 'L', $fill);
-            $pdf->Cell(20, 6, number_format((float)$pos['quantity'], 2, ',', '.'), 1, 0, 'C', $fill);
-            $pdf->Cell(30, 6, number_format((float)$pos['unit_price'], 2, ',', '.') . ' €', 1, 0, 'R', $fill);
-            $pdf->Cell(20, 6, (float)$pos['tax_rate'] . ' %', 1, 0, 'C', $fill);
-            $pdf->Cell(30, 6, number_format($lineNet, 2, ',', '.') . ' €', 1, 1, 'R', $fill);
+            $pdf->Cell(93, 6, $pos['description'], 1, 0, 'L', $fill);
+            $pdf->Cell(18, 6, number_format((float)$pos['quantity'], 2, ',', '.'), 1, 0, 'C', $fill);
+            $pdf->Cell(27, 6, number_format((float)$pos['unit_price'], 2, ',', '.') . ' €', 1, 0, 'R', $fill);
+            $pdf->Cell(15, 6, (float)$pos['tax_rate'] . ' %', 1, 0, 'C', $fill);
+            $pdf->Cell(27, 6, number_format($lineNet, 2, ',', '.') . ' €', 1, 1, 'R', $fill);
             $fill = !$fill;
         }
 
-        // Totals
-        $totalY = $pdf->GetY() + 5;
-        $pdf->SetFont($font, '', 9);
-        $pdf->SetXY(120, $totalY);
-        $pdf->Cell(40, 6, 'Nettobetrag:', 0, 0, 'R');
-        $pdf->Cell(30, 6, number_format((float)$invoice['total_net'], 2, ',', '.') . ' €', 0, 1, 'R');
+        // ── TOTALS ───────────────────────────────────────────────────────
+        $totalY = $pdf->GetY() + 4;
+        $pdf->SetFont($font, '', 8.5);
+        $pdf->SetTextColor(...$darkColor);
 
-        $pdf->SetXY(120, $totalY + 6);
-        $pdf->Cell(40, 6, 'MwSt.:', 0, 0, 'R');
-        $pdf->Cell(30, 6, number_format((float)$invoice['total_tax'], 2, ',', '.') . ' €', 0, 1, 'R');
+        $pdf->SetXY(125, $totalY);
+        $pdf->Cell(38, 5.5, 'Nettobetrag:', 0, 0, 'R');
+        $pdf->Cell(27, 5.5, number_format((float)$invoice['total_net'], 2, ',', '.') . ' €', 0, 1, 'R');
+
+        $pdf->SetXY(125, $totalY + 5.5);
+        $pdf->Cell(38, 5.5, 'MwSt.:', 0, 0, 'R');
+        $pdf->Cell(27, 5.5, number_format((float)$invoice['total_tax'], 2, ',', '.') . ' €', 0, 1, 'R');
 
         $pdf->SetDrawColor(...$primaryColor);
-        $pdf->SetLineWidth(0.4);
-        $pdf->Line(120, $totalY + 13, 190, $totalY + 13);
+        $pdf->SetLineWidth(0.3);
+        $pdf->Line(125, $totalY + 12, 190, $totalY + 12);
 
-        $pdf->SetFont($font, 'B', 11);
+        $pdf->SetFont($font, 'B', 10);
         $pdf->SetTextColor(...$accentColor);
-        $pdf->SetXY(120, $totalY + 14);
-        $pdf->Cell(40, 8, 'Gesamtbetrag:', 0, 0, 'R');
-        $pdf->Cell(30, 8, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
+        $pdf->SetXY(125, $totalY + 13);
+        $pdf->Cell(38, 7, 'Gesamtbetrag:', 0, 0, 'R');
+        $pdf->Cell(27, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
-        // Notes / Payment Terms
-        $pdf->SetFont($font, '', 9);
+        // ── NOTES / PAYMENT TERMS ────────────────────────────────────────
+        $pdf->SetFont($font, '', 8.5);
         $pdf->SetTextColor(...$darkColor);
+
         if (!empty($invoice['notes'])) {
-            $pdf->SetXY(20, $totalY + 14);
-            $pdf->MultiCell(90, 5, $invoice['notes'], 0, 'L');
+            $pdf->SetXY(20, $totalY);
+            $pdf->MultiCell(98, 5, $invoice['notes'], 0, 'L');
         }
 
         $paymentTerms = $invoice['payment_terms'] ?? $settings['payment_terms'] ?? '';
         if (!empty($paymentTerms)) {
-            $notesY = $pdf->GetY() + 8;
-            $pdf->SetXY(20, $notesY);
-            $pdf->SetFont($font, 'I', 8);
+            $afterTotals = max($pdf->GetY(), $totalY + 22) + 5;
+            $pdf->SetXY(20, $afterTotals);
+            $pdf->SetFont($font, 'I', 7.5);
             $pdf->SetTextColor(...$grayColor);
-            $pdf->MultiCell(170, 4, $paymentTerms, 0, 'L');
+            $pdf->MultiCell(170, 3.5, $paymentTerms, 0, 'L');
         }
 
-        // Footer
-        $footerY = 270;
+        // ── FOOTER (pinned to bottom of last page) ───────────────────────
+        $pdf->SetY(-($footerHeight + 2));
         $pdf->SetDrawColor(...$grayColor);
-        $pdf->SetLineWidth(0.3);
-        $pdf->Line(20, $footerY, 190, $footerY);
-        $pdf->SetFont($font, '', 7);
+        $pdf->SetLineWidth(0.2);
+        $pdf->Line(20, $pdf->GetY(), 190, $pdf->GetY());
+        $pdf->SetFont($font, '', 6.5);
         $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY(20, $footerY + 2);
+        $pdf->SetX(20);
 
         $footerParts = [];
-        if ($bankName) $footerParts[] = 'Bank: ' . $bankName;
-        if ($bankIban) $footerParts[] = 'IBAN: ' . $bankIban;
-        if ($bankBic)  $footerParts[] = 'BIC: ' . $bankBic;
+        if ($bankName)  $footerParts[] = 'Bank: ' . $bankName;
+        if ($bankIban)  $footerParts[] = 'IBAN: ' . $bankIban;
+        if ($bankBic)   $footerParts[] = 'BIC: ' . $bankBic;
         if ($taxNumber) $footerParts[] = 'St.-Nr.: ' . $taxNumber;
 
-        $pdf->Cell(170, 4, implode('   |   ', $footerParts), 0, 0, 'C');
+        $pdf->Cell(170, 3.5, implode('   |   ', $footerParts), 0, 1, 'C');
 
         if (!empty($footerCustom)) {
-            $pdf->SetXY(20, $footerY + 7);
-            $pdf->Cell(170, 4, $footerCustom, 0, 0, 'C');
+            $pdf->SetX(20);
+            $pdf->Cell(170, 3.5, $footerCustom, 0, 0, 'C');
         }
 
         return $pdf->Output('', 'S');
