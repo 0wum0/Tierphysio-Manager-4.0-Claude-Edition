@@ -725,14 +725,12 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   top: calc(100% + 4px);
   left: 0;
   right: 0;
-  background: var(--bg-elevated);
+  background: var(--bg-elevated) !important;
   border: 1px solid var(--glass-border-hover);
   border-radius: var(--radius-md);
   box-shadow: 0 8px 32px rgba(0,0,0,0.35);
   overflow-y: auto;
   z-index: 9000;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
 }
 .cs-wrapper.cs-open .cs-dropdown {
   display: block;
@@ -746,14 +744,15 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   padding: 0.55rem 0.875rem;
   font-size: 0.875rem;
   color: var(--text-primary);
+  background: var(--bg-elevated);
   cursor: pointer;
-  transition: background 0.12s;
+  transition: background 0.12s, color 0.12s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 .cs-option:hover {
-  background: var(--glass-bg-hover);
+  background: rgba(79,124,255,0.12);
   color: var(--accent-light);
 }
 .cs-option.cs-selected {
@@ -769,10 +768,11 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   opacity: 0.6;
   cursor: not-allowed;
 }
-/* Light mode adjustments */
-[data-theme="light"] .cs-dropdown {
-  box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-}
+/* Light mode */
+[data-theme="light"] .cs-dropdown { box-shadow: 0 8px 32px rgba(0,0,0,0.12); }
+[data-theme="light"] .cs-option   { background: #ffffff; color: #0f0f1e; }
+[data-theme="light"] .cs-option:hover   { background: #f0f2f8; color: var(--accent); }
+[data-theme="light"] .cs-option.cs-selected { background: var(--accent-glow); color: var(--accent); }
 
 .form-hint { font-size: 0.75rem; color: var(--text-muted); }
 .form-error { font-size: 0.75rem; color: var(--danger); }
