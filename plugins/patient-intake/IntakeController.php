@@ -171,7 +171,22 @@ class IntakeController extends Controller
                 $ownerId = (int)$pdo->lastInsertId();
             }
 
-            /* 2. Create patient — use PDO directly */
+            /* 2. Copy photo from intake storage to patients storage */
+            $photoFilename = '';
+            if (!empty($submission['patient_photo'])) {
+                $src    = STORAGE_PATH . '/intake/' . $submission['patient_photo'];
+                $dstDir = STORAGE_PATH . '/patients';
+                if (!is_dir($dstDir)) {
+                    mkdir($dstDir, 0755, true);
+                }
+                $dst = $dstDir . '/' . $submission['patient_photo'];
+                if (file_exists($src)) {
+                    copy($src, $dst);
+                    $photoFilename = $submission['patient_photo'];
+                }
+            }
+
+            /* 3. Create patient — use PDO directly */
             $ins2 = $pdo->prepare(
                 "INSERT INTO patients (name, species, breed, gender, birth_date, color, chip_number, owner_id, photo, status, created_at, updated_at)
                  VALUES (?,?,?,?,?,?,?,?,?,'aktiv',NOW(),NOW())"
@@ -185,7 +200,7 @@ class IntakeController extends Controller
                 $submission['patient_color'],
                 $submission['patient_chip'],
                 $ownerId,
-                $submission['patient_photo'],
+                $photoFilename,
             ]);
             $patientId = (int)$pdo->lastInsertId();
 
