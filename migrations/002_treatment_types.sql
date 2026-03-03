@@ -16,8 +16,7 @@ CREATE TABLE IF NOT EXISTS `treatment_types` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 ALTER TABLE `patient_timeline`
-    ADD COLUMN IF NOT EXISTS `treatment_type_id` INT UNSIGNED NULL AFTER `type`,
-    ADD CONSTRAINT `fk_timeline_treatment` FOREIGN KEY (`treatment_type_id`) REFERENCES `treatment_types` (`id`) ON DELETE SET NULL;
+    ADD COLUMN IF NOT EXISTS `treatment_type_id` INT UNSIGNED NULL AFTER `type`;
 
 INSERT IGNORE INTO `treatment_types` (`name`, `color`, `price`, `sort_order`) VALUES
     ('Physiotherapie',        '#4f7cff', NULL, 1),
