@@ -223,8 +223,8 @@ class PatientController extends Controller
             $this->abort(404);
         }
 
-        $file = $this->sanitize($params['file']);
-        $path = STORAGE_PATH . '/patients/' . $params['id'] . '/docs/' . $file;
+        $file = basename($this->sanitize($params['file']));
+        $path = STORAGE_PATH . '/patients/' . (int)$params['id'] . '/timeline/' . $file;
 
         if (!file_exists($path) || !is_file($path)) {
             $this->abort(404);
@@ -233,9 +233,12 @@ class PatientController extends Controller
         $finfo    = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($path);
 
+        $isImage = str_starts_with($mimeType, 'image/');
+
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: attachment; filename="' . $file . '"');
+        header('Content-Disposition: ' . ($isImage ? 'inline' : 'attachment') . '; filename="' . $file . '"');
         header('Content-Length: ' . filesize($path));
+        header('Cache-Control: private, max-age=3600');
         readfile($path);
         exit;
     }
