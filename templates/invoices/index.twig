@@ -110,7 +110,7 @@
 </div>
 
 {# Stats #}
-<div class="stats-grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));">
+<div class="stats-grid">
     <div class="stat-card" style="--stat-color:#4f7cff;">
         <div class="stat-card-header"><span class="stat-card-label">{{ t('invoices.revenue_week') }}</span></div>
         <div class="stat-card-value">{{ stats.revenue_week|money }}</div>
@@ -151,7 +151,7 @@
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                 <input type="text" name="search" class="form-control" placeholder="Suche nach Rechnungsnummer, Tierhalter..." value="{{ search }}">
             </div>
-            <select name="status" class="form-control" style="width:180px;flex:none;" data-cs-width="180px">
+            <select name="status" class="form-control" style="flex:none;min-width:140px;" data-cs-width="160px">
                 <option value="">{{ t('invoices.all_status') }}</option>
                 <option value="draft"   {{ status == 'draft'   ? 'selected' : '' }}>{{ t('invoices.status_draft') }}</option>
                 <option value="open"    {{ status == 'open'    ? 'selected' : '' }}>{{ t('invoices.status_open') }}</option>

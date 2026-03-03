@@ -156,6 +156,8 @@ img { max-width: 100%; height: auto; }
   min-height: 100vh;
   position: relative;
   z-index: 1;
+  overflow-x: hidden;
+  max-width: 100vw;
 }
 
 /* ============================================================
@@ -353,6 +355,8 @@ img { max-width: 100%; height: auto; }
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 /* ============================================================
@@ -415,6 +419,8 @@ img { max-width: 100%; height: auto; }
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  min-width: 0;
+  overflow-x: hidden;
 }
 
 .page-header {
@@ -443,7 +449,7 @@ img { max-width: 100%; height: auto; }
    ============================================================ */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
   gap: 1rem;
 }
 
@@ -1638,6 +1644,12 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Stats */
   .stats-grid { grid-template-columns: 1fr 1fr; }
 
+  /* Invite stats (3-col grid in template) */
+  .invite-stats-grid { grid-template-columns: 1fr 1fr 1fr !important; }
+
+  /* Calendar header buttons: wrap */
+  .cal-page-header-actions { flex-wrap: wrap; gap: 0.5rem; }
+
   /* Patient grid: 2 columns on tablet */
   .patient-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .patient-card { min-width: 0; }
@@ -1710,8 +1722,11 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   }
   .page-header .flex.gap-2 .btn { flex: 1; justify-content: center; }
 
-  /* Stats: single column */
-  .stats-grid { grid-template-columns: 1fr; }
+  /* Stats: two columns on tiny phones */
+  .stats-grid { grid-template-columns: 1fr 1fr; }
+
+  /* Invite stats: 2+1 layout */
+  .invite-stats-grid { grid-template-columns: 1fr 1fr !important; }
 
   /* Patient grid: single column */
   .patient-grid { grid-template-columns: 1fr; gap: 0.625rem; }
@@ -1741,6 +1756,21 @@ textarea.form-control { resize: vertical; min-height: 100px; }
   /* Hide more table columns on very small phones */
   .data-table th:nth-child(3),
   .data-table td:nth-child(3) { display: none; } /* patient column in invoices */
+
+  /* Inline stats grid used on invite/intake pages */
+  .invite-stats-grid { grid-template-columns: 1fr 1fr !important; }
+
+  /* Calendar header: full-width button row */
+  .cal-page-header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+  .cal-page-header-actions .btn {
+    flex: 1;
+    min-width: 80px;
+    justify-content: center;
+  }
 
   /* Modals */
   .modal,

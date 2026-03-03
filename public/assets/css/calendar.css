@@ -508,10 +508,37 @@
 }
 
 @media (max-width: 640px) {
-  .cal-body { padding: 0.25rem; min-height: 420px; }
-  .cal-toolbar { gap: 0.35rem; padding: 0.6rem 0.75rem; }
-  .cal-title { font-size: 0.875rem; }
+  .cal-body { padding: 0.25rem; min-height: 380px; }
+  .cal-toolbar {
+    gap: 0.35rem;
+    padding: 0.6rem 0.75rem;
+    flex-wrap: wrap;
+  }
+  .cal-title {
+    font-size: 0.875rem;
+    order: -1;
+    width: 100%;
+    flex: none;
+  }
   .cal-view-btn { padding: 0.3rem 0.5rem; font-size: 0.72rem; }
+}
+
+@media (max-width: 480px) {
+  .cal-card { border-radius: 12px; }
+  .cal-body { padding: 0.1rem; min-height: 340px; }
+  .cal-toolbar {
+    padding: 0.5rem 0.625rem;
+    gap: 0.3rem;
+  }
+  /* Keep toolbar row compact: nav left, views right */
+  .cal-title {
+    font-size: 0.8rem;
+    order: -1;
+    width: 100%;
+  }
+  .fc { font-size: 0.78rem; }
+  .fc .fc-daygrid-day-number { font-size: 0.72rem; padding: 0.2rem 0.35rem; }
+  .fc .fc-col-header-cell-cushion { font-size: 0.65rem; padding: 0.4rem 0.25rem; }
 }
 
 /* iCal import collapsible */
