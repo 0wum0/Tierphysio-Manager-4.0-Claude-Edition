@@ -360,14 +360,14 @@ const CustomSelect = {
         sel.dataset.csInit = '1';
 
         /* Read styles BEFORE hiding */
-        const selStyles   = window.getComputedStyle(sel);
-        const selInlineW  = sel.dataset.csWidth || sel.style.width;
+        const selStyles    = window.getComputedStyle(sel);
+        const selInlineW   = sel.dataset.csWidth || sel.style.width;
         const selInlineFlex = sel.style.flex;
-        const selWidth    = selInlineW || 'auto';
-        const selFontSize = selStyles.fontSize || '0.9rem';
-        const selPadT     = selStyles.paddingTop    || '0.65rem';
-        const selPadB     = selStyles.paddingBottom || '0.65rem';
-        const selPadL     = selStyles.paddingLeft   || '0.875rem';
+        const selWidth     = selInlineW || 'auto';
+        const selFontSize  = selStyles.fontSize || '0.9rem';
+        const selPadT      = selStyles.paddingTop    || '0.65rem';
+        const selPadB      = selStyles.paddingBottom || '0.65rem';
+        const selPadL      = selStyles.paddingLeft   || '0.875rem';
 
         sel.style.display = 'none';
 
@@ -401,16 +401,30 @@ const CustomSelect = {
         trigger.appendChild(triggerText);
         trigger.appendChild(arrow);
 
+        /* Dropdown is mounted to body (portal) to escape overflow/z-index traps */
         const dropdown = document.createElement('div');
         dropdown.className = 'cs-dropdown';
         dropdown.setAttribute('role', 'listbox');
-        dropdown.style.cssText = 'display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;z-index:9999;border-radius:12px;overflow-y:auto;max-height:240px;';
+        dropdown.style.cssText = 'display:none;position:fixed;z-index:99999;border-radius:12px;overflow-y:auto;max-height:240px;min-width:160px;';
+        document.body.appendChild(dropdown);
 
         wrapper.appendChild(trigger);
-        wrapper.appendChild(dropdown);
         sel.parentNode.insertBefore(wrapper, sel.nextSibling);
 
-        const getVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+        const positionDropdown = () => {
+            const rect = trigger.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - rect.bottom;
+            const dropH = Math.min(240, Math.max(spaceBelow - 8, 120));
+            dropdown.style.maxHeight = dropH + 'px';
+            dropdown.style.width     = rect.width + 'px';
+            if (spaceBelow >= dropH + 8) {
+                dropdown.style.top  = (rect.bottom + 4) + 'px';
+                dropdown.style.left = rect.left + 'px';
+            } else {
+                dropdown.style.top  = (rect.top - dropH - 4) + 'px';
+                dropdown.style.left = rect.left + 'px';
+            }
+        };
 
         const applyDropdownStyle = () => {
             const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
@@ -425,9 +439,9 @@ const CustomSelect = {
         const syncOptions = () => {
             dropdown.innerHTML = '';
             applyDropdownStyle();
-            const isDark   = document.documentElement.getAttribute('data-theme') !== 'light';
-            const bgNormal  = isDark ? '#141428' : '#ffffff';
-            const bgHover   = isDark ? 'rgba(79,124,255,0.15)' : '#f0f2f8';
+            const isDark     = document.documentElement.getAttribute('data-theme') !== 'light';
+            const bgNormal   = isDark ? '#141428' : '#ffffff';
+            const bgHover    = isDark ? 'rgba(79,124,255,0.15)' : '#f0f2f8';
             const bgSelected = isDark ? 'rgba(79,124,255,0.25)' : 'rgba(59,110,240,0.12)';
             const colNormal  = isDark ? '#f0f0ff' : '#0f0f1e';
             const colAccent  = isDark ? '#6b9dff' : '#3b6ef0';
@@ -462,11 +476,12 @@ const CustomSelect = {
                         item.style.color = colAccent;
                     });
                     item.addEventListener('mouseleave', () => {
-                        const sel2 = parseInt(item.dataset.index) === sel.selectedIndex;
-                        item.style.background = sel2 ? bgSelected : bgNormal;
-                        item.style.color = sel2 ? colAccent : colNormal;
+                        const isSel = parseInt(item.dataset.index) === sel.selectedIndex;
+                        item.style.background = isSel ? bgSelected : bgNormal;
+                        item.style.color = isSel ? colAccent : colNormal;
                     });
-                    item.addEventListener('click', e => {
+                    item.addEventListener('mousedown', e => {
+                        e.preventDefault();
                         e.stopPropagation();
                         sel.selectedIndex = i;
                         sel.dispatchEvent(new Event('change', { bubbles: true }));
@@ -489,28 +504,41 @@ const CustomSelect = {
 
         const open = () => {
             if (sel.disabled) return;
+            /* Close all other open dropdowns */
+            document.querySelectorAll('.cs-dropdown[data-cs-open]').forEach(d => {
+                if (d !== dropdown) {
+                    d.style.display = 'none';
+                    delete d.dataset.csOpen;
+                    const tw = d._csTrigger;
+                    if (tw) tw.setAttribute('aria-expanded', 'false');
+                }
+            });
             document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => {
                 if (w !== wrapper) w.classList.remove('cs-open');
             });
-            /* Re-render options with current theme colors */
             syncOptions();
+            positionDropdown();
             wrapper.classList.add('cs-open');
             dropdown.style.display = 'block';
+            dropdown.dataset.csOpen = '1';
+            dropdown._csTrigger = trigger;
             trigger.setAttribute('aria-expanded', 'true');
-            const rect = wrapper.getBoundingClientRect();
-            const spaceBelow = window.innerHeight - rect.bottom;
-            dropdown.style.maxHeight = Math.min(240, Math.max(spaceBelow - 8, 120)) + 'px';
         };
 
         const close = () => {
             wrapper.classList.remove('cs-open');
             dropdown.style.display = 'none';
+            delete dropdown.dataset.csOpen;
             trigger.setAttribute('aria-expanded', 'false');
         };
 
-        trigger.addEventListener('click', e => {
+        trigger.addEventListener('mousedown', e => {
             e.stopPropagation();
-            wrapper.classList.contains('cs-open') ? close() : open();
+            if (wrapper.classList.contains('cs-open')) {
+                close();
+            } else {
+                open();
+            }
         });
 
         trigger.addEventListener('keydown', e => {
@@ -520,7 +548,21 @@ const CustomSelect = {
             if (e.key === 'ArrowUp')   { e.preventDefault(); sel.selectedIndex = Math.max(sel.selectedIndex - 1, 0); sel.dispatchEvent(new Event('change', { bubbles: true })); syncSelected(); }
         });
 
-        /* Rebuild when options change (e.g. AJAX populated selects) */
+        /* Reposition on scroll/resize */
+        const reposition = () => { if (wrapper.classList.contains('cs-open')) positionDropdown(); };
+        window.addEventListener('scroll', reposition, true);
+        window.addEventListener('resize', reposition);
+
+        /* Cleanup dropdown from body when wrapper is removed */
+        const observer = new MutationObserver(() => {
+            if (!document.body.contains(wrapper)) {
+                dropdown.remove();
+                observer.disconnect();
+            }
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+
+        /* Rebuild when options change */
         const mo = new MutationObserver(() => { syncOptions(); syncSelected(); });
         mo.observe(sel, { childList: true });
 
@@ -548,9 +590,15 @@ document.addEventListener('DOMContentLoaded', () => {
     CustomSelect.init();
     InvoicePositions.init();
 
-    /* Close all custom selects on outside click */
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => w.classList.remove('cs-open'));
+    /* Close all custom selects on outside mousedown */
+    document.addEventListener('mousedown', (e) => {
+        if (!e.target.closest('.cs-wrapper') && !e.target.closest('.cs-dropdown')) {
+            document.querySelectorAll('.cs-wrapper.cs-open').forEach(w => w.classList.remove('cs-open'));
+            document.querySelectorAll('.cs-dropdown[data-cs-open]').forEach(d => {
+                d.style.display = 'none';
+                delete d.dataset.csOpen;
+            });
+        }
     });
 
     document.getElementById('theme-toggle')?.addEventListener('click', () => ThemeManager.toggle());
