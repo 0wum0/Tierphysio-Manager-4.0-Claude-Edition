@@ -63,11 +63,13 @@
                         <input type="url" name="company_website" class="form-control" value="{{ settings.company_website ?? '' }}" placeholder="https://...">
                     </div>
                 </div>
-                {# Logo upload #}
-                <div class="divider mt-4 mb-4"></div>
-                <div class="form-label mb-2">{{ t('settings.company_logo') }}</div>
+            </div>
+
+            {# Logo Upload — separate form, cannot nest inside main form #}
+            <div class="glass-card">
+                <h3 class="font-semibold mb-3" style="font-size:0.95rem;color:var(--accent);">{{ t('settings.company_logo') }}</h3>
                 {% if settings.company_logo %}
-                    <div class="mb-2">
+                    <div class="mb-3">
                         <img src="/storage/uploads/{{ settings.company_logo }}" alt="Logo" style="max-height:60px;border-radius:var(--radius-sm);">
                     </div>
                 {% endif %}
