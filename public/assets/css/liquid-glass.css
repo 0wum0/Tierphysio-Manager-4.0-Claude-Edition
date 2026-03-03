@@ -1,0 +1,607 @@
+/* ============================================================
+   Liquid Glass Design System
+   Echter Apple-Glaseffekt: SVG-Displacement, prismatische
+   Kanten, Backdrop-Blur, irisierender Rand
+   ============================================================ */
+
+/* ── SVG Filter (wird per JS inline ins <body> injiziert) ──
+   Hier als Referenz — die Filter-ID "lg-distort" wird in CSS
+   via url(#lg-distort) referenziert.
+   ---------------------------------------------------------- */
+
+/* ── CSS Custom Properties ── */
+:root {
+  /* Liquid Glass Tokens */
+  --lg-blur:            28px;
+  --lg-saturate:        160%;
+  --lg-brightness:      1.04;
+
+  /* Prismatic edge — subtiler Regenbogen-Rand */
+  --lg-edge-light:      rgba(255,255,255,0.55);
+  --lg-edge-shadow:     rgba(0,0,0,0.18);
+
+  /* Inner glow */
+  --lg-inner-glow:      rgba(255,255,255,0.10);
+  --lg-inner-glow-top:  rgba(255,255,255,0.22);
+
+  /* Tint (leichter Blau-Lila-Schimmer wie Apple) */
+  --lg-tint:            rgba(120,160,255,0.07);
+  --lg-tint-hover:      rgba(120,160,255,0.11);
+
+  /* Radii */
+  --lg-radius-sm:   14px;
+  --lg-radius-md:   18px;
+  --lg-radius-lg:   24px;
+  --lg-radius-xl:   32px;
+  --lg-radius-pill: 9999px;
+}
+
+[data-theme="light"] {
+  --lg-tint:           rgba(200,220,255,0.12);
+  --lg-tint-hover:     rgba(200,220,255,0.20);
+  --lg-inner-glow:     rgba(255,255,255,0.50);
+  --lg-inner-glow-top: rgba(255,255,255,0.80);
+  --lg-edge-light:     rgba(255,255,255,0.90);
+  --lg-edge-shadow:    rgba(0,0,0,0.10);
+}
+
+/* ============================================================
+   Base Liquid Glass mixin (als Utility-Klasse)
+   ============================================================ */
+.lg,
+.lg-card,
+.lg-panel,
+.lg-sidebar,
+.lg-modal,
+.lg-btn,
+.lg-input {
+  position: relative;
+  backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  -webkit-backdrop-filter: blur(var(--lg-blur)) saturate(var(--lg-saturate)) brightness(var(--lg-brightness));
+  background: var(--lg-tint);
+  /* Prismatischer Rand: außen dunkel, innen hell */
+  border: 1px solid rgba(255,255,255,0.18);
+  /* Innen-Glow oben + Außen-Schatten */
+  box-shadow:
+    inset 0  1px 0    var(--lg-inner-glow-top),
+    inset 0 -1px 0    rgba(0,0,0,0.08),
+    inset 1px 0 0     var(--lg-inner-glow),
+    inset -1px 0 0    var(--lg-inner-glow),
+    0 8px 32px rgba(0,0,0,0.25),
+    0 2px  8px rgba(0,0,0,0.15);
+  transition:
+    background 0.2s ease,
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s cubic-bezier(0.4,0,0.2,1);
+  overflow: hidden;
+}
+
+/* Prismatischer Pseudo-Rand — schimmernder Top-Edge */
+.lg::before,
+.lg-card::before,
+.lg-panel::before,
+.lg-sidebar::before,
+.lg-modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent         0%,
+    rgba(255,255,255,0.0)  5%,
+    rgba(180,200,255,0.5) 20%,
+    rgba(255,255,255,0.9) 50%,
+    rgba(200,180,255,0.5) 80%,
+    rgba(255,255,255,0.0) 95%,
+    transparent        100%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Schimmernder Reflex oben-links */
+.lg::after,
+.lg-card::after,
+.lg-panel::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 60%; height: 45%;
+  background: radial-gradient(
+    ellipse at 30% 0%,
+    rgba(255,255,255,0.12) 0%,
+    transparent 70%
+  );
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Hover — mehr Tint + lift */
+.lg:hover,
+.lg-card:hover,
+.lg-panel:hover {
+  background: var(--lg-tint-hover);
+  border-color: rgba(255,255,255,0.28);
+  box-shadow:
+    inset 0  1px 0    rgba(255,255,255,0.30),
+    inset 0 -1px 0    rgba(0,0,0,0.10),
+    inset 1px 0 0     rgba(255,255,255,0.14),
+    inset -1px 0 0    rgba(255,255,255,0.14),
+    0 16px 48px rgba(0,0,0,0.35),
+    0  4px 12px rgba(0,0,0,0.20);
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   lg-card — ersetzt glass-card
+   ============================================================ */
+.lg-card {
+  border-radius: var(--lg-radius-lg);
+  padding: 1.5rem;
+}
+
+/* ============================================================
+   lg-panel — flächige Bereiche (Sidebar, Header)
+   ============================================================ */
+.lg-panel {
+  border-radius: 0;
+  border: none;
+  border-right: 1px solid rgba(255,255,255,0.10);
+}
+
+/* ============================================================
+   lg-modal
+   ============================================================ */
+.lg-modal {
+  border-radius: var(--lg-radius-xl);
+  background: rgba(14,14,30,0.60) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  box-shadow:
+    inset 0  1px 0    rgba(255,255,255,0.22),
+    inset 0 -1px 0    rgba(0,0,0,0.15),
+    0 40px 100px rgba(0,0,0,0.65),
+    0  8px  24px rgba(0,0,0,0.40) !important;
+}
+
+/* ============================================================
+   lg-btn — Liquid Glass Button
+   ============================================================ */
+.lg-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--lg-radius-md);
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  color: rgba(255,255,255,0.92);
+  white-space: nowrap;
+  line-height: 1.5;
+  border: 1px solid rgba(255,255,255,0.20) !important;
+  background: rgba(255,255,255,0.08) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.25),
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 4px 12px rgba(0,0,0,0.20) !important;
+}
+
+.lg-btn:hover {
+  background: rgba(255,255,255,0.14) !important;
+  border-color: rgba(255,255,255,0.32) !important;
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.35),
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 6px 20px rgba(0,0,0,0.28) !important;
+  color: #fff;
+  text-decoration: none;
+}
+
+.lg-btn:active { transform: translateY(0); }
+
+/* Primär-Variante */
+.lg-btn-primary {
+  background: linear-gradient(135deg,
+    rgba(79,124,255,0.55),
+    rgba(168,85,247,0.45)) !important;
+  border-color: rgba(100,150,255,0.40) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.30),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    0 4px 20px rgba(79,124,255,0.35),
+    0 2px  8px rgba(0,0,0,0.25) !important;
+}
+
+.lg-btn-primary:hover {
+  background: linear-gradient(135deg,
+    rgba(79,124,255,0.70),
+    rgba(168,85,247,0.60)) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.40),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    0 6px 28px rgba(79,124,255,0.50),
+    0 2px 10px rgba(0,0,0,0.30) !important;
+  color: #fff !important;
+}
+
+/* Klein */
+.lg-btn-sm {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.78rem;
+  border-radius: var(--lg-radius-sm);
+}
+
+/* ============================================================
+   lg-input
+   ============================================================ */
+.lg-input {
+  width: 100%;
+  padding: 0.65rem 0.875rem;
+  border-radius: var(--lg-radius-sm);
+  color: #f0f0ff;
+  font-size: 0.9rem;
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.05) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+.lg-input::placeholder { color: rgba(144,144,176,0.8); }
+
+.lg-input:focus {
+  outline: none;
+  background: rgba(255,255,255,0.09) !important;
+  border-color: rgba(100,150,255,0.55) !important;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.12),
+    0 0 0 3px rgba(79,124,255,0.20),
+    inset 0 1px 0 rgba(255,255,255,0.08) !important;
+}
+
+/* ============================================================
+   Override: glass-card → Liquid Glass
+   ============================================================ */
+.glass-card {
+  position: relative;
+  backdrop-filter: blur(28px) saturate(160%) brightness(1.04) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.04) !important;
+  background: var(--lg-tint) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  border-radius: var(--lg-radius-lg) !important;
+  box-shadow:
+    inset 0  1px 0    rgba(255,255,255,0.20),
+    inset 0 -1px 0    rgba(0,0,0,0.08),
+    0 8px 32px rgba(0,0,0,0.28),
+    0 2px  8px rgba(0,0,0,0.15) !important;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(180,200,255,0.4) 20%,
+    rgba(255,255,255,0.85) 50%,
+    rgba(200,180,255,0.4) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+.glass-card::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0;
+  width: 55%; height: 40%;
+  background: radial-gradient(ellipse at 25% 0%, rgba(255,255,255,0.10) 0%, transparent 65%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.glass-card:hover {
+  background: var(--lg-tint-hover) !important;
+  border-color: rgba(255,255,255,0.26) !important;
+  box-shadow:
+    inset 0  1px 0    rgba(255,255,255,0.28),
+    inset 0 -1px 0    rgba(0,0,0,0.10),
+    0 16px 48px rgba(0,0,0,0.38),
+    0  4px 12px rgba(0,0,0,0.20) !important;
+  transform: translateY(-2px);
+}
+
+/* ============================================================
+   Override: Sidebar → Liquid Glass Panel
+   ============================================================ */
+.sidebar {
+  background: rgba(8,8,20,0.65) !important;
+  backdrop-filter: blur(32px) saturate(180%) brightness(1.03) !important;
+  -webkit-backdrop-filter: blur(32px) saturate(180%) brightness(1.03) !important;
+  border-right: 1px solid rgba(255,255,255,0.10) !important;
+  box-shadow: 4px 0 40px rgba(0,0,0,0.40) !important;
+}
+
+/* Prismatische rechte Kante der Sidebar */
+.sidebar::after {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(
+    to bottom,
+    transparent 0%,
+    rgba(180,200,255,0.35) 20%,
+    rgba(255,255,255,0.60) 50%,
+    rgba(200,180,255,0.35) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ============================================================
+   Override: Top Header
+   ============================================================ */
+.top-header {
+  background: rgba(8,8,20,0.60) !important;
+  backdrop-filter: blur(28px) saturate(170%) brightness(1.03) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(170%) brightness(1.03) !important;
+  border-bottom: 1px solid rgba(255,255,255,0.09) !important;
+  box-shadow:
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 4px 20px rgba(0,0,0,0.15) !important;
+}
+
+/* ============================================================
+   Override: Modals
+   ============================================================ */
+.modal {
+  background: rgba(10,10,25,0.70) !important;
+  backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  -webkit-backdrop-filter: blur(40px) saturate(180%) brightness(1.05) !important;
+  border: 1px solid rgba(255,255,255,0.16) !important;
+  border-radius: var(--lg-radius-xl) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.12),
+    0 40px 100px rgba(0,0,0,0.60),
+    0  8px  24px rgba(0,0,0,0.35) !important;
+  overflow: hidden;
+}
+
+/* Prismatische obere Kante Modal */
+.modal::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(150,190,255,0.4) 20%,
+    rgba(255,255,255,0.90) 50%,
+    rgba(200,160,255,0.4) 80%,
+    transparent 100%
+  );
+  pointer-events: none;
+  z-index: 5;
+}
+
+/* ============================================================
+   Override: Buttons
+   ============================================================ */
+.btn-primary {
+  background: linear-gradient(135deg, rgba(79,124,255,0.75), rgba(168,85,247,0.65)) !important;
+  border: 1px solid rgba(120,160,255,0.40) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.30),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    0 4px 20px rgba(79,124,255,0.40),
+    0 2px  6px rgba(0,0,0,0.25) !important;
+  color: #fff !important;
+  backdrop-filter: blur(12px) !important;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, rgba(79,124,255,0.90), rgba(168,85,247,0.80)) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.40),
+    inset 0 -1px 0 rgba(0,0,0,0.15),
+    0 6px 28px rgba(79,124,255,0.55),
+    0 2px  8px rgba(0,0,0,0.30) !important;
+  transform: translateY(-1px);
+  filter: none !important;
+}
+
+.btn-secondary {
+  background: rgba(255,255,255,0.07) !important;
+  border: 1px solid rgba(255,255,255,0.14) !important;
+  color: rgba(200,210,255,0.90) !important;
+  backdrop-filter: blur(12px) !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.15),
+    inset 0 -1px 0 rgba(0,0,0,0.08),
+    0 2px  8px rgba(0,0,0,0.18) !important;
+}
+
+.btn-secondary:hover {
+  background: rgba(255,255,255,0.12) !important;
+  border-color: rgba(255,255,255,0.24) !important;
+  color: #fff !important;
+  box-shadow:
+    inset 0  1px 0 rgba(255,255,255,0.22),
+    inset 0 -1px 0 rgba(0,0,0,0.10),
+    0 4px 14px rgba(0,0,0,0.25) !important;
+}
+
+/* ============================================================
+   Override: Form Controls
+   ============================================================ */
+.form-control {
+  background: rgba(255,255,255,0.06) !important;
+  border: 1px solid rgba(255,255,255,0.12) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.15),
+    inset 0 1px 0 rgba(255,255,255,0.04) !important;
+  color: #f0f0ff !important;
+}
+
+.form-control:focus {
+  background: rgba(255,255,255,0.09) !important;
+  border-color: rgba(100,150,255,0.60) !important;
+  box-shadow:
+    inset 0 2px 4px rgba(0,0,0,0.10),
+    0 0 0 3px rgba(79,124,255,0.22),
+    inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+
+/* ============================================================
+   Override: Table container
+   ============================================================ */
+.table-container {
+  background: rgba(255,255,255,0.025) !important;
+  backdrop-filter: blur(24px) saturate(150%) !important;
+  border: 1px solid rgba(255,255,255,0.09) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.07),
+    0 8px 32px rgba(0,0,0,0.25) !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.table-container::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5) 50%, transparent);
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* ============================================================
+   Override: Nav items
+   ============================================================ */
+.nav-item.active {
+  background: linear-gradient(135deg,
+    rgba(79,124,255,0.20),
+    rgba(168,85,247,0.14)) !important;
+  border: 1px solid rgba(100,150,255,0.28) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 2px 12px rgba(79,124,255,0.18) !important;
+  backdrop-filter: blur(8px) !important;
+}
+
+/* ============================================================
+   Liquid Glass Nav-Badge
+   ============================================================ */
+.nav-badge {
+  background: rgba(239,68,68,0.80) !important;
+  backdrop-filter: blur(8px) !important;
+  box-shadow: 0 2px 8px rgba(239,68,68,0.40) !important;
+}
+
+/* ============================================================
+   Light theme overrides
+   ============================================================ */
+[data-theme="light"] {
+  --lg-tint:          rgba(255,255,255,0.45);
+  --lg-tint-hover:    rgba(255,255,255,0.65);
+  --lg-inner-glow:    rgba(255,255,255,0.70);
+  --lg-inner-glow-top:rgba(255,255,255,0.95);
+  --lg-edge-light:    rgba(255,255,255,0.95);
+}
+
+[data-theme="light"] .sidebar {
+  background: rgba(235,238,252,0.72) !important;
+  border-right: 1px solid rgba(0,0,0,0.08) !important;
+  box-shadow: 4px 0 32px rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] .top-header {
+  background: rgba(242,244,255,0.78) !important;
+  border-bottom-color: rgba(0,0,0,0.07) !important;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] .glass-card {
+  background: rgba(255,255,255,0.58) !important;
+  border-color: rgba(255,255,255,0.90) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 8px 32px rgba(100,120,200,0.10),
+    0 2px  8px rgba(0,0,0,0.08) !important;
+}
+
+[data-theme="light"] .glass-card:hover {
+  background: rgba(255,255,255,0.78) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 16px 48px rgba(100,120,200,0.14),
+    0  4px 12px rgba(0,0,0,0.10) !important;
+}
+
+[data-theme="light"] .modal {
+  background: rgba(245,247,255,0.88) !important;
+  border-color: rgba(255,255,255,0.95) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,1),
+    0 40px 100px rgba(100,120,200,0.20),
+    0  8px  24px rgba(0,0,0,0.12) !important;
+}
+
+[data-theme="light"] .btn-secondary {
+  background: rgba(255,255,255,0.65) !important;
+  border-color: rgba(0,0,0,0.12) !important;
+  color: rgba(30,40,80,0.90) !important;
+}
+
+[data-theme="light"] .btn-secondary:hover {
+  background: rgba(255,255,255,0.85) !important;
+  color: rgba(30,40,80,1) !important;
+}
+
+[data-theme="light"] .form-control {
+  background: rgba(255,255,255,0.72) !important;
+  border-color: rgba(0,0,0,0.10) !important;
+  color: #0f0f2e !important;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.06) !important;
+}
+
+[data-theme="light"] .form-control:focus {
+  background: rgba(255,255,255,0.95) !important;
+  border-color: rgba(59,110,240,0.50) !important;
+  box-shadow:
+    inset 0 1px 3px rgba(0,0,0,0.04),
+    0 0 0 3px rgba(59,110,240,0.14) !important;
+}
+
+[data-theme="light"] .nav-item.active {
+  background: linear-gradient(135deg,
+    rgba(59,110,240,0.14),
+    rgba(147,51,234,0.10)) !important;
+  border-color: rgba(59,110,240,0.25) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.8),
+    0 2px 10px rgba(59,110,240,0.12) !important;
+}

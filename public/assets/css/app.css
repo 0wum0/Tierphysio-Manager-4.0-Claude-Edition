@@ -1748,10 +1748,10 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 
 /* ============================================================
-   Liquid Glass Enhancements — stronger glassmorphism
+   Liquid Glass Enhancements — richer ambient background
+   (Glass overrides are in liquid-glass.css)
    ============================================================ */
 
-/* Richer body background — animated ambient blobs */
 body::before {
   background:
     radial-gradient(ellipse 900px 700px at 15%  5%,  rgba(79,124,255,0.10) 0%, transparent 65%),
@@ -1760,90 +1760,7 @@ body::before {
     radial-gradient(ellipse 400px 300px at 90% 10%,  rgba(168,85,247,0.05) 0%, transparent 60%);
 }
 
-/* Sidebar — true liquid glass */
-.sidebar {
-  background: rgba(10,10,22,0.72) !important;
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(28px) saturate(180%) !important;
-  border-right: 1px solid rgba(255,255,255,0.07) !important;
-  box-shadow: 4px 0 32px rgba(0,0,0,0.35);
-}
-
-/* Sidebar brand gradient line */
-.sidebar-brand {
-  background: linear-gradient(135deg, rgba(79,124,255,0.08), rgba(168,85,247,0.05));
-}
-
-/* Active nav item — gradient glow */
-.nav-item.active {
-  background: linear-gradient(135deg, rgba(79,124,255,0.18), rgba(168,85,247,0.12)) !important;
-  border: 1px solid rgba(79,124,255,0.25) !important;
-  box-shadow: 0 2px 16px rgba(79,124,255,0.15), inset 0 1px 0 rgba(255,255,255,0.05);
-}
-
-/* Top header — glass */
-.top-header {
-  background: rgba(10,10,22,0.65) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border-bottom: 1px solid rgba(255,255,255,0.06) !important;
-}
-
-/* Glass cards — enhanced */
-.glass-card {
-  background: rgba(255,255,255,0.038) !important;
-  backdrop-filter: blur(24px) saturate(150%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(150%) !important;
-  border: 1px solid rgba(255,255,255,0.075) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.04);
-}
-
-.glass-card:hover {
-  background: rgba(255,255,255,0.055) !important;
-  border-color: rgba(255,255,255,0.12) !important;
-  box-shadow: 0 12px 48px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.06) !important;
-  transform: translateY(-2px);
-}
-
-/* Modals — deeper glass */
-.modal {
-  background: rgba(14,14,28,0.92) !important;
-  backdrop-filter: blur(32px) saturate(180%) !important;
-  -webkit-backdrop-filter: blur(32px) saturate(180%) !important;
-  border: 1px solid rgba(255,255,255,0.10) !important;
-  box-shadow: 0 32px 80px rgba(0,0,0,0.7), inset 0 1px 0 rgba(255,255,255,0.05) !important;
-}
-
-/* Buttons — primary gets glow pulse */
-.btn-primary {
-  background: linear-gradient(135deg, #4f7cff, #a855f7) !important;
-  box-shadow: 0 4px 20px rgba(79,124,255,0.35) !important;
-}
-.btn-primary:hover {
-  box-shadow: 0 6px 28px rgba(79,124,255,0.5) !important;
-  filter: brightness(1.08);
-}
-
-/* Form controls — glass */
-.form-control {
-  background: rgba(255,255,255,0.05) !important;
-  border: 1px solid rgba(255,255,255,0.09) !important;
-  backdrop-filter: blur(8px) !important;
-}
-.form-control:focus {
-  background: rgba(255,255,255,0.08) !important;
-  border-color: rgba(79,124,255,0.6) !important;
-  box-shadow: 0 0 0 3px rgba(79,124,255,0.18) !important;
-}
-
-/* Table container */
-.table-container {
-  background: rgba(255,255,255,0.025) !important;
-  backdrop-filter: blur(20px) !important;
-  border: 1px solid rgba(255,255,255,0.07) !important;
-}
-
-/* Page title — subtle gradient text */
+/* Page title — gradient text */
 .page-title {
   background: linear-gradient(135deg, #f0f0ff 30%, #9090c0);
   -webkit-background-clip: text;
@@ -1861,7 +1778,6 @@ body::before {
   border-color: rgba(79,124,255,0.3) !important;
 }
 
-/* Light theme overrides for enhancements */
 [data-theme="light"] body::before {
   background:
     radial-gradient(ellipse 900px 700px at 15%  5%,  rgba(59,110,240,0.07) 0%, transparent 65%),
@@ -1869,48 +1785,9 @@ body::before {
     radial-gradient(ellipse 500px 400px at 55% 40%,  rgba(6,182,212,0.04)  0%, transparent 65%);
 }
 
-[data-theme="light"] .sidebar {
-  background: rgba(230,234,248,0.82) !important;
-  backdrop-filter: blur(28px) saturate(180%) !important;
-  border-right-color: rgba(0,0,0,0.08) !important;
-  box-shadow: 4px 0 24px rgba(0,0,0,0.08);
-}
-
-[data-theme="light"] .top-header {
-  background: rgba(240,242,250,0.80) !important;
-  border-bottom-color: rgba(0,0,0,0.07) !important;
-}
-
-[data-theme="light"] .glass-card {
-  background: rgba(255,255,255,0.65) !important;
-  border-color: rgba(0,0,0,0.08) !important;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.9) !important;
-}
-
-[data-theme="light"] .glass-card:hover {
-  background: rgba(255,255,255,0.82) !important;
-  box-shadow: 0 8px 32px rgba(0,0,0,0.10), inset 0 1px 0 rgba(255,255,255,1) !important;
-}
-
-[data-theme="light"] .modal {
-  background: rgba(248,250,255,0.97) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-  box-shadow: 0 24px 80px rgba(0,0,0,0.18) !important;
-}
-
 [data-theme="light"] .page-title {
   background: linear-gradient(135deg, #0f0f2e 30%, #3b6ef0);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-}
-
-[data-theme="light"] .form-control {
-  background: rgba(255,255,255,0.75) !important;
-  border-color: rgba(0,0,0,0.1) !important;
-}
-[data-theme="light"] .form-control:focus {
-  background: rgba(255,255,255,0.95) !important;
-  border-color: rgba(59,110,240,0.5) !important;
-  box-shadow: 0 0 0 3px rgba(59,110,240,0.12) !important;
 }
