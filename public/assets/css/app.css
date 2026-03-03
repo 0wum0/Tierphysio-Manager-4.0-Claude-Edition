@@ -1423,71 +1423,186 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); }
 
 /* ============================================================
-   Responsive
+   Sidebar Overlay — CSS-only visibility via .open
    ============================================================ */
-@media (max-width: 1024px) {
-  :root { --sidebar-width: 220px; }
-}
-
-/* Sidebar overlay - hidden by default, shown via .open class only */
 #sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.55);
   z-index: 200;
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
+  cursor: pointer;
 }
 #sidebar-overlay.open {
   display: block;
 }
 
+/* ============================================================
+   Responsive ≤ 1024px
+   ============================================================ */
+@media (max-width: 1024px) {
+  :root { --sidebar-width: 220px; }
+}
+
+/* ============================================================
+   Responsive ≤ 768px  (Tablet / Mobile Landscape)
+   ============================================================ */
 @media (max-width: 768px) {
+  /* Sidebar slides in from left */
   .sidebar {
     transform: translateX(-100%);
     z-index: 300;
+    transition: transform 0.25s ease;
   }
-
   .sidebar.open {
     transform: translateX(0);
     box-shadow: 0 0 40px rgba(0,0,0,0.6);
   }
-
   .main-content { margin-left: 0; }
 
+  /* Header */
+  .top-header { padding: 0 1rem; }
+  .page-content { padding: 1rem; }
+
+  /* Page header: stack on small screens */
+  .page-header {
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .page-header > div:first-child { flex: 1; min-width: 0; }
+  .page-header > a.btn,
+  .page-header > button.btn,
+  .page-header > .flex { flex-shrink: 0; }
+
+  /* Forms */
   .form-grid-2,
   .form-grid-3,
   .form-grid-4 { grid-template-columns: 1fr; }
 
+  /* Stats */
   .stats-grid { grid-template-columns: 1fr 1fr; }
 
-  .patient-grid { grid-template-columns: 1fr 1fr; }
-
-  .top-header { padding: 0 1rem; }
-  .page-content { padding: 1rem; }
-
-  /* Search bar: selects and buttons must not overflow */
-  .search-bar { flex-wrap: wrap; }
-  .search-bar .form-control[style*="width"] { width: 100% !important; min-width: 0; }
-  .search-bar select.form-control { width: 100% !important; }
-
-  /* Patient card: prevent overflow on narrow screens */
+  /* Patient grid: 2 columns on tablet */
+  .patient-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
   .patient-card { min-width: 0; }
-  .patient-card-name { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .patient-card-name {
+    font-size: 0.9rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .patient-card-image { height: 120px; }
 
-  /* Table containers: allow horizontal scroll instead of layout break */
-  .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  /* Search bar: wrap on tablet */
+  .search-bar { flex-wrap: wrap; gap: 0.5rem; }
+  .search-input-wrapper { min-width: 0; }
+  .search-bar select.form-control,
+  .search-bar .form-control[style*="width"] {
+    width: auto !important;
+    flex: 1;
+    min-width: 120px;
+  }
 
-  /* Modal: full width on mobile */
-  .modal { width: 96vw !important; max-width: 96vw !important; margin: 0.5rem; }
-  .modal-xl { width: 96vw !important; max-width: 96vw !important; }
+  /* Tables: horizontal scroll, no squeeze */
+  .table-container {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: var(--radius-lg);
+  }
+  .data-table { min-width: 600px; }
+
+  /* Invoice table columns: hide less important on tablet */
+  .data-table th:nth-child(4),
+  .data-table td:nth-child(4) { display: none; } /* due date */
+
+  /* Modals: nearly full width */
+  .modal,
+  .modal-lg,
+  .modal-xl {
+    width: 96vw !important;
+    max-width: 96vw !important;
+    max-height: 92vh;
+    margin: 0.5rem auto;
+  }
+  .modal-body { padding: 1rem; }
+
+  /* Invoice modal: stack columns */
+  .modal-body .flex.gap-4 { flex-direction: column; }
+  #pdf-frame-wrap-* { height: 300px; }
 }
 
+/* ============================================================
+   Responsive ≤ 480px  (Mobile Portrait)
+   ============================================================ */
 @media (max-width: 480px) {
-  .stats-grid   { grid-template-columns: 1fr; }
-  .patient-grid { grid-template-columns: 1fr; }
+  .page-content { padding: 0.75rem; }
 
-  .page-header { flex-direction: column; align-items: flex-start; gap: 0.75rem; }
-  .page-header > div:last-child { width: 100%; display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .page-header .btn { flex: 1; justify-content: center; }
+  /* Page header */
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+  .page-header > a.btn,
+  .page-header > button.btn {
+    width: 100%;
+    justify-content: center;
+  }
+  .page-header .flex.gap-2 {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+  .page-header .flex.gap-2 .btn { flex: 1; justify-content: center; }
+
+  /* Stats: single column */
+  .stats-grid { grid-template-columns: 1fr; }
+
+  /* Patient grid: single column */
+  .patient-grid { grid-template-columns: 1fr; gap: 0.625rem; }
+  .patient-card { display: flex; flex-direction: row; align-items: center; }
+  .patient-card-image {
+    width: 72px;
+    height: 72px;
+    flex-shrink: 0;
+    border-radius: var(--radius) 0 0 var(--radius);
+  }
+  .patient-card-body { padding: 0.625rem 0.75rem; flex: 1; min-width: 0; }
+  .patient-card-name { font-size: 0.875rem; margin-bottom: 0.1rem; }
+  .patient-card-species { font-size: 0.75rem; margin-bottom: 0.25rem; }
+  .patient-card-meta { flex-wrap: wrap; gap: 0.25rem; }
+
+  /* Search bar: full width inputs */
+  .search-bar { flex-direction: column; align-items: stretch; }
+  .search-input-wrapper { width: 100%; }
+  .search-bar select.form-control,
+  .search-bar .form-control[style*="width"] { width: 100% !important; }
+  .search-bar .btn { width: 100%; justify-content: center; }
+
+  /* Tables: all columns squeezed → horizontal scroll */
+  .data-table { min-width: 500px; font-size: 0.8rem; }
+  .data-table th, .data-table td { padding: 0.5rem 0.5rem; }
+
+  /* Hide more table columns on very small phones */
+  .data-table th:nth-child(3),
+  .data-table td:nth-child(3) { display: none; } /* patient column in invoices */
+
+  /* Modals */
+  .modal,
+  .modal-lg,
+  .modal-xl {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 96vh;
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    margin: auto 0 0;
+  }
+  .modal-overlay { align-items: flex-end; }
+
+  /* Glass cards */
+  .glass-card { padding: 0.875rem; }
+
+  /* Flex layouts that break on mobile */
+  .flex.gap-4[style*="flex-wrap:wrap"] { gap: 0.75rem; }
 }
