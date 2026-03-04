@@ -49,6 +49,32 @@ class IntakeController extends Controller
             return;
         }
 
+        /* CSRF validation */
+        $csrfToken = $_POST['_csrf_token'] ?? '';
+        if (!$this->session->validateCsrfToken($csrfToken)) {
+            header('Content-Type: application/json');
+            http_response_code(403);
+            echo json_encode(['ok' => false, 'errors' => ['Ungültige Anfrage. Bitte Seite neu laden.']]);
+            exit;
+        }
+
+        /* IP-based rate limiting: max 5 submissions per 10 minutes */
+        $ip      = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+        $rateKey = 'intake_rate_' . md5($ip);
+        $window  = 600;
+        $limit   = 5;
+        $now     = time();
+        $history = $_SESSION[$rateKey] ?? [];
+        $history = array_filter($history, fn(int $t) => $now - $t < $window);
+        if (count($history) >= $limit) {
+            header('Content-Type: application/json');
+            http_response_code(429);
+            echo json_encode(['ok' => false, 'errors' => ['Zu viele Anfragen. Bitte warten Sie einige Minuten.']]);
+            exit;
+        }
+        $history[] = $now;
+        $_SESSION[$rateKey] = array_values($history);
+
         $data = $this->buildSubmissionData();
         $errors = $this->validateSubmission($data);
 
@@ -222,7 +248,7 @@ class IntakeController extends Controller
             error_log('[PatientIntake] accept error: ' . $e->getMessage());
             header('Content-Type: application/json');
             http_response_code(500);
-            echo json_encode(['ok' => false, 'error' => 'Fehler beim Übernehmen: ' . $e->getMessage()]);
+            echo json_encode(['ok' => false, 'error' => 'Fehler beim Übernehmen. Bitte erneut versuchen.']);
         }
         exit;
     }
@@ -313,9 +339,9 @@ class IntakeController extends Controller
             'patient_birth_date'=> $this->post('patient_birth_date') ?: null,
             'patient_color'     => $this->sanitize($this->post('patient_color', '')),
             'patient_chip'      => $this->sanitize($this->post('patient_chip', '')),
-            'reason'            => $this->post('reason', ''),
+            'reason'            => $this->sanitize($this->post('reason', '')),
             'appointment_wish'  => $this->sanitize($this->post('appointment_wish', '')),
-            'notes'             => $this->post('notes', ''),
+            'notes'             => $this->sanitize($this->post('notes', '')),
             'status'            => 'neu',
         ];
     }
@@ -366,7 +392,7 @@ class IntakeController extends Controller
             mkdir($dir, 0755, true);
         }
 
-        $filename = 'intake_' . uniqid() . '.' . $ext;
+        $filename = 'intake_' . bin2hex(random_bytes(16)) . '.' . $ext;
         $dest     = $dir . '/' . $filename;
 
         if (move_uploaded_file($file['tmp_name'], $dest)) {
