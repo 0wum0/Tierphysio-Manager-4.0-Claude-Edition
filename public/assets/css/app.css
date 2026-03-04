@@ -1122,9 +1122,10 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.6);
-  backdrop-filter: blur(4px);
-  z-index: 200;
+  background: rgba(2,2,14,0.72);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1169,11 +1170,6 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 
 .modal-overlay.open .modal { transform: scale(1) translateY(0); }
-
-.modal-overlay {
-  background: rgba(2,2,14,0.7);
-  backdrop-filter: blur(8px);
-}
 
 .modal-lg { max-width: 760px; }
 .modal-xl { max-width: 960px; }
