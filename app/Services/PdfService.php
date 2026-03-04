@@ -142,22 +142,25 @@ class PdfService
 
         // ── MAIN CONTENT ─────────────────────────────────────────────────
 
-        // "Rechnung" — script image top right
+        // "Rechnung" script image — top right, height ~28mm
         $rechnungImg = ROOT_PATH . '/public/assets/img/rechnung-script.png';
+        $rechnungImgH = 28; // rendered height in mm
         if (file_exists($rechnungImg)) {
             $imgW = 72;
-            $pdf->Image($rechnungImg, $rightEdge - $imgW, 6, $imgW, 0, 'PNG');
+            $pdf->Image($rechnungImg, $rightEdge - $imgW, 5, $imgW, 0, 'PNG');
         } else {
+            $rechnungImgH = 18;
             $pdf->SetFont($font, 'BI', 34);
             $pdf->SetTextColor(...$darkColor);
-            $pdf->SetXY($contentX, 10);
-            $pdf->Cell($contentW, 18, 'Rechnung', 0, 1, 'R');
+            $pdf->SetXY($contentX, 5);
+            $pdf->Cell($contentW, $rechnungImgH, 'Rechnung', 0, 1, 'R');
         }
 
-        // Company info block — top right, smaller
+        // Company info block — top right, BELOW the Rechnung image
+        $companyInfoTopY = 5 + $rechnungImgH + 1;
         $pdf->SetFont($font, 'B', $fontSize);
         $pdf->SetTextColor(...$darkColor);
-        $pdf->SetXY($contentX + ($contentW / 2), 30);
+        $pdf->SetXY($contentX + ($contentW / 2), $companyInfoTopY);
         $pdf->Cell($contentW / 2, 5, $companyName, 0, 1, 'R');
 
         $pdf->SetFont($font, '', $fontSize - 1.5);
@@ -169,15 +172,17 @@ class PdfService
             $companyEmail,
             ($showWebsite && $companyWebsite) ? $companyWebsite : '',
         ]);
-        $infoY = 36;
+        $infoY = $companyInfoTopY + 6;
         foreach ($infoLines as $line) {
             $pdf->SetXY($contentX + ($contentW / 2), $infoY);
             $pdf->Cell($contentW / 2, 4, $line, 0, 1, 'R');
             $infoY += 4;
         }
+        // Address block starts below company info
+        $headerBottomY = $infoY + 4;
 
-        // ── ADDRESS BLOCK: Recipient left, Company right ──────────────────
-        $addrTopY = 58;
+        // ── ADDRESS BLOCK: Recipient left ────────────────────────────────
+        $addrTopY = max($headerBottomY, 58);
 
         // Recipient (left column of content area)
         $colW = $contentW / 2 - 4;
@@ -220,7 +225,7 @@ class PdfService
         }
 
         // ── POSITIONS TABLE ───────────────────────────────────────────────
-        $tableTopY = 100;
+        $tableTopY = max($addrTopY + 38, 100);
 
         // Table header — thin line above/below, grey labels
         $pdf->SetDrawColor(...$lightGray);
@@ -253,11 +258,20 @@ class PdfService
             $priceStr = number_format((float)$pos['unit_price'], 2, ',', '.') . ' €';
             $totalStr = number_format($lineNet, 2, ',', '.') . ' €';
 
-            // Check for page overflow — leave space for totals + footer
-            if ($rowY > 210) {
+            // Check for page overflow — leave space for totals (~40mm) + footer (~50mm)
+            if ($rowY > 190) {
                 $pdf->AddPage();
                 $pdf->SetFillColor(...$sidebarColor);
                 $pdf->Rect(0, 0, $sidebarW, $pageH, 'F');
+                // Redraw sidebar labels on continuation page
+                $pdf->SetFont($font, '', $fontSize - 2);
+                $pdf->SetTextColor(220, 235, 220);
+                $pdf->SetXY(3, 20);
+                $pdf->Cell($sidebarW - 6, 4, 'Rechnungsnummer', 0, 1, 'C');
+                $pdf->SetFont($font, 'B', $fontSize - 1);
+                $pdf->SetTextColor(255, 255, 255);
+                $pdf->SetXY(3, 24);
+                $pdf->Cell($sidebarW - 6, 5, $invoice['invoice_number'], 0, 1, 'C');
                 $rowY = 15;
             }
 
@@ -331,9 +345,17 @@ class PdfService
             $pdf->MultiCell($contentW, 4, $invoice['notes'], 0, 'L');
         }
 
-        // ── "Vielen Dank!" ────────────────────────────────────────────────
-        $thankY = $grossY + 32;
-        if (!empty($invoice['notes'])) $thankY += 12;
+        // ── "Vielen Dank!" — placed above footer with enough room ─────────
+        // Image height approx 20mm, then closing text, then footer at 248
+        $vielenDankImgH = 22;
+        $paymentTerms   = $invoice['payment_terms'] ?? $settings['payment_terms'] ?? '';
+        $closingFull    = trim(($closingText ? $closingText . "\n" : '') . $paymentTerms);
+        $closingLines   = $closingFull !== '' ? (substr_count($closingFull, "\n") + 1) : 0;
+        $closingH       = $closingLines * 5;
+        // Place "Vielen Dank!" so that text + footer fits: footer starts at 248
+        $thankY = 248 - 50 - $vielenDankImgH - $closingH; // ~176 with no closing
+        // But never above the totals block
+        $thankY = max($thankY, $grossY + 18);
 
         $vielenDankImg = ROOT_PATH . '/public/assets/img/vielen-dank-script.png';
         if (file_exists($vielenDankImg)) {
@@ -343,14 +365,12 @@ class PdfService
             $pdf->SetFont($font, 'BI', 24);
             $pdf->SetTextColor(...$darkColor);
             $pdf->SetXY($contentX, $thankY);
-            $pdf->Cell($contentW, 12, 'Vielen Dank!', 0, 1, 'L');
+            $pdf->Cell($contentW, $vielenDankImgH, 'Vielen Dank!', 0, 1, 'L');
         }
 
-        // Closing / payment terms below "Vielen Dank!"
-        $closingY = $thankY + 14;
-        $paymentTerms = $invoice['payment_terms'] ?? $settings['payment_terms'] ?? '';
-        $closingFull  = trim(($closingText ? $closingText . "\n" : '') . $paymentTerms);
+        // Closing / payment terms BELOW the image
         if ($closingFull !== '') {
+            $closingY = $thankY + $vielenDankImgH + 2;
             $pdf->SetFont($font, '', $fontSize - 1);
             $pdf->SetTextColor(...$grayColor);
             $pdf->SetXY($contentX, $closingY);
