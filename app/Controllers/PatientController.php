@@ -201,10 +201,13 @@ class PatientController extends Controller
         $file = null;
         if (!empty($_FILES['attachment']['name'])) {
             $destination = STORAGE_PATH . '/patients/' . $params['id'] . '/timeline';
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
             $file = $this->uploadFile('attachment', $destination, [
                 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                 'application/pdf', 'application/msword',
-                'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+                'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
             ]);
             if ($file) {
                 $data['attachment'] = $file;
@@ -241,6 +244,9 @@ class PatientController extends Controller
 
         if (!empty($_FILES['attachment']['name'])) {
             $destination = STORAGE_PATH . '/patients/' . $params['id'] . '/timeline';
+            if (!is_dir($destination)) {
+                mkdir($destination, 0755, true);
+            }
             $file = $this->uploadFile('attachment', $destination, [
                 'image/jpeg', 'image/png', 'image/gif', 'image/webp',
                 'application/pdf', 'application/msword',
@@ -303,10 +309,10 @@ class PatientController extends Controller
         $finfo    = new \finfo(FILEINFO_MIME_TYPE);
         $mimeType = $finfo->file($path);
 
-        $isImage = str_starts_with($mimeType, 'image/');
+        $isInline = str_starts_with($mimeType, 'image/') || $mimeType === 'application/pdf';
 
         header('Content-Type: ' . $mimeType);
-        header('Content-Disposition: ' . ($isImage ? 'inline' : 'attachment') . '; filename="' . $file . '"');
+        header('Content-Disposition: ' . ($isInline ? 'inline' : 'attachment') . '; filename="' . $file . '"');
         header('Content-Length: ' . filesize($path));
         header('Cache-Control: private, max-age=3600');
         readfile($path);
