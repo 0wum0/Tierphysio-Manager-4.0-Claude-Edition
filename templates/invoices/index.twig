@@ -165,6 +165,9 @@
 </form>
 
 {% if invoices %}
+<div class="mob-hide-table">
+
+    {# ── Desktop: Tabelle ── #}
     <div class="table-container">
         <table class="data-table">
             <thead>
@@ -205,6 +208,31 @@
             </tbody>
         </table>
     </div>
+
+    {# ── Mobile: Card List ── #}
+    <div class="mob-card-list">
+        {% for invoice in invoices %}
+        <div class="mob-card invoice-row" data-modal-open="modal-invoice-{{ invoice.id }}" data-invoice-id="{{ invoice.id }}">
+            <div class="mob-card-header">
+                <span class="mob-card-title" style="color:var(--accent);">{{ invoice.invoice_number }}</span>
+                <span class="badge badge-{{ invoice.status }}">{{ t('invoices.status_' ~ invoice.status) }}</span>
+            </div>
+            <div class="mob-card-meta">
+                <span class="mob-card-meta-item" style="font-weight:600;color:var(--text-primary);font-size:0.9rem;">{{ invoice.total_gross|money }}</span>
+                <span class="mob-card-meta-item">👤 {{ invoice.owner_name ?? '—' }}</span>
+                {% if invoice.patient_name %}<span class="mob-card-meta-item">🐾 {{ invoice.patient_name }}</span>{% endif %}
+                <span class="mob-card-meta-item">📅 {{ invoice.issue_date|date_de }}</span>
+                {% if invoice.due_date %}
+                <span class="mob-card-meta-item {{ invoice.status == 'overdue' ? 'text-danger' : '' }}">
+                    Fällig: {{ invoice.due_date|date_de }}
+                </span>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>{# /mob-hide-table #}
 
     {% if pagination.last_page > 1 %}
         <div class="pagination">
