@@ -243,7 +243,7 @@ img { max-width: 100%; height: auto; }
   border-radius: var(--radius-lg);
   box-shadow: var(--glass-shadow);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Prismatic top edge */
@@ -269,7 +269,7 @@ img { max-width: 100%; height: auto; }
   padding: 1.5rem;
   transition: var(--transition);
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 /* Prismatic top edge on glass-card */
