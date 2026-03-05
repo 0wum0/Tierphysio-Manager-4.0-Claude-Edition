@@ -413,8 +413,6 @@
 <script src="/themes/smart-tierphysio/plugins/waves/waves.min.js"></script>
 <script src="/themes/smart-tierphysio/scripts/core/smartApp.js"></script>
 
-{% block scripts %}{% endblock %}
-
 <script>
 /* ═══════════════════════════════════════════════════════
    SmartTierphysio — Bridge JS
@@ -566,6 +564,8 @@
 
 })();
 </script>
+
+{% block scripts %}{% endblock %}
 
 {# Notification polling #}
 {% if intake_unread_count is defined %}
