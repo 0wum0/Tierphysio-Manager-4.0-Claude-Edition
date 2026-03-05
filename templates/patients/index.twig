@@ -1094,7 +1094,8 @@ if (pdInvoiceBtn) {
         const o = currentPatientData.owner;
         document.getElementById('inv-patient-id').value = p.id || '';
         document.getElementById('inv-owner-id').value   = (o && o.id) ? o.id : '';
-        Modal.open('modal-invoice-inline');
+        var invoiceOverlay = document.getElementById('modal-invoice-inline');
+        if (invoiceOverlay) { invoiceOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
     });
 }
 
@@ -1139,7 +1140,46 @@ if (pdEditBtn) {
         } else {
             prev.innerHTML = '<svg width="28" height="28" fill="none" viewBox="0 0 24 24" style="opacity:0.3;"><path stroke="currentColor" stroke-width="1.5" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/></svg>';
         }
-        Modal.open('modal-edit-patient-inline');
+        var editOverlay2 = document.getElementById('modal-edit-patient-inline');
+        if (editOverlay2) { editOverlay2.classList.add('open'); document.body.style.overflow = 'hidden'; }
+    });
+}
+
+/* ── Edit form: AJAX submit — stay on page ── */
+var editForm = document.getElementById('edit-patient-form');
+if (editForm) {
+    editForm.addEventListener('submit', function (e) {
+        e.preventDefault();
+        var btn = editForm.querySelector('button[type="submit"]');
+        if (btn) { btn.disabled = true; btn.textContent = 'Speichern…'; }
+
+        var fd = new FormData(editForm);
+        fetch(editForm.action, {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: fd
+        })
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+            if (data.ok) {
+                /* Update currentPatientData so the detail modal reflects changes */
+                if (currentPatientData && data.patient) {
+                    currentPatientData.patient = data.patient;
+                    /* Refresh header in detail modal */
+                    pdName.textContent = data.patient.name || '';
+                    pdSpecies.textContent = [data.patient.species, data.patient.breed].filter(Boolean).join(' · ');
+                }
+                var editOverlay = document.getElementById('modal-edit-patient-inline');
+                if (editOverlay) { editOverlay.classList.remove('open'); }
+                /* Re-open patient detail modal */
+                var detailOverlay = document.getElementById('modal-patient-detail');
+                if (detailOverlay) { detailOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+            }
+        })
+        .catch(function () { alert('Fehler beim Speichern.'); })
+        .finally(function () {
+            if (btn) { btn.disabled = false; btn.textContent = 'Speichern'; }
+        });
     });
 }
 

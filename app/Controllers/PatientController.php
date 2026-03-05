@@ -162,8 +162,14 @@ class PatientController extends Controller
         ];
 
         $this->patientService->update((int)$params['id'], $data);
+
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json')) {
+            $this->json(['ok' => true, 'patient' => $this->patientService->findById((int)$params['id'])]);
+            return;
+        }
+
         $this->session->flash('success', $this->translator->trans('patients.updated'));
-        $this->redirect("/patienten/{$params['id']}");
+        $this->redirect('/patienten');
     }
 
     public function delete(array $params = []): void
