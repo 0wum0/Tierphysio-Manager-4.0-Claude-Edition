@@ -352,6 +352,11 @@
     margin-top: 4px;
   }
 
+  /* ── Embedded (iframe) mode ────────────────────────── */
+  body.embedded .toolbar { display: none; }
+  body.embedded .paper-wrap { margin: 10px auto 20px; }
+  body.embedded .a4 { box-shadow: 0 2px 12px rgba(0,0,0,0.12); }
+
   /* ── Print styles ─────────────────────────────────── */
   @media print {
     body { background: #fff; }
@@ -362,6 +367,9 @@
 </style>
 </head>
 <body>
+<script>
+  if (window.self !== window.top) { document.documentElement.classList.add('embedded'); document.addEventListener('DOMContentLoaded', function(){ document.body.classList.add('embedded'); }); }
+</script>
 
 {# ── Toolbar ───────────────────────────────────────── #}
 <div class="toolbar">

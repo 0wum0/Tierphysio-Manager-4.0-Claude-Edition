@@ -319,15 +319,15 @@
                     });
             }
 
-            // Lazy-load PDF in iframe
+            // Lazy-load HTML preview in iframe
             const pdfWrap = document.getElementById('pdf-frame-wrap-' + invoiceId);
             const pdfPlaceholder = document.getElementById('pdf-placeholder-' + invoiceId);
             if (pdfWrap && pdfPlaceholder && !pdfWrap.dataset.loaded) {
                 pdfWrap.dataset.loaded = '1';
                 const frame = document.createElement('iframe');
-                frame.src   = '/rechnungen/' + invoiceId + '/pdf';
+                frame.src   = '/rechnungen/' + invoiceId + '/vorschau';
                 frame.style.cssText = 'width:100%;height:100%;border:none;display:block;';
-                frame.title = 'Rechnungs-PDF';
+                frame.title = 'Rechnungs-Vorschau';
                 pdfPlaceholder.remove();
                 pdfWrap.appendChild(frame);
             }
