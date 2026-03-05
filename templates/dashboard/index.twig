@@ -35,9 +35,11 @@
 
 {# Build ordered panel list: saved order first, then any new panels appended #}
 {% set all_panels = ['panel-kpi-revenue', 'panel-revenue-chart', 'panel-activity-kpis', 'panel-quick-actions'] %}
-{% if plugin_widgets %}{% set all_panels = all_panels|merge(['panel-plugin-widgets']) %}{% endif %}
+{% for w in plugin_widgets %}{% set all_panels = all_panels|merge([w.id]) %}{% endfor %}
 {% set ordered_panels = saved_layout ?? all_panels %}
 {% for id in all_panels %}{% if id not in ordered_panels %}{% set ordered_panels = ordered_panels|merge([id]) %}{% endif %}{% endfor %}
+{% set widget_map = {} %}
+{% for w in plugin_widgets %}{% set widget_map = widget_map|merge({(w.id): w}) %}{% endfor %}
 
 <div class="main-content" id="js-dashboard">
     <div id="dashboard-grid" class="row g-3">
@@ -246,22 +248,24 @@
         </div>
         {% endif %}
 
-        {# ── Panel: Plugin Widgets ── #}
-        {% if panel_id == 'panel-plugin-widgets' and plugin_widgets %}
-        <div class="col-12" data-panel-id="panel-plugin-widgets">
-            <div class="panel" id="panel-plugin-widgets">
+        {# ── Plugin Widget Panels (one panel per plugin) ── #}
+        {% if panel_id in widget_map|keys %}
+        {% set w = widget_map[panel_id] %}
+        <div class="{{ w.col ?? 'col-xl-4 col-lg-5 col-12' }}" data-panel-id="{{ w.id }}">
+            <div class="panel" id="{{ w.id }}">
                 <div class="panel-hdr">
                     <h2>
-                        <svg class="sa-icon sa-icon-warning me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
-                        Plugins
+                        {% if w.icon %}<span class="me-2">{{ w.icon|raw }}</span>{% endif %}
+                        {{ w.title }}
                     </h2>
                     <div class="panel-toolbar">
                         <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" title="Vollbild"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#maximize-2"></use></svg></button>
                     </div>
                 </div>
                 <div class="panel-container">
                     <div class="panel-content">
-                        <div class="row g-3">{% for widget in plugin_widgets %}<div class="col-md-6">{{ widget|raw }}</div>{% endfor %}</div>
+                        {{ w.content|raw }}
                     </div>
                 </div>
             </div>

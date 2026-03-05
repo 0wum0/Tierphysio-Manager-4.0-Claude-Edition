@@ -125,10 +125,10 @@ class PluginManager
         $widgets = [];
         foreach ($this->hooks['dashboardWidgets'] ?? [] as $entry) {
             $result = ($entry['callback'])($context);
-            if (is_string($result) && $result !== '') {
+            if (is_array($result) && isset($result['id'])) {
                 $widgets[] = $result;
-            } elseif (is_array($result)) {
-                $widgets = array_merge($widgets, $result);
+            } elseif (is_string($result) && $result !== '') {
+                $widgets[] = ['id' => 'plugin-' . count($widgets), 'title' => 'Plugin', 'content' => $result];
             }
         }
         return $widgets;

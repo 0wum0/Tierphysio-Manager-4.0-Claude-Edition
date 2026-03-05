@@ -62,48 +62,48 @@ class ServiceProvider
         $router->get('/intake/foto/{file}', [IntakeController::class, 'servePhoto'], ['auth']);
     }
 
-    public function dashboardWidget(array $context): string
+    public function dashboardWidget(array $context): array
     {
         try {
-            $db   = Application::getInstance()->getContainer()->get(\App\Core\Database::class);
-            $repo = new IntakeRepository($db);
-            $neu  = $repo->countByStatus('neu');
-            $ib   = $repo->countByStatus('in_bearbeitung');
+            $db     = Application::getInstance()->getContainer()->get(\App\Core\Database::class);
+            $repo   = new IntakeRepository($db);
+            $neu    = $repo->countByStatus('neu');
+            $ib     = $repo->countByStatus('in_bearbeitung');
             $latest = $repo->getLatestUnread(3);
         } catch (\Throwable) {
-            return '';
+            return [];
         }
 
-        $total = $neu + $ib;
-
-        $html  = '<div style="padding:1rem;">';
-        $html .= '<div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">';
-        $html .= '<svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22,6 12,13 2,6"/></svg>';
-        $html .= 'Eingangsmeldungen</div>';
-
-        $html .= '<div style="display:flex;gap:1rem;margin-bottom:0.75rem;">';
-        $html .= '<div style="text-align:center;flex:1;"><div style="font-size:1.4rem;font-weight:700;color:' . ($neu > 0 ? '#ef4444' : 'var(--accent)') . ';">' . $neu . '</div><div style="font-size:0.7rem;color:var(--text-muted);">Neu</div></div>';
-        $html .= '<div style="text-align:center;flex:1;"><div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' . $ib . '</div><div style="font-size:0.7rem;color:var(--text-muted);">In Bearb.</div></div>';
+        $html  = '<div class="d-flex gap-3 mb-3">';
+        $html .= '<div class="text-center flex-fill"><div class="fs-3 fw-800" style="color:' . ($neu > 0 ? '#ef4444' : 'var(--bs-primary)') . '">' . $neu . '</div><div class="fs-nano text-muted">Neu</div></div>';
+        $html .= '<div class="text-center flex-fill"><div class="fs-3 fw-800" style="color:var(--bs-primary)">' . $ib . '</div><div class="fs-nano text-muted">In Bearb.</div></div>';
         $html .= '</div>';
 
+        $html .= '<div class="list-group list-group-flush">';
         if (empty($latest)) {
-            $html .= '<div style="font-size:0.8rem;color:var(--text-muted);">Keine offenen Meldungen.</div>';
+            $html .= '<div class="list-group-item text-muted fs-sm">Keine offenen Meldungen.</div>';
         } else {
             foreach ($latest as $item) {
-                $name    = htmlspecialchars($item['patient_name']);
-                $owner   = htmlspecialchars($item['owner_first_name'] . ' ' . $item['owner_last_name']);
-                $time    = date('d.m. H:i', strtotime($item['created_at']));
-                $html .= '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--glass-border);">';
-                $html .= '<span style="width:8px;height:8px;border-radius:50%;background:#ef4444;flex-shrink:0;display:inline-block;animation:pulse 2s infinite;"></span>';
-                $html .= '<span style="font-size:0.78rem;color:var(--text-muted);flex-shrink:0;">' . $time . '</span>';
-                $html .= '<span style="font-size:0.82rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' . $name . ' · ' . $owner . '</span>';
-                $html .= '</div>';
+                $name  = htmlspecialchars($item['patient_name']);
+                $owner = htmlspecialchars($item['owner_first_name'] . ' ' . $item['owner_last_name']);
+                $time  = date('d.m. H:i', strtotime($item['created_at']));
+                $html .= '<a href="/eingangsmeldungen" class="list-group-item list-group-item-action d-flex align-items-center gap-2 px-0 py-2">';
+                $html .= '<span style="width:9px;height:9px;border-radius:50%;background:#ef4444;flex-shrink:0;"></span>';
+                $html .= '<span class="text-muted fs-nano" style="flex-shrink:0;min-width:70px;">' . $time . '</span>';
+                $html .= '<span class="fs-sm fw-500 text-truncate">' . $name . ' <span class="text-muted">· ' . $owner . '</span></span>';
+                $html .= '</a>';
             }
         }
-
-        $html .= '<a href="/eingangsmeldungen" style="display:block;margin-top:0.75rem;text-align:center;font-size:0.78rem;color:var(--accent);text-decoration:none;">Alle anzeigen →</a>';
         $html .= '</div>';
-        return $html;
+        $html .= '<a href="/eingangsmeldungen" class="btn btn-sm btn-outline-primary w-100 mt-2">Alle anzeigen →</a>';
+
+        return [
+            'id'      => 'panel-widget-intake',
+            'title'   => 'Eingangsmeldungen',
+            'icon'    => '<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22,6 12,13 2,6"/></svg>',
+            'content' => $html,
+            'col'     => 'col-xl-4 col-lg-5 col-12',
+        ];
     }
 
     private function injectNotificationCount(View $view): void

@@ -67,7 +67,7 @@ class ServiceProvider
         $router->post('/api/kalender/events/{id}/loeschen', [CalendarController::class, 'apiDelete'], ['auth']);
     }
 
-    public function dashboardWidget(array $context): string
+    public function dashboardWidget(array $context): array
     {
         try {
             $db   = Application::getInstance()->getContainer()->get(\App\Core\Database::class);
@@ -75,38 +75,40 @@ class ServiceProvider
             $upcoming = $repo->findUpcoming(5);
             $stats    = $repo->getStats();
         } catch (\Throwable) {
-            return '';
+            return [];
         }
 
-        $html  = '<div style="padding:1rem;">';
-        $html .= '<div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-muted);margin-bottom:0.75rem;display:flex;align-items:center;gap:0.5rem;">';
-        $html .= '<svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>';
-        $html .= 'Nächste Termine</div>';
-
-        $html .= '<div style="display:flex;gap:1rem;margin-bottom:0.75rem;">';
-        $html .= '<div style="text-align:center;flex:1;"><div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' . ($stats['today'] ?? 0) . '</div><div style="font-size:0.7rem;color:var(--text-muted);">Heute</div></div>';
-        $html .= '<div style="text-align:center;flex:1;"><div style="font-size:1.4rem;font-weight:700;color:var(--accent);">' . ($stats['upcoming'] ?? 0) . '</div><div style="font-size:0.7rem;color:var(--text-muted);">Geplant</div></div>';
+        $html  = '<div class="d-flex gap-3 mb-3">';
+        $html .= '<div class="text-center flex-fill"><div class="fs-3 fw-800" style="color:var(--bs-primary)">' . ($stats['today'] ?? 0) . '</div><div class="fs-nano text-muted">Heute</div></div>';
+        $html .= '<div class="text-center flex-fill"><div class="fs-3 fw-800" style="color:var(--bs-primary)">' . ($stats['upcoming'] ?? 0) . '</div><div class="fs-nano text-muted">Geplant</div></div>';
         $html .= '</div>';
 
+        $html .= '<div class="list-group list-group-flush">';
         if (empty($upcoming)) {
-            $html .= '<div style="font-size:0.8rem;color:var(--text-muted);">Keine Termine geplant.</div>';
+            $html .= '<div class="list-group-item text-muted fs-sm">Keine Termine geplant.</div>';
         } else {
             foreach ($upcoming as $a) {
-                $color   = htmlspecialchars($a['color'] ?? $a['treatment_type_color'] ?? '#4f7cff');
+                $color   = htmlspecialchars($a['treatment_type_color'] ?? '#4f7cff');
                 $time    = date('d.m. H:i', strtotime($a['start_at']));
                 $title   = htmlspecialchars($a['title']);
-                $patient = $a['patient_name'] ? ' · ' . htmlspecialchars($a['patient_name']) : '';
-                $html .= '<div style="display:flex;align-items:center;gap:0.5rem;padding:0.35rem 0;border-bottom:1px solid var(--glass-border);">';
-                $html .= '<span style="width:8px;height:8px;border-radius:50%;background:' . $color . ';flex-shrink:0;display:inline-block;"></span>';
-                $html .= '<span style="font-size:0.78rem;color:var(--text-muted);flex-shrink:0;">' . $time . '</span>';
-                $html .= '<span style="font-size:0.82rem;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">' . $title . $patient . '</span>';
-                $html .= '</div>';
+                $patient = $a['patient_name'] ? ' <span class="text-muted">· ' . htmlspecialchars($a['patient_name']) . '</span>' : '';
+                $html .= '<a href="/kalender" class="list-group-item list-group-item-action d-flex align-items-center gap-2 px-0 py-2">';
+                $html .= '<span style="width:9px;height:9px;border-radius:50%;background:' . $color . ';flex-shrink:0;"></span>';
+                $html .= '<span class="text-muted fs-nano" style="flex-shrink:0;min-width:70px;">' . $time . '</span>';
+                $html .= '<span class="fs-sm fw-500 text-truncate">' . $title . $patient . '</span>';
+                $html .= '</a>';
             }
         }
-
-        $html .= '<a href="/kalender" style="display:block;margin-top:0.75rem;text-align:center;font-size:0.78rem;color:var(--accent);text-decoration:none;">Kalender öffnen →</a>';
         $html .= '</div>';
-        return $html;
+        $html .= '<a href="/kalender" class="btn btn-sm btn-outline-primary w-100 mt-2">Kalender öffnen →</a>';
+
+        return [
+            'id'      => 'panel-widget-calendar',
+            'title'   => 'Nächste Termine',
+            'icon'    => '<svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>',
+            'content' => $html,
+            'col'     => 'col-xl-4 col-lg-5 col-12',
+        ];
     }
 
     public function navItem(array $context): array
