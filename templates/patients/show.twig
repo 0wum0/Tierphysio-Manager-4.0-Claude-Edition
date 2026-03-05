@@ -207,7 +207,7 @@
                                     <div class="timeline-title">{{ entry.title }}</div>
                                 {% endif %}
                                 {% if entry.content %}
-                                    <div class="timeline-content">{{ entry.content }}</div>
+                                    <div class="timeline-content ql-view">{{ entry.content|raw }}</div>
                                 {% endif %}
                                 {% if entry.attachment %}
                                     {% set ext = entry.attachment|split('.')|last|lower %}

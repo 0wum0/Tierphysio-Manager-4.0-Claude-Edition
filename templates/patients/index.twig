@@ -1318,7 +1318,7 @@ function renderTimeline(timeline, patientId) {
                     </div>
                 </div>
                 ${e.title ? `<div class="timeline-title">${esc(e.title)}</div>` : ''}
-                ${e.content ? `<div class="timeline-content ql-editor" style="padding:0;min-height:0;">${e.content}</div>` : ''}
+                ${e.content ? `<div class="timeline-content ql-view">${e.content}</div>` : ''}
                 ${e.treatment_type_name ? `<div style="margin-top:0.5rem;text-align:right;"><span style="display:inline-block;padding:0.18rem 0.65rem;border-radius:999px;font-size:0.68rem;font-weight:600;background:${esc(e.treatment_type_color)}22;color:${esc(e.treatment_type_color)};border:1px solid ${esc(e.treatment_type_color)}44;">${esc(e.treatment_type_name)}</span></div>` : ''}
                 ${attachHtml}
             </div>
