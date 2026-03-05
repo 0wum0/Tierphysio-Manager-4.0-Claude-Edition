@@ -368,25 +368,32 @@ class PdfService
         $pdf->Cell($cTotal, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
         // ── NOTES ─────────────────────────────────────────────────────────
+        $afterContentY = $grossY + 8; // track Y position after all content above Vielen Dank
         if (!empty($invoice['notes'])) {
-            $notesY = $grossY + 18;
+            $notesY = $afterContentY;
             $pdf->SetFont($font, '', $fontSize - 1);
             $pdf->SetTextColor(...$grayColor);
             $pdf->SetXY($contentX, $notesY);
             $pdf->MultiCell($contentW, 4, $invoice['notes'], 0, 'L');
+            $afterContentY = $pdf->GetY() + 4;
         }
 
-        // ── "Vielen Dank!" — placed above footer with enough room ─────────
-        // Image height approx 20mm, then closing text, then footer at 248
+        // ── "Vielen Dank!" — always AFTER notes, never overlapping ────────
         $vielenDankImgH = 22;
         $paymentTerms   = $invoice['payment_terms'] ?? $settings['payment_terms'] ?? '';
         $closingFull    = trim(($closingText ? $closingText . "\n" : '') . $paymentTerms);
         $closingLines   = $closingFull !== '' ? (substr_count($closingFull, "\n") + 1) : 0;
         $closingH       = $closingLines * 5;
-        // Place "Vielen Dank!" so that text + footer fits: footer starts at 248
-        $thankY = 248 - 50 - $vielenDankImgH - $closingH; // ~176 with no closing
-        // But never above the totals block
-        $thankY = max($thankY, $grossY + 18);
+
+        // Ideal position: push up from footer so everything fits
+        $footerTopY  = 248;
+        $thankYIdeal = $footerTopY - 14 - $closingH - $vielenDankImgH;
+        // Never above actual content end
+        $thankY = max($thankYIdeal, $afterContentY + 4);
+        // If no room before footer, just place directly after content
+        if ($thankY + $vielenDankImgH + $closingH + 14 > $footerTopY) {
+            $thankY = $afterContentY + 4;
+        }
 
         $vielenDankImg = $this->resolveAssetImg($settings['pdf_vielen_dank_bild'] ?? 'vielen-dank-script.png');
         if (file_exists($vielenDankImg)) {
