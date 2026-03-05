@@ -279,11 +279,7 @@
             const modalId   = 'modal-invoice-' + invoiceId;
 
             // Open modal via existing modal system
-            const overlay = document.getElementById(modalId);
-            if (overlay) {
-                window.openModal ? window.openModal(modalId) : overlay.classList.add('is-open');
-                document.body.style.overflow = 'hidden';
-            }
+            window.openModal(modalId);
 
             // Lazy-load positions
             const posBox = document.getElementById('positions-' + invoiceId);

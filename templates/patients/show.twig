@@ -527,35 +527,14 @@
     }
 })();
 
-/* ── Modal open/close ── */
+/* ── Modal open/close — use global window.openModal/closeModal from layout.twig ── */
 (function () {
-    function openModal(id) {
-        var el = document.getElementById(id);
-        if (el) { el.classList.add('open'); document.body.style.overflow = 'hidden'; }
-    }
-    function closeModal(id) {
-        var el = document.getElementById(id);
-        if (el) { el.classList.remove('open'); document.body.style.overflow = ''; }
-    }
-
     /* Auto-open modal from ?open= query param */
     var openParam = new URLSearchParams(window.location.search).get('open');
-    if (openParam === 'invoice') { openModal('modal-create-invoice'); }
-    else if (openParam === 'edit') { openModal('modal-edit-patient'); }
+    if (openParam === 'invoice') { window.openModal('modal-create-invoice'); }
+    else if (openParam === 'edit') { window.openModal('modal-edit-patient'); }
     /* Clean URL without reload */
     if (openParam) { history.replaceState(null, '', window.location.pathname); }
-    document.addEventListener('click', function (e) {
-        var opener = e.target.closest('[data-modal-open]');
-        if (opener) { e.preventDefault(); openModal(opener.getAttribute('data-modal-open')); return; }
-        var closer = e.target.closest('[data-modal-close]');
-        if (closer) { e.preventDefault(); closeModal(closer.getAttribute('data-modal-close')); return; }
-        if (e.target.classList.contains('tp-overlay')) { closeModal(e.target.id); }
-    });
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') {
-            document.querySelectorAll('.tp-overlay.open').forEach(function (o) { closeModal(o.id); });
-        }
-    });
 })();
 
 /* ── Datei-Viewer ── */

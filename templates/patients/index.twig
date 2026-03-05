@@ -1095,7 +1095,7 @@ if (pdInvoiceBtn) {
         document.getElementById('inv-patient-id').value = p.id || '';
         document.getElementById('inv-owner-id').value   = (o && o.id) ? o.id : '';
         var invoiceOverlay = document.getElementById('modal-invoice-inline');
-        if (invoiceOverlay) { invoiceOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        if (invoiceOverlay) { window.openModal('modal-invoice-inline'); }
     });
 }
 
@@ -1141,7 +1141,7 @@ if (pdEditBtn) {
             prev.innerHTML = '<svg width="28" height="28" fill="none" viewBox="0 0 24 24" style="opacity:0.3;"><path stroke="currentColor" stroke-width="1.5" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/></svg>';
         }
         var editOverlay2 = document.getElementById('modal-edit-patient-inline');
-        if (editOverlay2) { editOverlay2.classList.add('open'); document.body.style.overflow = 'hidden'; }
+        if (editOverlay2) { window.openModal('modal-edit-patient-inline'); }
     });
 }
 
@@ -1170,10 +1170,10 @@ if (editForm) {
                     pdSpecies.textContent = [data.patient.species, data.patient.breed].filter(Boolean).join(' · ');
                 }
                 var editOverlay = document.getElementById('modal-edit-patient-inline');
-                if (editOverlay) { editOverlay.classList.remove('open'); }
+                if (editOverlay) { window.closeModal('modal-edit-patient-inline'); }
                 /* Re-open patient detail modal */
                 var detailOverlay = document.getElementById('modal-patient-detail');
-                if (detailOverlay) { detailOverlay.classList.add('open'); document.body.style.overflow = 'hidden'; }
+                if (detailOverlay) { window.openModal('modal-patient-detail'); }
             }
         })
         .catch(function () { alert('Fehler beim Speichern.'); })
@@ -1336,7 +1336,7 @@ function renderTimeline(timeline, patientId) {
 
 function openPatientModal(patientId) {
     resetModal();
-    Modal.open('modal-patient-detail');
+    window.openModal('modal-patient-detail');
     initQuill();
     if (quillEditor) quillEditor.setContents([]);
 
