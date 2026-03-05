@@ -26,18 +26,27 @@
 </div>
 
 {# ════════════════════════════════════════════════════════════════
-   MODULAR DASHBOARD
-   Structure: div.main-content > div.row > div.col-* > div.panel[id]
-   saveloadscript.js saves panel positions by ID to localStorage.
-   Sortable.js (loaded in smartApp.js) enables drag & drop via panel-hdr > h2.
+   MODULAR DASHBOARD — server-persisted panel order per user
+   saved_layout = array of panel IDs in saved order (from DB)
+   Panels are sorted server-side via Twig, then Sortable.js enables
+   drag & drop. onEnd → POST /api/dashboard/layout → DB save.
+   Same order on every device because it's stored server-side.
    ════════════════════════════════════════════════════════════════ #}
-<div class="main-content">
-    <div class="row g-3">
 
-        {# ── Column LEFT (wide) ── #}
-        <div class="col-xl-8 col-lg-7 col-12 d-flex flex-column gap-3">
+{# Build ordered panel list: saved order first, then any new panels appended #}
+{% set all_panels = ['panel-kpi-revenue', 'panel-revenue-chart', 'panel-activity-kpis', 'panel-quick-actions'] %}
+{% if plugin_widgets %}{% set all_panels = all_panels|merge(['panel-plugin-widgets']) %}{% endif %}
+{% set ordered_panels = saved_layout ?? all_panels %}
+{% for id in all_panels %}{% if id not in ordered_panels %}{% set ordered_panels = ordered_panels|merge([id]) %}{% endif %}{% endfor %}
 
-            {# Panel: KPI Revenue #}
+<div class="main-content" id="js-dashboard">
+    <div id="dashboard-grid" class="row g-3">
+
+    {% for panel_id in ordered_panels %}
+
+        {# ── Panel: KPI Revenue ── #}
+        {% if panel_id == 'panel-kpi-revenue' %}
+        <div class="col-12" data-panel-id="panel-kpi-revenue">
             <div class="panel" id="panel-kpi-revenue">
                 <div class="panel-hdr">
                     <h2>
@@ -92,9 +101,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
 
-            {# Panel: Revenue Chart #}
-            <div class="panel" id="panel-revenue-chart">
+        {# ── Panel: Revenue Chart ── #}
+        {% if panel_id == 'panel-revenue-chart' %}
+        <div class="col-xl-8 col-lg-7 col-12" data-panel-id="panel-revenue-chart">
+            <div class="panel h-100" id="panel-revenue-chart">
                 <div class="panel-hdr">
                     <h2>
                         <svg class="sa-icon sa-icon-primary me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#bar-chart-2"></use></svg>
@@ -117,38 +130,13 @@
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
 
-            {# Panel: Plugin Widgets (only if any) #}
-            {% if plugin_widgets %}
-            <div class="panel" id="panel-plugin-widgets">
-                <div class="panel-hdr">
-                    <h2>
-                        <svg class="sa-icon sa-icon-warning me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
-                        Plugins
-                    </h2>
-                    <div class="panel-toolbar">
-                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
-                    </div>
-                </div>
-                <div class="panel-container">
-                    <div class="panel-content">
-                        <div class="row g-3">
-                            {% for widget in plugin_widgets %}
-                            <div class="col-md-6">{{ widget|raw }}</div>
-                            {% endfor %}
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
-
-        </div>{# /col-left #}
-
-        {# ── Column RIGHT (narrow) ── #}
-        <div class="col-xl-4 col-lg-5 col-12 d-flex flex-column gap-3">
-
-            {# Panel: Activity KPIs #}
-            <div class="panel" id="panel-activity-kpis">
+        {# ── Panel: Activity KPIs ── #}
+        {% if panel_id == 'panel-activity-kpis' %}
+        <div class="col-xl-4 col-lg-5 col-12" data-panel-id="panel-activity-kpis">
+            <div class="panel h-100" id="panel-activity-kpis">
                 <div class="panel-hdr">
                     <h2>
                         <svg class="sa-icon sa-icon-info me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#activity"></use></svg>
@@ -216,8 +204,12 @@
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
 
-            {# Panel: Quick Actions #}
+        {# ── Panel: Quick Actions ── #}
+        {% if panel_id == 'panel-quick-actions' %}
+        <div class="col-xl-4 col-lg-5 col-12" data-panel-id="panel-quick-actions">
             <div class="panel" id="panel-quick-actions">
                 <div class="panel-hdr">
                     <h2>
@@ -231,21 +223,15 @@
                 <div class="panel-container">
                     <div class="panel-content d-flex flex-column gap-2">
                         <a href="/patienten" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(239,68,68,0.12);color:#ef4444;flex-shrink:0;">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                            </span>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(239,68,68,0.12);color:#ef4444;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_patient') }}</span>
                         </a>
                         <a href="/tierhalter" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(168,85,247,0.12);color:#a855f7;flex-shrink:0;">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
-                            </span>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(168,85,247,0.12);color:#a855f7;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_owner') }}</span>
                         </a>
                         <a href="/rechnungen/erstellen" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(79,124,255,0.12);color:#4f7cff;flex-shrink:0;">
-                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg>
-                            </span>
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(79,124,255,0.12);color:#4f7cff;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_invoice') }}</span>
                         </a>
                         {% if stats.overdue_count > 0 %}
@@ -257,10 +243,34 @@
                     </div>
                 </div>
             </div>
+        </div>
+        {% endif %}
 
-        </div>{# /col-right #}
+        {# ── Panel: Plugin Widgets ── #}
+        {% if panel_id == 'panel-plugin-widgets' and plugin_widgets %}
+        <div class="col-12" data-panel-id="panel-plugin-widgets">
+            <div class="panel" id="panel-plugin-widgets">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-warning me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
+                        Plugins
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                    </div>
+                </div>
+                <div class="panel-container">
+                    <div class="panel-content">
+                        <div class="row g-3">{% for widget in plugin_widgets %}<div class="col-md-6">{{ widget|raw }}</div>{% endfor %}</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
 
-    </div>{# /row #}
+    {% endfor %}
+
+    </div>{# /dashboard-grid #}
 </div>{# /main-content #}
 
 {% endblock %}
@@ -347,15 +357,35 @@
     });
 })();
 
+/* ── Sortable drag & drop with server-side persistence ── */
+(function() {
+    var grid = document.getElementById('dashboard-grid');
+    if (!grid || typeof Sortable === 'undefined') return;
+
+    Sortable.create(grid, {
+        handle: '.panel-hdr h2',
+        animation: 200,
+        ghostClass: 'panel-selected',
+        onEnd: function() {
+            var order = Array.from(grid.querySelectorAll('[data-panel-id]'))
+                            .map(function(el) { return el.getAttribute('data-panel-id'); });
+            fetch('/api/dashboard/layout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ layout: order })
+            });
+        }
+    });
+})();
+
 /* ── Dashboard panel position reset ── */
 function resetPanelState() {
     if (!confirm('Dashboard-Layout zurücksetzen?')) return;
-    try {
-        var cfg = JSON.parse(localStorage.getItem('layoutSettings') || '{}');
-        delete cfg.panelState;
-        localStorage.setItem('layoutSettings', JSON.stringify(cfg));
-    } catch(e) {}
-    location.reload();
+    fetch('/api/dashboard/layout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ layout: null })
+    }).then(function() { location.reload(); });
 }
 </script>
 {% endblock %}

@@ -15,6 +15,8 @@ use App\Controllers\ProfileController;
 $router->get('/', [DashboardController::class, 'index'], ['auth']);
 $router->get('/dashboard', [DashboardController::class, 'index'], ['auth']);
 $router->get('/dashboard/chart-data', [DashboardController::class, 'chartData'], ['auth']);
+$router->post('/api/dashboard/layout', [DashboardController::class, 'saveLayout'], ['auth']);
+$router->get('/api/dashboard/layout', [DashboardController::class, 'loadLayout'], ['auth']);
 
 $router->get('/login', [AuthController::class, 'showLogin'], ['guest']);
 $router->post('/login', [AuthController::class, 'login'], ['guest']);
