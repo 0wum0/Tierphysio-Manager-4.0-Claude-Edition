@@ -32,21 +32,11 @@
         }
 
         .login-brand-icon {
-            width: 72px;
-            height: 72px;
-            border-radius: 18px;
-            background: linear-gradient(135deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 60%, var(--bs-info)));
             display: inline-flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 0.75rem;
-            box-shadow: 0 0 0 0 var(--bs-primary);
-            animation: logoPulse 3s ease-in-out infinite;
-        }
-
-        @keyframes logoPulse {
-            0%, 100% { box-shadow: 0 0 12px 2px color-mix(in srgb, var(--bs-primary) 40%, transparent); }
-            50%       { box-shadow: 0 0 28px 8px color-mix(in srgb, var(--bs-primary) 25%, transparent); }
+            filter: drop-shadow(0 0 10px rgba(110,168,254,0.5));
         }
 
         .login-brand-name {
@@ -133,9 +123,33 @@
             <img src="/storage/uploads/{{ company_logo }}" alt="Logo" class="login-brand-logo d-block mx-auto">
         {% else %}
             <div class="login-brand-icon mx-auto">
-                <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
-                    <path stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(24,24)">
+                        <ellipse cx="0" cy="0" rx="18" ry="7" fill="url(#lg0)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="0" cy="0" rx="18" ry="7" fill="url(#lg1)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="60" to="420" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="0" cy="0" rx="18" ry="7" fill="url(#lg2)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="120" to="480" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <circle cx="0" cy="0" r="6" fill="white" opacity="0.95"/>
+                    </g>
+                    <defs>
+                        <linearGradient id="lg0" x1="-18" y1="0" x2="18" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#A8ECF9"/>
+                            <stop offset="1" stop-color="#6EA8FE"/>
+                        </linearGradient>
+                        <linearGradient id="lg1" x1="-18" y1="0" x2="18" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#6EA8FE"/>
+                            <stop offset="1" stop-color="#a78bfa"/>
+                        </linearGradient>
+                        <linearGradient id="lg2" x1="-18" y1="0" x2="18" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#a78bfa"/>
+                            <stop offset="1" stop-color="#A8ECF9"/>
+                        </linearGradient>
+                    </defs>
                 </svg>
             </div>
         {% endif %}
