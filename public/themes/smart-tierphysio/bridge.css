@@ -259,41 +259,66 @@
 
 /* ══════════════════════════════════════════════════════════
    MODALS — our custom modal-overlay system
+   Needs high specificity to beat smartapp.min.css .modal rules
    ══════════════════════════════════════════════════════════ */
 .modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
+  display: none !important;
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.55) !important;
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  align-items: center;
-  justify-content: center;
-  z-index: 1060;
-  padding: 1rem;
+  align-items: center !important;
+  justify-content: center !important;
+  z-index: 2000 !important;
+  padding: 1rem !important;
+  overflow: hidden !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  top: 0 !important; right: 0 !important; bottom: 0 !important; left: 0 !important;
+  transform: none !important;
+  opacity: 1 !important;
+  transition: none !important;
 }
 .modal-overlay.is-open,
 .modal-overlay.open {
   display: flex !important;
 }
 
-/* Override Bootstrap's own .modal inside our overlay */
+/* Override SmartAdmin's .modal (which sets position:fixed, width:100%, etc.) */
+.modal-overlay > .modal,
 .modal-overlay .modal {
   position: relative !important;
-  display: block !important;
-  background: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 16px;
-  width: 100%;
-  max-width: 560px;
-  max-height: 92dvh;
-  overflow-y: auto;
-  box-shadow: 0 24px 64px rgba(0,0,0,0.35);
-  animation: modalIn 0.2s ease;
+  display: flex !important;
+  flex-direction: column !important;
+  top: auto !important;
+  left: auto !important;
+  right: auto !important;
+  bottom: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  background: var(--bs-body-bg) !important;
+  border: 1px solid var(--bs-border-color) !important;
+  border-radius: 16px !important;
+  width: 100% !important;
+  max-width: 560px !important;
+  max-height: 92dvh !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.35) !important;
+  animation: modalIn 0.2s ease !important;
+  padding: 0 !important;
+  z-index: auto !important;
+  pointer-events: auto !important;
+  opacity: 1 !important;
 }
-.modal-overlay .modal.modal-lg  { max-width: 760px; }
-.modal-overlay .modal.modal-xl  { max-width: 1000px; }
-.modal-overlay .modal.modal-sm  { max-width: 400px; }
+.modal-overlay > .modal.modal-lg,
+.modal-overlay .modal.modal-lg  { max-width: 760px !important; }
+.modal-overlay > .modal.modal-xl,
+.modal-overlay .modal.modal-xl  { max-width: 1000px !important; }
+.modal-overlay > .modal.modal-sm,
+.modal-overlay .modal.modal-sm  { max-width: 400px !important; }
 
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.95) translateY(-8px); }
@@ -301,16 +326,17 @@
 }
 
 .modal-overlay .modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid var(--bs-border-color);
-  position: sticky;
-  top: 0;
-  background: var(--bs-body-bg);
-  z-index: 1;
-  border-radius: 16px 16px 0 0;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 1.1rem 1.25rem !important;
+  border-bottom: 1px solid var(--bs-border-color) !important;
+  position: sticky !important;
+  top: 0 !important;
+  background: var(--bs-body-bg) !important;
+  z-index: 1 !important;
+  border-radius: 16px 16px 0 0 !important;
+  flex-shrink: 0 !important;
 }
 .modal-overlay .modal-title {
   font-size: 1.05rem;
@@ -319,15 +345,18 @@
   color: var(--bs-body-color);
 }
 .modal-overlay .modal-body {
-  padding: 1.25rem;
+  padding: 1.25rem !important;
+  overflow-y: auto !important;
+  flex: 1 !important;
 }
 .modal-overlay .modal-footer {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  padding: 1rem 1.25rem;
-  border-top: 1px solid var(--bs-border-color);
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  gap: 0.5rem !important;
+  padding: 1rem 1.25rem !important;
+  border-top: 1px solid var(--bs-border-color) !important;
+  flex-shrink: 0 !important;
 }
 .modal-close {
   background: transparent;
@@ -1118,22 +1147,27 @@ table:not(.table):not(.table-calendar) tbody tr:hover td { background: var(--bs-
    PATIENT GRID + CARDS
    ══════════════════════════════════════════════════════════ */
 .patient-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
+  display: grid !important;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)) !important;
+  gap: 1rem !important;
+  margin-bottom: 1.5rem !important;
+  width: 100% !important;
 }
 @media (max-width: 576px) {
-  .patient-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 0.75rem; }
+  .patient-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)) !important; gap: 0.75rem !important; }
 }
 
 .patient-card {
-  background: var(--bs-body-bg);
-  border: 1px solid var(--bs-border-color);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: transform 0.15s, box-shadow 0.15s;
-  cursor: pointer;
+  background: var(--bs-body-bg) !important;
+  border: 1px solid var(--bs-border-color) !important;
+  border-radius: 12px !important;
+  overflow: hidden !important;
+  transition: transform 0.15s, box-shadow 0.15s !important;
+  cursor: pointer !important;
+  width: auto !important;
+  max-width: none !important;
+  float: none !important;
+  display: block !important;
 }
 .patient-card:hover {
   transform: translateY(-2px);
