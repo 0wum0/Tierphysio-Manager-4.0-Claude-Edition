@@ -9,18 +9,25 @@
     <meta name="msapplication-tap-highlight" content="no">
     <title>{% block title %}{{ page_title ?? app_name }}{% endblock %} — {{ app_name }}</title>
 
-    {# FOUC prevention #}
+    {# FOUC prevention — reads same 'layoutSettings' key as saveloadscript.js #}
     <script>
     (function(){
         try {
-            var t = localStorage.getItem('sa-theme-mode') || 'dark';
-            document.documentElement.setAttribute('data-bs-theme', t);
-            if (t === 'dark') document.documentElement.classList.add('set-nav-dark');
-            var s = localStorage.getItem('sa-theme-style') || '';
-            if (s) document.documentElement.setAttribute('data-theme-style', s);
-            var saved = localStorage.getItem('sa-layout-classes');
-            if (saved) {
-                saved.split(' ').forEach(function(c){ if(c) document.documentElement.classList.add(c); });
+            var raw = localStorage.getItem('layoutSettings');
+            var cfg = raw ? JSON.parse(raw) : {};
+            var theme = cfg.theme || 'dark';
+            document.documentElement.setAttribute('data-bs-theme', theme);
+            if (theme === 'dark') document.documentElement.classList.add('set-nav-dark');
+            /* restore set-* HTML classes saved by SmartAdmin */
+            if (cfg.htmlRoot) {
+                cfg.htmlRoot.split(/\s+/).forEach(function(c){ if(c) document.documentElement.classList.add(c); });
+            }
+            /* restore colour theme CSS */
+            if (cfg.themeStyle) {
+                var lnk = document.createElement('link');
+                lnk.id = 'theme-style'; lnk.rel = 'stylesheet'; lnk.media = 'screen';
+                lnk.href = cfg.themeStyle;
+                document.head.appendChild(lnk);
             }
         } catch(e){}
     })();
@@ -286,17 +293,6 @@
     {# ── Main Content ── #}
     <main class="main-content" id="js-page-content" role="main">
 
-        {# Page header #}
-        <div class="subheader d-flex align-items-center justify-content-between mb-3">
-            <div class="subheader-title">
-                <h1 class="subheader-h1">{% block header_title %}{{ page_title ?? app_name }}{% endblock %}</h1>
-            </div>
-            <div class="subheader-block">
-                {# Breadcrumb / Actions slot #}
-                {% block subheader_actions %}{% endblock %}
-            </div>
-        </div>
-
         {# Flash messages #}
         {% if flash.success is defined %}
         <div class="alert alert-success alert-dismissible d-flex align-items-center mb-3" role="alert" data-auto-dismiss="5000">
@@ -326,20 +322,19 @@
     </main>
 
     {# ── Settings Drawer ── #}
-    <aside class="app-aside js-drawer-settings" id="js-app-settings" role="complementary">
-        <div class="sticky-top d-flex align-items-center justify-content-between p-3 border-bottom">
-            <h6 class="fw-700 m-0">
-                <svg class="sa-icon me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#settings"></use></svg>
+    <aside class="app-drawer js-drawer-settings" id="js-app-settings" role="complementary">
+        <div class="app-drawer-header">
+            <div class="h5 mb-0 fw-700">
                 App-Einstellungen
-            </h6>
-            <button class="btn btn-sm btn-ghost-secondary"
+            </div>
+            <button type="button" class="btn btn-system ms-auto"
                     data-action="toggle-swap" data-toggleclass="open"
                     data-target="aside.js-drawer-settings" aria-label="Schließen">
-                <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#x"></use></svg>
+                <svg class="sa-icon sa-icon-2x"><use href="/themes/smart-tierphysio/icons/sprite.svg#x"></use></svg>
             </button>
         </div>
 
-        <div class="custom-scroll p-3">
+        <div class="custom-scrollbar h-100 p-3">
 
             <div class="mod-status" data-prefix="Layout">
                 <div class="form-check">
@@ -420,17 +415,153 @@
 
 {% block scripts %}{% endblock %}
 
-{# Auto-dismiss alerts #}
 <script>
-(function(){
-    document.querySelectorAll('[data-auto-dismiss]').forEach(function(el){
+/* ═══════════════════════════════════════════════════════
+   SmartTierphysio — Bridge JS
+   modal-overlay system + data-confirm + auto-dismiss
+   ═══════════════════════════════════════════════════════ */
+(function () {
+    'use strict';
+
+    /* ── 1. Modal System ─────────────────────────────── */
+    function openModal(id) {
+        var el = document.getElementById(id);
+        if (!el) return;
+        el.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+        el.dispatchEvent(new CustomEvent('modal:open'));
+    }
+
+    function closeModal(id) {
+        var el = id ? document.getElementById(id) : null;
+        if (!el) {
+            /* close all open (support both .is-open and .open) */
+            document.querySelectorAll('.modal-overlay.is-open, .modal-overlay.open').forEach(function (m) {
+                m.classList.remove('is-open');
+                m.classList.remove('open');
+                m.dispatchEvent(new CustomEvent('modal:close'));
+            });
+        } else {
+            el.classList.remove('is-open');
+            el.classList.remove('open');
+            el.dispatchEvent(new CustomEvent('modal:close'));
+        }
+        if (!document.querySelector('.modal-overlay.is-open, .modal-overlay.open')) {
+            document.body.style.overflow = '';
+        }
+    }
+
+    /* delegate [data-modal-open] buttons */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-modal-open]');
+        if (btn) { e.preventDefault(); openModal(btn.getAttribute('data-modal-open')); return; }
+
+        var close = e.target.closest('[data-modal-close]');
+        if (close) { e.preventDefault(); closeModal(close.getAttribute('data-modal-close')); return; }
+
+        /* click on overlay backdrop (outside modal box) */
+        if (e.target.classList.contains('modal-overlay')) { closeModal(e.target.id || null); return; }
+    });
+
+    /* ESC key closes modals */
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') closeModal(null);
+    });
+
+    /* expose globally so page JS can call it */
+    window.openModal  = openModal;
+    window.closeModal = closeModal;
+
+    /* ── 2. Settings Tabs (delegated) ───────────────────── */
+    document.addEventListener('click', function (e) {
+        var tab = e.target.closest('.settings-tab');
+        if (!tab) return;
+        var tabId = tab.getAttribute('data-tab');
+        if (!tabId) return;
+        /* deactivate all tabs + contents in same container */
+        var container = tab.closest('.settings-tabs');
+        if (container) {
+            container.querySelectorAll('.settings-tab').forEach(function (t) { t.classList.remove('active'); });
+        }
+        document.querySelectorAll('.settings-tab-content').forEach(function (c) { c.classList.remove('active'); });
+        tab.classList.add('active');
+        var content = document.getElementById('tab-' + tabId);
+        if (content) content.classList.add('active');
+        /* persist active tab in sessionStorage */
+        try { sessionStorage.setItem('activeSettingsTab', tabId); } catch (ex) {}
+    });
+
+    /* Restore active settings tab on page load */
+    (function () {
+        var tabs = document.querySelectorAll('.settings-tab');
+        if (!tabs.length) return;
+        try {
+            var saved = sessionStorage.getItem('activeSettingsTab');
+            var target = saved ? document.querySelector('.settings-tab[data-tab="' + saved + '"]') : null;
+            if (!target) target = tabs[0];
+            if (target) target.click();
+        } catch (e) { if (tabs[0]) tabs[0].click(); }
+    })();
+
+    /* ── 3. data-confirm on forms/buttons ───────────────── */
+    document.addEventListener('submit', function (e) {
+        var msg = e.target.getAttribute('data-confirm');
+        if (msg && !confirm(msg)) e.preventDefault();
+    });
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-confirm]:not(form)');
+        if (btn) {
+            var msg = btn.getAttribute('data-confirm');
+            if (msg && !confirm(msg)) e.preventDefault();
+        }
+    });
+
+    /* ── 3. Auto-dismiss alerts ──────────────────────── */
+    document.querySelectorAll('[data-auto-dismiss]').forEach(function (el) {
         var t = parseInt(el.getAttribute('data-auto-dismiss')) || 5000;
-        setTimeout(function(){
+        setTimeout(function () {
             el.style.transition = 'opacity .4s';
             el.style.opacity = '0';
-            setTimeout(function(){ el.remove(); }, 400);
+            setTimeout(function () { el.remove(); }, 400);
         }, t);
     });
+
+    /* ── 4. Sync radio state from layoutSettings (saveloadscript.js key) ── */
+    (function () {
+        try {
+            var raw = localStorage.getItem('layoutSettings');
+            var cfg = raw ? JSON.parse(raw) : {};
+            var style = '';
+            /* extract style name from saved href e.g. /themes/.../css/themes/nebula.css */
+            if (cfg.themeStyle) {
+                var m = cfg.themeStyle.match(/\/([^/]+)\.css$/);
+                if (m) style = m[1];
+            }
+            /* check radio matching this style */
+            document.querySelectorAll('[data-action="theme-style"]').forEach(function (r) {
+                r.checked = (r.getAttribute('data-theme-style') === style);
+            });
+        } catch (e) {}
+    })();
+
+    /* ── 5. Dark/Light toggle (supplement saveloadscript.js) ── */
+    document.addEventListener('click', function (e) {
+        var btn = e.target.closest('[data-action="toggle-theme"]');
+        if (!btn) return;
+        var html  = document.documentElement;
+        var theme = html.getAttribute('data-bs-theme') === 'dark' ? 'light' : 'dark';
+        html.setAttribute('data-bs-theme', theme);
+        if (theme === 'dark') html.classList.add('set-nav-dark');
+        else html.classList.remove('set-nav-dark');
+        /* persist via saveloadscript.js layoutSettings format */
+        try {
+            var raw = localStorage.getItem('layoutSettings');
+            var cfg = raw ? JSON.parse(raw) : {};
+            cfg.theme = theme;
+            localStorage.setItem('layoutSettings', JSON.stringify(cfg));
+        } catch (ex) {}
+    });
+
 })();
 </script>
 
@@ -438,15 +569,14 @@
 {% if intake_unread_count is defined %}
 <script>
 (function(){
-    var badge = document.querySelector('.notif-bell-badge');
     function poll(){
         fetch('/api/intake/notifications',{headers:{'X-Requested-With':'XMLHttpRequest'}})
         .then(function(r){return r.json();})
         .then(function(d){
             var c = d.count||0;
-            document.querySelectorAll('.notif-bell-badge').forEach(function(b){
+            document.querySelectorAll('.badge.badge-icon').forEach(function(b){
                 b.textContent = c > 9 ? '9+' : c;
-                b.style.display = c > 0 ? 'flex' : 'none';
+                b.style.display = c > 0 ? '' : 'none';
             });
         }).catch(function(){});
     }
