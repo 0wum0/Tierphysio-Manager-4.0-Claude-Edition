@@ -1,8 +1,7 @@
 <!DOCTYPE html>
-<html lang="{{ current_locale }}" class="set-nav-dark">
-{# NOTE: data-bs-theme is intentionally NOT hardcoded here.
-   saveloadscript.js (loaded in <head>) reads localStorage and sets it
-   before any CSS is parsed — this prevents FOUC and respects user preference. #}
+<html lang="{{ current_locale }}" data-bs-theme="dark" class="set-nav-dark">
+{# data-bs-theme="dark" is the default fallback. saveloadscript.js (in <head>)
+   overrides it immediately from localStorage when the user has saved a preference. #}
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no, maximum-scale=5">
@@ -315,14 +314,15 @@
 
             </div>{# /content-wrapper / js-page-content #}
 
-            <footer class="app-footer">
-                <div class="app-footer-content flex-grow-1">
-                    {{ app_name }} &copy; {{ "now"|date("Y") }}
-                    <span class="hidden-mobile"> — Alle Rechte vorbehalten.</span>
-                </div>
-            </footer>
-
         </div>{# /app-content #}
+
+        <footer class="app-footer">
+            <div class="app-footer-content flex-grow-1">
+                {{ app_name }} &copy; {{ "now"|date("Y") }}
+                <span class="hidden-mobile"> — Alle Rechte vorbehalten.</span>
+            </div>
+        </footer>
+
     </div>{# /app-body #}
 
     {# ═══════════════════════════════════════════════════════
