@@ -1,4 +1,4 @@
-{% extends active_theme_layout ?? 'layouts/base.twig' %}
+﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
 <div class="page-header">
@@ -11,11 +11,11 @@
         <span class="badge badge-{{ patient.status|lower|replace({' ':'_', 'ä':'ae','ü':'ue','ö':'oe'}) }}">{{ patient.status }}</span>
     </div>
     <div class="flex gap-2">
-        <button class="btn btn-secondary btn-sm" data-modal-open="modal-create-invoice">
+        <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-create-invoice">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
             {{ t('patients.create_invoice') }}
         </button>
-        <button class="btn btn-primary btn-sm" data-modal-open="modal-edit-patient">
+        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-edit-patient">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
             {{ t('common.edit') }}
         </button>
@@ -248,11 +248,11 @@
 </div>
 
 {# Edit Patient Modal #}
-<div class="tp-overlay" hidden id="modal-edit-patient">
-    <div class="tp-modal tp-modal-lg">
+<div class="modal fade" id="modal-edit-patient" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('common.edit') }}: {{ patient.name }}</h3>
-            <button class="modal-close" data-modal-close="modal-edit-patient" type="button">
+            <button class="modal-close" data-bs-dismiss="modal" type="button">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
@@ -319,22 +319,22 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-modal-close="modal-edit-patient">{{ t('common.cancel') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ t('common.save') }}</button>
             </div>
         </form>
-    </div>
+    </div></div>
 </div>
 
 {# ── Rechnung erstellen Modal ────────────────────────────────────── #}
-<div class="tp-overlay" hidden id="modal-create-invoice">
-    <div class="tp-modal tp-modal-xl" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
+<div class="modal fade" id="modal-create-invoice" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
                 <span class="font-bold" style="font-size:1rem;">Rechnung erstellen</span>
             </div>
-            <button class="modal-close" data-modal-close="modal-create-invoice" type="button">
+            <button class="modal-close" data-bs-dismiss="modal" type="button">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
@@ -432,14 +432,14 @@
         </div>
 
         <div class="modal-footer" style="flex-shrink:0;">
-            <button type="button" class="btn btn-secondary" data-modal-close="modal-create-invoice">{{ t('common.cancel') }}</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
             <button type="submit" class="btn btn-primary">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 21 17 13 7 13 7 21"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 3 7 8 15 8"/></svg>
                 Rechnung speichern
             </button>
         </div>
         </form>
-    </div>
+    </div></div>
 </div>
 
 {# Position Row Template for modal #}

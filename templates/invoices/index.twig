@@ -1,17 +1,17 @@
-{% extends active_theme_layout ?? 'layouts/base.twig' %}
+﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
 
 {# ── INVOICE DETAIL MODALS ─────────────────────────────────────────── #}
 {% for invoice in invoices %}
-<div class="tp-overlay" hidden id="modal-invoice-{{ invoice.id }}">
-    <div class="tp-modal tp-modal-xl" style="max-width:900px;width:95vw;max-height:90vh;display:flex;flex-direction:column;">
+<div class="modal fade" id="modal-invoice-{{ invoice.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">
                 <span class="font-bold" style="font-size:1rem;">{{ invoice.invoice_number }}</span>
                 <span class="badge badge-{{ invoice.status }}">{{ t('invoices.status_' ~ invoice.status) }}</span>
             </div>
-            <button class="modal-close" data-modal-close="modal-invoice-{{ invoice.id }}" type="button">
+            <button class="modal-close" data-bs-dismiss="modal" type="button">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
@@ -95,7 +95,7 @@
 
             </div>
         </div>
-    </div>
+    </div></div>
 </div>
 {% endfor %}
 <div class="page-header">
@@ -184,7 +184,7 @@
             </thead>
             <tbody>
                 {% for invoice in invoices %}
-                <tr class="invoice-row" data-modal-open="modal-invoice-{{ invoice.id }}" data-invoice-id="{{ invoice.id }}" style="cursor:pointer;">
+                <tr class="invoice-row" data-bs-toggle="modal" data-bs-target="#modal-invoice-{{ invoice.id }}" data-invoice-id="{{ invoice.id }}" style="cursor:pointer;">
                     <td><span class="font-semibold" style="color:var(--accent);">{{ invoice.invoice_number }}</span></td>
                     <td>{{ invoice.owner_name ?? '—' }}</td>
                     <td>{{ invoice.patient_name ?? '—' }}</td>
@@ -212,7 +212,7 @@
     {# ── Mobile: Card List ── #}
     <div class="mob-card-list">
         {% for invoice in invoices %}
-        <div class="mob-card invoice-row" data-modal-open="modal-invoice-{{ invoice.id }}" data-invoice-id="{{ invoice.id }}">
+        <div class="mob-card invoice-row" data-bs-toggle="modal" data-bs-target="#modal-invoice-{{ invoice.id }}" data-invoice-id="{{ invoice.id }}">
             <div class="mob-card-header">
                 <span class="mob-card-title" style="color:var(--accent);">{{ invoice.invoice_number }}</span>
                 <span class="badge badge-{{ invoice.status }}">{{ t('invoices.status_' ~ invoice.status) }}</span>

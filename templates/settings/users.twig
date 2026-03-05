@@ -1,4 +1,4 @@
-{% extends active_theme_layout ?? 'layouts/base.twig' %}
+﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
 <div class="page-header">
@@ -9,7 +9,7 @@
         </a>
         <h1 class="page-title">{{ t('settings.users') }}</h1>
     </div>
-    <button class="btn btn-primary" data-modal-open="modal-new-user">
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-user">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         {{ t('settings.new_user') }}
     </button>
@@ -53,7 +53,7 @@
                 <td>
                     <div class="flex gap-2" style="justify-content:flex-end;">
                         <button type="button" class="btn btn-secondary btn-sm"
-                            data-modal-open="modal-edit-user-{{ user.id }}">
+                            data-bs-toggle="modal" data-bs-target="#modal-edit-user-{{ user.id }}">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                             {{ t('common.edit') }}
                         </button>
@@ -77,11 +77,11 @@
 </div>
 
 {# New User Modal #}
-<div class="tp-overlay" hidden id="modal-new-user">
-    <div class="tp-modal">
+<div class="modal fade" id="modal-new-user" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('settings.new_user') }}</h3>
-            <button class="modal-close" data-modal-close="modal-new-user" type="button">
+            <button class="modal-close" data-bs-dismiss="modal" type="button">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
@@ -107,19 +107,19 @@
                 </select>
             </div>
             <div class="modal-footer" style="padding:1rem 0 0;margin-top:1rem;border-top:1px solid var(--glass-border);">
-                <button type="button" class="btn btn-secondary" data-modal-close="modal-new-user">{{ t('common.cancel') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ t('common.create') }}</button>
             </div>
         </form>
-    </div>
+    </div></div>
 </div>
 {# Edit User Modals (one per user) #}
 {% for user in users %}
-<div class="tp-overlay" hidden id="modal-edit-user-{{ user.id }}">
-    <div class="tp-modal">
+<div class="modal fade" id="modal-edit-user-{{ user.id }}" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">Benutzer bearbeiten</h3>
-            <button class="modal-close" data-modal-close="modal-edit-user-{{ user.id }}" type="button">
+            <button class="modal-close" data-bs-dismiss="modal" type="button">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
@@ -148,11 +148,11 @@
                 </select>
             </div>
             <div class="modal-footer" style="padding:1rem 0 0;margin-top:1rem;border-top:1px solid var(--glass-border);">
-                <button type="button" class="btn btn-secondary" data-modal-close="modal-edit-user-{{ user.id }}">{{ t('common.cancel') }}</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
                 <button type="submit" class="btn btn-primary">{{ t('common.save') }}</button>
             </div>
         </form>
-    </div>
+    </div></div>
 </div>
 {% endfor %}
 

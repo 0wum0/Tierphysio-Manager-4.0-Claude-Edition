@@ -416,56 +416,35 @@
 <script>
 /* ═══════════════════════════════════════════════════════
    SmartTierphysio — Bridge JS
-   modal-overlay system + data-confirm + auto-dismiss
+   Wraps Bootstrap 5 modal API for legacy data-modal-open/close
    ═══════════════════════════════════════════════════════ */
 (function () {
     'use strict';
 
-    /* ── 1. Modal System ─────────────────────────────── */
+    /* ── 1. Modal System — Bootstrap 5 native ────────── */
     function openModal(id) {
         var el = document.getElementById(id);
         if (!el) return;
-        el.removeAttribute('hidden');
-        el.classList.add('is-open');
-        document.body.style.overflow = 'hidden';
-        el.dispatchEvent(new CustomEvent('modal:open'));
+        bootstrap.Modal.getOrCreateInstance(el).show();
     }
 
     function closeModal(id) {
-        var el = id ? document.getElementById(id) : null;
-        if (!el) {
-            document.querySelectorAll('.tp-overlay.is-open, .tp-overlay.open').forEach(function (m) {
-                m.setAttribute('hidden', '');
-                m.classList.remove('is-open');
-                m.classList.remove('open');
-                m.dispatchEvent(new CustomEvent('modal:close'));
-            });
+        if (id) {
+            var el = document.getElementById(id);
+            if (el) bootstrap.Modal.getOrCreateInstance(el).hide();
         } else {
-            el.setAttribute('hidden', '');
-            el.classList.remove('is-open');
-            el.classList.remove('open');
-            el.dispatchEvent(new CustomEvent('modal:close'));
-        }
-        if (!document.querySelector('.tp-overlay.is-open, .tp-overlay.open')) {
-            document.body.style.overflow = '';
+            document.querySelectorAll('.modal.show').forEach(function (m) {
+                bootstrap.Modal.getOrCreateInstance(m).hide();
+            });
         }
     }
 
-    /* delegate [data-modal-open] buttons */
+    /* delegate legacy [data-modal-open] buttons */
     document.addEventListener('click', function (e) {
         var btn = e.target.closest('[data-modal-open]');
         if (btn) { e.preventDefault(); openModal(btn.getAttribute('data-modal-open')); return; }
-
         var close = e.target.closest('[data-modal-close]');
         if (close) { e.preventDefault(); closeModal(close.getAttribute('data-modal-close')); return; }
-
-        /* click on overlay backdrop (outside modal box) */
-        if (e.target.classList.contains('tp-overlay')) { closeModal(e.target.id || null); return; }
-    });
-
-    /* ESC key closes modals */
-    document.addEventListener('keydown', function (e) {
-        if (e.key === 'Escape') closeModal(null);
     });
 
     /* expose globally so page JS can call it */
