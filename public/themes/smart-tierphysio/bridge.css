@@ -286,9 +286,9 @@
   display: flex !important;
 }
 
-/* Override SmartAdmin's .modal (which sets position:fixed, width:100%, etc.) */
-.modal-overlay > .modal,
-.modal-overlay .modal {
+/* Override SmartAdmin's .modal — use .tp-modal as inner box class */
+.modal-overlay > .tp-modal,
+.modal-overlay .tp-modal {
   position: relative !important;
   display: flex !important;
   flex-direction: column !important;
@@ -313,19 +313,19 @@
   pointer-events: auto !important;
   opacity: 1 !important;
 }
-.modal-overlay > .modal.modal-lg,
-.modal-overlay .modal.modal-lg  { max-width: 760px !important; }
-.modal-overlay > .modal.modal-xl,
-.modal-overlay .modal.modal-xl  { max-width: 1000px !important; }
-.modal-overlay > .modal.modal-sm,
-.modal-overlay .modal.modal-sm  { max-width: 400px !important; }
+.modal-overlay > .tp-modal.tp-modal-lg,
+.modal-overlay .tp-modal.tp-modal-lg  { max-width: 760px !important; }
+.modal-overlay > .tp-modal.tp-modal-xl,
+.modal-overlay .tp-modal.tp-modal-xl  { max-width: 1000px !important; }
+.modal-overlay > .tp-modal.tp-modal-sm,
+.modal-overlay .tp-modal.tp-modal-sm  { max-width: 400px !important; }
 
 @keyframes modalIn {
   from { opacity: 0; transform: scale(0.95) translateY(-8px); }
   to   { opacity: 1; transform: scale(1) translateY(0); }
 }
 
-.modal-overlay .modal-header {
+.modal-overlay .tp-modal-header, .modal-overlay .modal-header {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -338,18 +338,18 @@
   border-radius: 16px 16px 0 0 !important;
   flex-shrink: 0 !important;
 }
-.modal-overlay .modal-title {
+.modal-overlay .tp-modal-header .modal-title, .modal-overlay .modal-title {
   font-size: 1.05rem;
   font-weight: 700;
   margin: 0;
   color: var(--bs-body-color);
 }
-.modal-overlay .modal-body {
+.modal-overlay .tp-modal-body, .modal-overlay .modal-body {
   padding: 1.25rem !important;
   overflow-y: auto !important;
   flex: 1 !important;
 }
-.modal-overlay .modal-footer {
+.modal-overlay .tp-modal-footer, .modal-overlay .modal-footer {
   display: flex !important;
   align-items: center !important;
   justify-content: flex-end !important;

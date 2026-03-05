@@ -346,7 +346,7 @@
 
 {# ── PATIENT DETAIL MODAL (single, reused for all patients) ── #}
 <div class="modal-overlay" id="modal-patient-detail">
-    <div class="modal modal-xl" style="max-width:860px;width:96vw;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="tp-modal tp-modal-xl" style="max-width:860px;width:96vw;max-height:92vh;display:flex;flex-direction:column;">
 
         {# Modal Header: photo strip + name + badge + actions #}
         <div id="pd-header" style="padding:0.75rem 1rem;border-bottom:1px solid var(--glass-border);flex-shrink:0;">
@@ -627,7 +627,7 @@
 
 {# New Patient Modal #}
 <div class="modal-overlay" id="modal-new-patient">
-    <div class="modal modal-lg">
+    <div class="tp-modal tp-modal-lg">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('patients.new_patient') }}</h3>
             <button class="modal-close" data-modal-close="modal-new-patient" type="button">
@@ -703,7 +703,7 @@
 
 {# ── Edit Patient Modal (inline, no navigation) ───────────────────── #}
 <div class="modal-overlay" id="modal-edit-patient-inline">
-    <div class="modal modal-lg">
+    <div class="tp-modal tp-modal-lg">
         <div class="modal-header">
             <h3 class="modal-title" id="edit-modal-title">Patient bearbeiten</h3>
             <button class="modal-close" data-modal-close="modal-edit-patient-inline" type="button">
@@ -795,7 +795,7 @@
 
 {# ── Create Invoice Modal (inline, no navigation) ─────────────────── #}
 <div class="modal-overlay" id="modal-invoice-inline">
-    <div class="modal modal-xl" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
+    <div class="tp-modal tp-modal-xl" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
