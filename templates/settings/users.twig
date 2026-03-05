@@ -78,7 +78,7 @@
 
 {# New User Modal #}
 <div class="modal-overlay" id="modal-new-user">
-    <div class="modal">
+    <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('settings.new_user') }}</h3>
             <button class="modal-close" data-modal-close="modal-new-user" type="button">
@@ -116,7 +116,7 @@
 {# Edit User Modals (one per user) #}
 {% for user in users %}
 <div class="modal-overlay" id="modal-edit-user-{{ user.id }}">
-    <div class="modal">
+    <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">Benutzer bearbeiten</h3>
             <button class="modal-close" data-modal-close="modal-edit-user-{{ user.id }}" type="button">

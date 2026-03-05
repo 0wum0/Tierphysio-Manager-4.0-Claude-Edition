@@ -1043,7 +1043,7 @@
 
 {# Edit Modal für Behandlungsart #}
 <div class="modal-overlay" id="modal-edit-tt" onclick="if(event.target===this)this.classList.remove('open')">
-    <div class="modal">
+    <div class="tp-modal">
         <div class="modal-header">
             <h2 class="modal-title">Behandlungsart bearbeiten</h2>
             <button class="modal-close" onclick="document.getElementById('modal-edit-tt').classList.remove('open')" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -1139,7 +1139,7 @@
    MODALS: Benutzer anlegen / bearbeiten
 ════════════════════════════════════════════════════ #}
 <div class="modal-overlay" id="modal-new-user">
-    <div class="modal">
+    <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('settings.new_user') }}</h3>
             <button class="modal-close" data-modal-close="modal-new-user" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
@@ -1166,7 +1166,7 @@
 
 {% for user in users %}
 <div class="modal-overlay" id="modal-edit-user-{{ user.id }}">
-    <div class="modal">
+    <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">Benutzer bearbeiten</h3>
             <button class="modal-close" data-modal-close="modal-edit-user-{{ user.id }}" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
