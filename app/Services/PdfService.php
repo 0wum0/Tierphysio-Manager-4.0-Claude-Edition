@@ -585,8 +585,9 @@ class PdfService
             $y += 9;
 
             $ownerName = trim(($owner['first_name'] ?? '') . ' ' . ($owner['last_name'] ?? ''));
+            $kundenNr  = 'Kunden-Nr. ' . str_pad((string)($owner['id'] ?? 0), 4, '0', STR_PAD_LEFT);
             $ownerInfo = array_filter([
-                $ownerName,
+                $ownerName . '  (' . $kundenNr . ')',
                 $owner['street'] ?? '',
                 trim(($owner['zip'] ?? '') . ' ' . ($owner['city'] ?? '')),
                 $owner['email'] ?? '',
@@ -804,6 +805,10 @@ class PdfService
             $pdf->SetTextColor(255, 255, 255);
             $pdf->SetXY(3, $owY + 5);
             $pdf->MultiCell($sidebarW - 6, 4.5, $ownerName, 0, 'C');
+            $pdf->SetFont($font, '', $fontSize - 2.5);
+            $pdf->SetTextColor(200, 225, 200);
+            $pdf->SetXY(3, $pdf->GetY() + 1);
+            $pdf->Cell($sidebarW - 6, 4, 'Kunden-Nr. ' . str_pad((string)($owner['id'] ?? 0), 4, '0', STR_PAD_LEFT), 0, 1, 'C');
         }
     }
 

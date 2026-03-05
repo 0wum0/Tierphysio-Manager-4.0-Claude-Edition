@@ -1596,10 +1596,11 @@ function openPatientModal(patientId) {
 
             /* Owner */
             if (o) {
+                const kundenNr = 'Kunden-Nr. ' + String(o.id).padStart(4, '0');
                 pdOwner.innerHTML = `<a href="/tierhalter/${o.id}" class="pd-owner-link">
                     <div class="pd-owner-avatar">${esc((o.first_name||'').charAt(0)+(o.last_name||'').charAt(0))}</div>
                     <div class="pd-owner-info">
-                        <div class="pd-owner-name">${esc(o.first_name+' '+o.last_name)}</div>
+                        <div class="pd-owner-name">${esc(o.first_name+' '+o.last_name)} <span style="font-size:0.7rem;font-weight:600;color:var(--accent);background:var(--accent-soft,rgba(99,102,241,0.1));padding:0.1rem 0.45rem;border-radius:999px;margin-left:4px;">${kundenNr}</span></div>
                         ${o.phone ? `<div class="pd-owner-meta">${esc(o.phone)}</div>` : ''}
                         ${o.email ? `<div class="pd-owner-meta">${esc(o.email)}</div>` : ''}
                         ${o.street ? `<div class="pd-owner-meta">${esc(o.street)}${o.zip||o.city ? ', '+esc((o.zip||'')+' '+(o.city||'')).trim() : ''}</div>` : ''}

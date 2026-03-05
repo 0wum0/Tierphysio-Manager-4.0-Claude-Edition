@@ -45,7 +45,10 @@
                         <a href="/tierhalter/{{ owner.id }}" class="flex items-center gap-3" style="text-decoration:none;color:var(--text-primary);">
                             <div class="avatar-placeholder" style="width:34px;height:34px;font-size:0.75rem;flex-shrink:0;">{{ owner.first_name|first ~ owner.last_name|first }}</div>
                             <div>
-                                <div class="font-semibold">{{ owner.last_name }}, {{ owner.first_name }}</div>
+                                <div class="font-semibold" style="display:flex;align-items:center;gap:0.4rem;">
+                                    {{ owner.last_name }}, {{ owner.first_name }}
+                                    <span style="font-size:0.65rem;font-weight:700;color:var(--accent,#6366f1);background:rgba(99,102,241,0.1);padding:0.05rem 0.4rem;border-radius:999px;border:1px solid rgba(99,102,241,0.2);white-space:nowrap;">{{ '%04d'|format(owner.id) }}</span>
+                                </div>
                                 {% if owner.street %}<div class="text-xs text-muted">{{ owner.street }}</div>{% endif %}
                             </div>
                         </a>
