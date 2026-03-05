@@ -68,6 +68,43 @@
 .btn { display: inline-flex; align-items: center; gap: 0.4rem; }
 .btn-icon { padding: 0.35rem; width: 34px; height: 34px; justify-content: center; }
 
+/* ── Glow on primary buttons ── */
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  transition: box-shadow .2s, transform .1s, background .2s !important;
+}
+.btn-primary:hover {
+  box-shadow: 0 0 16px 4px color-mix(in srgb, var(--bs-primary) 50%, transparent) !important;
+  transform: translateY(-1px);
+}
+.btn-primary:active { transform: translateY(0); }
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255,255,255,.18) 0%, transparent 70%);
+  opacity: 0;
+  transition: opacity .25s;
+  pointer-events: none;
+}
+.btn-primary:hover::after { opacity: 1; }
+
+/* ── App header: glow around logo icon ── */
+.app-logo:hover [style*="background:var(--bs-primary)"],
+.app-logo:focus [style*="background:var(--bs-primary)"] {
+  box-shadow: 0 0 16px 4px color-mix(in srgb, var(--bs-primary) 45%, transparent) !important;
+  transition: box-shadow .25s;
+}
+
+/* ── Header btn-system hover glow ── */
+.app-header .btn-system {
+  transition: color .15s, box-shadow .2s;
+}
+.app-header .btn-system:hover {
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--bs-primary) 35%, transparent);
+}
+
 /* ═══════════════════════════════════════════
    GLASS CARD → Bootstrap card
    ═══════════════════════════════════════════ */

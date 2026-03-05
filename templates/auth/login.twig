@@ -1,70 +1,178 @@
 <!DOCTYPE html>
-<html lang="{{ current_locale }}" data-theme="{{ theme }}">
+<html lang="{{ current_locale }}" data-bs-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ t('auth.login_title') }} — {{ app_name }}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/css/app.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>{{ t('auth.login_title') }} — {{ company_name ?: app_name }}</title>
+    <link rel="stylesheet" href="/themes/smart-tierphysio/css/smartapp.min.css">
+    <link rel="stylesheet" href="/themes/smart-tierphysio/webfonts/smartadmin/sa-icons.css">
+    <script src="/themes/smart-tierphysio/scripts/core/saveloadscript.js"></script>
+    <style>
+        body { display:flex; align-items:center; justify-content:center; min-height:100vh; background:var(--bs-body-bg); }
+
+        .login-wrap {
+            width: 100%;
+            max-width: 420px;
+            padding: 1rem;
+        }
+
+        .login-brand {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .login-brand-logo {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            object-fit: contain;
+            margin-bottom: 0.75rem;
+            background: var(--bs-tertiary-bg);
+            padding: 8px;
+        }
+
+        .login-brand-icon {
+            width: 72px;
+            height: 72px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, var(--bs-primary), color-mix(in srgb, var(--bs-primary) 60%, var(--bs-info)));
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 0.75rem;
+            box-shadow: 0 0 0 0 var(--bs-primary);
+            animation: logoPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes logoPulse {
+            0%, 100% { box-shadow: 0 0 12px 2px color-mix(in srgb, var(--bs-primary) 40%, transparent); }
+            50%       { box-shadow: 0 0 28px 8px color-mix(in srgb, var(--bs-primary) 25%, transparent); }
+        }
+
+        .login-brand-name {
+            font-size: 1.45rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--bs-body-color);
+            margin-bottom: 0.2rem;
+        }
+
+        .login-brand-sub {
+            font-size: 0.8rem;
+            color: var(--bs-secondary-color);
+        }
+
+        .login-card {
+            background: var(--bs-tertiary-bg);
+            border: 1px solid var(--bs-border-color);
+            border-radius: 16px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px rgba(0,0,0,.18);
+        }
+
+        /* ── Glow Button (SmartAdmin style) ── */
+        .btn-login {
+            width: 100%;
+            padding: .7rem 1rem;
+            font-size: .95rem;
+            font-weight: 600;
+            border-radius: 10px;
+            border: none;
+            background: var(--bs-primary);
+            color: #fff;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: background .2s, box-shadow .2s, transform .1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            box-shadow: 0 0 0 0 var(--bs-primary);
+        }
+
+        .btn-login:hover {
+            background: color-mix(in srgb, var(--bs-primary) 85%, white);
+            box-shadow: 0 0 18px 4px color-mix(in srgb, var(--bs-primary) 45%, transparent);
+            transform: translateY(-1px);
+        }
+
+        .btn-login:active {
+            transform: translateY(0);
+            box-shadow: 0 0 8px 2px color-mix(in srgb, var(--bs-primary) 35%, transparent);
+        }
+
+        /* Ripple */
+        .btn-login::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, rgba(255,255,255,.25) 0%, transparent 70%);
+            opacity: 0;
+            transition: opacity .3s;
+        }
+        .btn-login:hover::after { opacity: 1; }
+
+        .form-floating label { font-size: .85rem; }
+
+        .login-footer {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: .78rem;
+            color: var(--bs-secondary-color);
+        }
+    </style>
 </head>
 <body>
-<div class="login-page">
-    <div class="login-card">
-        <div class="login-logo">
-            <div class="login-logo-icon">
+
+<div class="login-wrap">
+
+    {# Brand #}
+    <div class="login-brand">
+        {% if company_logo %}
+            <img src="/storage/uploads/{{ company_logo }}" alt="Logo" class="login-brand-logo d-block mx-auto">
+        {% else %}
+            <div class="login-brand-icon mx-auto">
                 <svg width="32" height="32" fill="none" viewBox="0 0 24 24">
                     <path stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                           d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
                 </svg>
             </div>
-            <div class="login-title">{{ app_name }}</div>
-            <div class="login-subtitle">{{ t('app.tagline') }}</div>
-        </div>
+        {% endif %}
+        <div class="login-brand-name">{{ company_name ?: app_name }}</div>
+        <div class="login-brand-sub">{{ t('app.tagline') }}</div>
+    </div>
+
+    {# Card #}
+    <div class="login-card">
 
         {% if flash.error is defined %}
-            <div class="alert alert-error mb-4">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="flex-shrink:0">
-                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                    <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-                </svg>
-                <span>{{ flash.error }}</span>
-            </div>
+        <div class="alert alert-danger d-flex align-items-center gap-2 mb-4 py-2" style="font-size:.85rem;">
+            <svg width="15" height="15" fill="none" viewBox="0 0 24 24" style="flex-shrink:0">
+                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                <line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                <line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            {{ flash.error }}
+        </div>
         {% endif %}
 
         <form action="/login" method="POST" autocomplete="on">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
-            <div class="form-group mb-4">
-                <label class="form-label" for="email">{{ t('auth.email') }}</label>
-                <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    class="form-control"
-                    placeholder="name@praxis.de"
-                    autocomplete="email"
-                    required
-                    autofocus
-                >
+            <div class="form-floating mb-3">
+                <input type="email" id="email" name="email" class="form-control"
+                       placeholder="name@praxis.de" autocomplete="email" required autofocus>
+                <label for="email">{{ t('auth.email') }}</label>
             </div>
 
-            <div class="form-group mb-6">
-                <label class="form-label" for="password">{{ t('auth.password') }}</label>
-                <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="form-control"
-                    placeholder="••••••••"
-                    autocomplete="current-password"
-                    required
-                >
+            <div class="form-floating mb-4">
+                <input type="password" id="password" name="password" class="form-control"
+                       placeholder="••••••••" autocomplete="current-password" required>
+                <label for="password">{{ t('auth.password') }}</label>
             </div>
 
-            <button type="submit" class="btn btn-primary w-full btn-lg">
+            <button type="submit" class="btn-login">
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
                     <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
                           d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/>
@@ -73,16 +181,14 @@
             </button>
         </form>
 
-        <div style="text-align:center;margin-top:1.5rem;">
-            <button id="theme-toggle" class="header-btn" style="margin:0 auto;" title="Design wechseln">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24">
-                    <path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-                          d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"/>
-                </svg>
-            </button>
-        </div>
     </div>
+
+    <div class="login-footer">
+        &copy; {{ "now"|date("Y") }} {{ company_name ?: app_name }}
+    </div>
+
 </div>
-<script src="/assets/js/app.js"></script>
+
+<script src="/themes/smart-tierphysio/scripts/vendors/bootstrap.bundle.min.js"></script>
 </body>
 </html>

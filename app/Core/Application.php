@@ -69,6 +69,17 @@ class Application
 
         if ($config->get('app.installed', false)) {
             $pluginManager->loadPlugins();
+
+            // Override app_name with company_name from DB settings
+            try {
+                $settingsRepo = new \App\Repositories\SettingsRepository($this->container->get(Database::class));
+                $companyName  = $settingsRepo->get('company_name', '');
+                if ($companyName !== '') {
+                    $view->addGlobal('app_name', $companyName);
+                }
+                // Also expose settings globally for layout templates
+                $view->addGlobal('global_settings', $settingsRepo->all());
+            } catch (\Throwable) {}
         }
 
         $this->router = new Router($this->container);

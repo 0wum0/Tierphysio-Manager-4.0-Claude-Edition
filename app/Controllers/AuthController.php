@@ -10,6 +10,7 @@ use App\Core\Session;
 use App\Core\Translator;
 use App\Core\View;
 use App\Repositories\UserRepository;
+use App\Repositories\SettingsRepository;
 
 class AuthController extends Controller
 {
@@ -18,15 +19,19 @@ class AuthController extends Controller
         Session $session,
         Config $config,
         Translator $translator,
-        private readonly UserRepository $userRepository
+        private readonly UserRepository $userRepository,
+        private readonly SettingsRepository $settingsRepository
     ) {
         parent::__construct($view, $session, $config, $translator);
     }
 
     public function showLogin(array $params = []): void
     {
+        $settings = $this->settingsRepository->all();
         $this->render('auth/login.twig', [
-            'page_title' => $this->translator->trans('auth.login_title'),
+            'page_title'   => $this->translator->trans('auth.login_title'),
+            'company_name' => $settings['company_name'] ?? '',
+            'company_logo' => $settings['company_logo'] ?? '',
         ]);
     }
 
