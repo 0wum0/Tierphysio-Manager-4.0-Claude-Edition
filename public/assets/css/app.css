@@ -2158,6 +2158,101 @@ textarea.form-control { resize: vertical; min-height: 100px; }
 }
 
 /* ============================================================
+   Mobile Bottom Navigation — always present in HTML,
+   hidden on desktop, shown on mobile via media query
+   ============================================================ */
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 64px;
+  background: rgba(4,4,18,0.85);
+  backdrop-filter: blur(32px) saturate(1.4);
+  -webkit-backdrop-filter: blur(32px) saturate(1.4);
+  border-top: 1px solid rgba(79,124,255,0.12);
+  box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+  z-index: 200;
+  padding: 0 0.25rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  justify-content: space-around;
+}
+
+[data-theme="light"] .mobile-bottom-nav {
+  background: rgba(240,242,252,0.92);
+  border-top-color: rgba(79,100,200,0.12);
+  box-shadow: 0 -2px 16px rgba(60,80,200,0.08);
+}
+
+.mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  flex: 1;
+  max-width: 80px;
+  height: 52px;
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0.3rem 0.25rem 0.2rem;
+  position: relative;
+}
+
+.mob-nav-item svg { flex-shrink: 0; }
+
+.mob-nav-item.active {
+  color: var(--accent);
+}
+
+.mob-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  border-radius: 0 0 2px 2px;
+}
+
+.mob-nav-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mob-nav-badge {
+  position: absolute;
+  top: -2px;
+  right: -4px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid var(--bg-base);
+}
+
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex;
+  }
+  /* Add bottom padding so page content doesn't hide behind nav */
+  .page-content {
+    padding-bottom: calc(64px + env(safe-area-inset-bottom, 0px) + 1rem) !important;
+  }
+}
+
+/* ============================================================
    Liquid Glass Enhancements — richer ambient background
    (Glass overrides are in liquid-glass.css)
    ============================================================ */

@@ -5,28 +5,33 @@ declare(strict_types=1);
 namespace Plugins\ThemeManager;
 
 use App\Core\Controller;
-use App\Core\Application;
 use App\Core\View;
+use App\Core\Session;
+use App\Core\Config;
+use App\Core\Translator;
 
 class ThemeController extends Controller
 {
     private ThemeManager $themeManager;
 
-    public function __construct()
-    {
-        parent::__construct();
-        $this->themeManager = Application::getInstance()->getContainer()->get(ThemeManager::class);
+    public function __construct(
+        View       $view,
+        Session    $session,
+        Config     $config,
+        Translator $translator,
+        ThemeManager $themeManager
+    ) {
+        parent::__construct($view, $session, $config, $translator);
+        $this->themeManager = $themeManager;
     }
 
     /* ── Admin list ─────────────────────────────────────────── */
 
     public function index(array $params = []): void
     {
-        $themes = $this->themeManager->all();
-        $view   = Application::getInstance()->getContainer()->get(View::class);
-        $view->render('@theme-manager/index.twig', [
+        $this->render('@theme-manager/index.twig', [
             'page_title' => 'Theme Manager',
-            'themes'     => $themes,
+            'themes'     => $this->themeManager->all(),
             'active'     => $this->themeManager->getActive(),
         ]);
     }
