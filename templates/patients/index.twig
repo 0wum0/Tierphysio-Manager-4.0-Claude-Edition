@@ -1650,6 +1650,7 @@ function exportPatientPDF() {
     const p = currentPatientData.patient;
     window.location.href = '/patienten/' + p.id + '/pdf';
 }
+window.exportPatientPDF = exportPatientPDF;
 function exportPatientPDF_old_unused() {
     if (!currentPatientData) return;
     const p = currentPatientData.patient;
@@ -1856,6 +1857,7 @@ function deletePatient() {
     document.body.appendChild(form);
     form.submit();
 }
+window.deletePatient = deletePatient;
 
 /* ── Card click listeners ─────────────────────────────────── */
 document.querySelectorAll('[data-patient-id]').forEach(function (card) {
