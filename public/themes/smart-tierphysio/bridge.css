@@ -44,8 +44,9 @@
 /* ═══════════════════════════════════════════
    MAIN CONTENT AREA
    ═══════════════════════════════════════════ */
-#js-page-content { padding: 1.75rem; min-height: calc(100vh - 64px); }
-@media (max-width: 991.98px) { #js-page-content { padding: 1rem; } }
+/* #js-page-content is now .content-wrapper — SmartAdmin handles padding via
+   .app-content .content-wrapper { padding: 1.5rem 2rem } in smartapp.css */
+#js-page-content { min-height: calc(100vh - 64px); }
 .subheader { display: none; }
 
 /* ═══════════════════════════════════════════
