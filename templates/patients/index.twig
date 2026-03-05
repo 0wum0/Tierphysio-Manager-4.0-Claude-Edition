@@ -4,12 +4,12 @@
 <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
 <style>
 /* ── Patient Modal Mobile Fixes ─────────────────────────────── */
-#modal-patient-detail .modal {
+#modal-patient-detail .tp-modal {
     max-height: 92vh;
     max-height: 92dvh; /* dynamic viewport height — accounts for mobile browser chrome */
 }
 @media (max-width: 600px) {
-    #modal-patient-detail .modal {
+    #modal-patient-detail .tp-modal {
         width: 100vw !important;
         max-width: 100vw !important;
         max-height: 100vh !important;
@@ -345,7 +345,7 @@
 </div>
 
 {# ── PATIENT DETAIL MODAL (single, reused for all patients) ── #}
-<div class="tp-overlay" id="modal-patient-detail">
+<div class="tp-overlay" hidden id="modal-patient-detail">
     <div class="tp-modal tp-modal-xl" style="max-width:860px;width:96vw;max-height:92vh;display:flex;flex-direction:column;">
 
         {# Modal Header: photo strip + name + badge + actions #}
@@ -626,7 +626,7 @@
 {% endif %}
 
 {# New Patient Modal #}
-<div class="tp-overlay" id="modal-new-patient">
+<div class="tp-overlay" hidden id="modal-new-patient">
     <div class="tp-modal tp-modal-lg">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('patients.new_patient') }}</h3>
@@ -702,7 +702,7 @@
 </div>
 
 {# ── Edit Patient Modal (inline, no navigation) ───────────────────── #}
-<div class="tp-overlay" id="modal-edit-patient-inline">
+<div class="tp-overlay" hidden id="modal-edit-patient-inline">
     <div class="tp-modal tp-modal-lg">
         <div class="modal-header">
             <h3 class="modal-title" id="edit-modal-title">Patient bearbeiten</h3>
@@ -794,7 +794,7 @@
 </div>
 
 {# ── Create Invoice Modal (inline, no navigation) ─────────────────── #}
-<div class="tp-overlay" id="modal-invoice-inline">
+<div class="tp-overlay" hidden id="modal-invoice-inline">
     <div class="tp-modal tp-modal-xl" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">

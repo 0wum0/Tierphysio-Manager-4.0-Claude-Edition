@@ -1042,7 +1042,7 @@
 </div>
 
 {# Edit Modal für Behandlungsart #}
-<div class="tp-overlay" id="modal-edit-tt" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="tp-overlay" hidden id="modal-edit-tt" onclick="if(event.target===this)this.classList.remove('open')">
     <div class="tp-modal">
         <div class="modal-header">
             <h2 class="modal-title">Behandlungsart bearbeiten</h2>
@@ -1138,7 +1138,7 @@
 {# ════════════════════════════════════════════════════
    MODALS: Benutzer anlegen / bearbeiten
 ════════════════════════════════════════════════════ #}
-<div class="tp-overlay" id="modal-new-user">
+<div class="tp-overlay" hidden id="modal-new-user">
     <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('settings.new_user') }}</h3>
@@ -1165,7 +1165,7 @@
 </div>
 
 {% for user in users %}
-<div class="tp-overlay" id="modal-edit-user-{{ user.id }}">
+<div class="tp-overlay" hidden id="modal-edit-user-{{ user.id }}">
     <div class="tp-modal">
         <div class="modal-header">
             <h3 class="modal-title">Benutzer bearbeiten</h3>

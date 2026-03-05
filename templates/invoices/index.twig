@@ -4,7 +4,7 @@
 
 {# ── INVOICE DETAIL MODALS ─────────────────────────────────────────── #}
 {% for invoice in invoices %}
-<div class="tp-overlay" id="modal-invoice-{{ invoice.id }}">
+<div class="tp-overlay" hidden id="modal-invoice-{{ invoice.id }}">
     <div class="tp-modal tp-modal-xl" style="max-width:900px;width:95vw;max-height:90vh;display:flex;flex-direction:column;">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">

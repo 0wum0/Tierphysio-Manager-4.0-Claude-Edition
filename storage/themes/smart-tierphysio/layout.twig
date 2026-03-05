@@ -427,6 +427,7 @@
     function openModal(id) {
         var el = document.getElementById(id);
         if (!el) return;
+        el.removeAttribute('hidden');
         el.classList.add('is-open');
         document.body.style.overflow = 'hidden';
         el.dispatchEvent(new CustomEvent('modal:open'));
@@ -435,13 +436,14 @@
     function closeModal(id) {
         var el = id ? document.getElementById(id) : null;
         if (!el) {
-            /* close all open (support both .is-open and .open) */
             document.querySelectorAll('.tp-overlay.is-open, .tp-overlay.open').forEach(function (m) {
+                m.setAttribute('hidden', '');
                 m.classList.remove('is-open');
                 m.classList.remove('open');
                 m.dispatchEvent(new CustomEvent('modal:close'));
             });
         } else {
+            el.setAttribute('hidden', '');
             el.classList.remove('is-open');
             el.classList.remove('open');
             el.dispatchEvent(new CustomEvent('modal:close'));

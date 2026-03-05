@@ -248,7 +248,7 @@
 </div>
 
 {# Edit Patient Modal #}
-<div class="tp-overlay" id="modal-edit-patient">
+<div class="tp-overlay" hidden id="modal-edit-patient">
     <div class="tp-modal tp-modal-lg">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('common.edit') }}: {{ patient.name }}</h3>
@@ -327,7 +327,7 @@
 </div>
 
 {# ── Rechnung erstellen Modal ────────────────────────────────────── #}
-<div class="tp-overlay" id="modal-create-invoice">
+<div class="tp-overlay" hidden id="modal-create-invoice">
     <div class="tp-modal tp-modal-xl" style="max-width:860px;width:95vw;max-height:92vh;display:flex;flex-direction:column;">
         <div class="modal-header" style="flex-shrink:0;">
             <div class="flex items-center gap-3">

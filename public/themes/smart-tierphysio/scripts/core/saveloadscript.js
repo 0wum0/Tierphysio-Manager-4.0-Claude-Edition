@@ -34,7 +34,7 @@ var htmlRoot = document.getElementsByTagName('HTML')[0],
             e = t ? JSON.parse(t) : {};
 
         // Load theme setting
-        var savedTheme = e.theme || 'light';
+        var savedTheme = e.theme || 'dark';
         htmlRoot.setAttribute('data-bs-theme', savedTheme);
 
         // Load theme style CSS file only if one was saved
@@ -56,7 +56,7 @@ var htmlRoot = document.getElementsByTagName('HTML')[0],
         layoutSettings.htmlRoot = filterClass(htmlRoot.className, /^(set)-/i);
 
         // Save theme attribute
-        layoutSettings.theme = htmlRoot.getAttribute('data-bs-theme') || 'light';
+        layoutSettings.theme = htmlRoot.getAttribute('data-bs-theme') || 'dark';
 
         // Save theme style CSS path
         var themeStyleElement = document.getElementById('theme-style');
