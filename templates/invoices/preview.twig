@@ -439,7 +439,11 @@
     </div>
 
     {# "Rechnung" script heading #}
-    <div class="inv-script">Rechnung</div>
+    {% set rechnungImg = settings.pdf_rechnung_bild ?? 'rechnung-script.png' %}
+    <div class="inv-script" style="text-align:right;margin-bottom:12px;">
+      <img src="/assets/img/{{ rechnungImg }}" alt="Rechnung" style="max-height:60px;max-width:220px;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span style="display:none;font-size:36pt;font-style:italic;font-family:Georgia,'Times New Roman',serif;color:var(--c-company-name);">Rechnung</span>
+    </div>
 
     {# Recipient #}
     <div class="inv-recipient">
@@ -539,7 +543,11 @@
     {% endif %}
 
     {# "Vielen Dank!" #}
-    <div class="inv-thankyou">Vielen Dank!</div>
+    {% set vielenDankImg = settings.pdf_vielen_dank_bild ?? 'vielen-dank-script.png' %}
+    <div class="inv-thankyou" style="margin-bottom:8px;">
+      <img src="/assets/img/{{ vielenDankImg }}" alt="Vielen Dank!" style="max-height:70px;max-width:260px;object-fit:contain;" onerror="this.style.display='none';this.nextElementSibling.style.display='block';">
+      <span style="display:none;">Vielen Dank!</span>
+    </div>
 
     {# ── Footer ───────────────────────────────────────── #}
     <div class="inv-footer">
