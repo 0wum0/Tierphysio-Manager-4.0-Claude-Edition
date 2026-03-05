@@ -10,7 +10,7 @@
         </h1>
         <p class="page-subtitle">{{ 'now'|date('l, d. F Y') }}</p>
     </div>
-    <div class="d-flex gap-2 flex-wrap">
+    <div class="d-flex gap-2 flex-wrap align-items-center">
         <a href="/patienten" class="btn btn-outline-secondary btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             {{ t('dashboard.new_patient') }}
@@ -19,221 +19,272 @@
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             {{ t('dashboard.new_invoice') }}
         </a>
+        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="resetPanelState()" title="Dashboard-Layout zurücksetzen">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="1 4 1 10 7 10"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M3.51 15a9 9 0 1 0 .49-4.95"/></svg>
+        </button>
     </div>
 </div>
 
-{# ── Revenue KPI Row ──────────────────────────────────────── #}
-<div class="row g-3 mb-3">
-    <div class="col-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm" style="border-left: 3px solid #4f7cff !important; border-radius:12px;">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="stat-card-label">{{ t('dashboard.revenue_week') }}</span>
-                    <div class="stat-card-icon" style="--stat-color:#4f7cff;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+{# ════════════════════════════════════════════════════════════════
+   MODULAR DASHBOARD
+   Structure: div.main-content > div.row > div.col-* > div.panel[id]
+   saveloadscript.js saves panel positions by ID to localStorage.
+   Sortable.js (loaded in smartApp.js) enables drag & drop via panel-hdr > h2.
+   ════════════════════════════════════════════════════════════════ #}
+<div class="main-content">
+    <div class="row g-3">
+
+        {# ── Column LEFT (wide) ── #}
+        <div class="col-xl-8 col-lg-7 col-12 d-flex flex-column gap-3">
+
+            {# Panel: KPI Revenue #}
+            <div class="panel" id="panel-kpi-revenue">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-primary me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#dollar-sign"></use></svg>
+                        Umsatz-Übersicht
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" title="Vollbild"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#maximize-2"></use></svg></button>
                     </div>
                 </div>
-                <div class="stat-card-value fs-3">{{ stats.revenue_week|money }}</div>
-                <div class="stat-card-meta mt-1">
-                    <svg width="11" height="11" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
-                    <span>{{ t('dashboard.revenue_week') }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm" style="border-left: 3px solid #a855f7 !important; border-radius:12px;">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="stat-card-label">{{ t('dashboard.revenue_month') }}</span>
-                    <div class="stat-card-icon" style="--stat-color:#a855f7;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>
+                <div class="panel-container">
+                    <div class="panel-content p-3">
+                        <div class="row g-3">
+                            <div class="col-6 col-sm-3">
+                                <div class="d-flex flex-column p-3 rounded-3" style="border-left:3px solid #4f7cff;background:rgba(79,124,255,0.06);">
+                                    <span class="stat-card-label mb-1">{{ t('dashboard.revenue_week') }}</span>
+                                    <span class="stat-card-value fs-4">{{ stats.revenue_week|money }}</span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="d-flex flex-column p-3 rounded-3" style="border-left:3px solid #a855f7;background:rgba(168,85,247,0.06);">
+                                    <span class="stat-card-label mb-1">{{ t('dashboard.revenue_month') }}</span>
+                                    <span class="stat-card-value fs-4">{{ stats.revenue_month|money }}</span>
+                                    <span class="fs-nano mt-1">
+                                        {% if stats.month_change > 0 %}<span class="trend-up">▲ {{ stats.month_change }}%</span>
+                                        {% elseif stats.month_change < 0 %}<span class="trend-down">▼ {{ stats.month_change|abs }}%</span>
+                                        {% else %}<span class="trend-flat">—</span>{% endif %}
+                                        <span class="text-muted">{{ t('dashboard.vs_last_month') }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="d-flex flex-column p-3 rounded-3" style="border-left:3px solid #06b6d4;background:rgba(6,182,212,0.06);">
+                                    <span class="stat-card-label mb-1">{{ t('dashboard.revenue_year') }}</span>
+                                    <span class="stat-card-value fs-4">{{ stats.revenue_year|money }}</span>
+                                    <span class="fs-nano mt-1">
+                                        {% if stats.year_change > 0 %}<span class="trend-up">▲ {{ stats.year_change }}%</span>
+                                        {% elseif stats.year_change < 0 %}<span class="trend-down">▼ {{ stats.year_change|abs }}%</span>
+                                        {% else %}<span class="trend-flat">—</span>{% endif %}
+                                        <span class="text-muted">{{ t('dashboard.vs_last_year') }}</span>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="col-6 col-sm-3">
+                                <div class="d-flex flex-column p-3 rounded-3" style="border-left:3px solid #22c55e;background:rgba(34,197,94,0.06);">
+                                    <span class="stat-card-label mb-1">{{ t('dashboard.revenue_total') }}</span>
+                                    <span class="stat-card-value fs-4">{{ stats.revenue_total|money }}</span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card-value fs-3">{{ stats.revenue_month|money }}</div>
-                <div class="stat-card-meta mt-1">
-                    {% if stats.month_change > 0 %}<span class="trend-up">▲ {{ stats.month_change }}%</span>
-                    {% elseif stats.month_change < 0 %}<span class="trend-down">▼ {{ stats.month_change|abs }}%</span>
-                    {% else %}<span class="trend-flat">—</span>{% endif %}
-                    <span>{{ t('dashboard.vs_last_month') }}</span>
-                </div>
             </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm" style="border-left: 3px solid #06b6d4 !important; border-radius:12px;">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="stat-card-label">{{ t('dashboard.revenue_year') }}</span>
-                    <div class="stat-card-icon" style="--stat-color:#06b6d4;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+
+            {# Panel: Revenue Chart #}
+            <div class="panel" id="panel-revenue-chart">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-primary me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#bar-chart-2"></use></svg>
+                        {{ t('dashboard.chart_title') }}
+                    </h2>
+                    <div class="panel-toolbar ms-auto d-flex align-items-center gap-2">
+                        <div class="btn-group btn-group-sm" role="group">
+                            <button class="btn btn-outline-secondary active" id="btn-weekly">{{ t('dashboard.weekly') }}</button>
+                            <button class="btn btn-outline-secondary" id="btn-monthly">{{ t('dashboard.monthly') }}</button>
+                        </div>
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" title="Vollbild"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#maximize-2"></use></svg></button>
                     </div>
                 </div>
-                <div class="stat-card-value fs-3">{{ stats.revenue_year|money }}</div>
-                <div class="stat-card-meta mt-1">
-                    {% if stats.year_change > 0 %}<span class="trend-up">▲ {{ stats.year_change }}%</span>
-                    {% elseif stats.year_change < 0 %}<span class="trend-down">▼ {{ stats.year_change|abs }}%</span>
-                    {% else %}<span class="trend-flat">—</span>{% endif %}
-                    <span>{{ t('dashboard.vs_last_year') }}</span>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="col-6 col-lg-3">
-        <div class="card h-100 border-0 shadow-sm" style="border-left: 3px solid #22c55e !important; border-radius:12px;">
-            <div class="card-body p-3">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <span class="stat-card-label">{{ t('dashboard.revenue_total') }}</span>
-                    <div class="stat-card-icon" style="--stat-color:#22c55e;">
-                        <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                <div class="panel-container">
+                    <div class="panel-content">
+                        <div style="height:260px;position:relative;">
+                            <canvas id="revenue-chart"></canvas>
+                        </div>
                     </div>
                 </div>
-                <div class="stat-card-value fs-3">{{ stats.revenue_total|money }}</div>
-                <div class="stat-card-meta mt-1">
-                    <span>{{ t('dashboard.revenue_total') }}</span>
+            </div>
+
+            {# Panel: Plugin Widgets (only if any) #}
+            {% if plugin_widgets %}
+            <div class="panel" id="panel-plugin-widgets">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-warning me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
+                        Plugins
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                    </div>
+                </div>
+                <div class="panel-container">
+                    <div class="panel-content">
+                        <div class="row g-3">
+                            {% for widget in plugin_widgets %}
+                            <div class="col-md-6">{{ widget|raw }}</div>
+                            {% endfor %}
+                        </div>
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
+            {% endif %}
 
-{# ── Activity KPIs ─────────────────────────────────────────── #}
-<div class="row g-3 mb-4">
-    <div class="col-6 col-sm-4 col-lg">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
-            <div class="fs-1 fw-800 mb-1" style="color:#06b6d4; line-height:1;">{{ stats.open_count }}</div>
-            <div class="stat-card-label mb-2">{{ t('dashboard.open_invoices') }}</div>
-            <a href="/rechnungen?status=open" class="btn btn-outline-info btn-sm w-100">{{ t('common.details') }}</a>
-        </div>
-    </div>
-    <div class="col-6 col-sm-4 col-lg">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px; {% if stats.overdue_count > 0 %}border-top: 3px solid #ef4444 !important;{% endif %}">
-            <div class="fs-1 fw-800 mb-1" style="color:{% if stats.overdue_count > 0 %}#ef4444{% else %}var(--bs-secondary-color){% endif %}; line-height:1;">{{ stats.overdue_count }}</div>
-            <div class="stat-card-label mb-2">{{ t('dashboard.overdue_invoices') }}</div>
-            <a href="/rechnungen?status=overdue" class="btn btn-outline-danger btn-sm w-100">{{ t('common.details') }}</a>
-        </div>
-    </div>
-    <div class="col-6 col-sm-4 col-lg">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
-            <div class="fs-1 fw-800 mb-1" style="color:#f59e0b; line-height:1;">{{ stats.new_patients }}</div>
-            <div class="stat-card-label mb-2">{{ t('dashboard.new_patients') }}</div>
-            <span class="badge bg-warning bg-opacity-15 text-warning border border-warning border-opacity-25 px-2">letzte 30 Tage</span>
-        </div>
-    </div>
-    <div class="col-6 col-sm-6 col-lg">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
-            <div class="fs-1 fw-800 mb-1" style="color:#4f7cff; line-height:1;">{{ stats.total_patients }}</div>
-            <div class="stat-card-label mb-2">{{ t('dashboard.total_patients') }}</div>
-            <a href="/patienten" class="btn btn-outline-primary btn-sm w-100">{{ t('common.details') }}</a>
-        </div>
-    </div>
-    <div class="col-6 col-sm-6 col-lg">
-        <div class="card border-0 shadow-sm text-center p-3" style="border-radius:12px;">
-            <div class="fs-1 fw-800 mb-1" style="color:#a855f7; line-height:1;">{{ stats.total_owners }}</div>
-            <div class="stat-card-label mb-2">{{ t('dashboard.total_owners') }}</div>
-            <a href="/tierhalter" class="btn btn-sm w-100" style="background:rgba(168,85,247,0.12);color:#a855f7;border:1px solid rgba(168,85,247,0.25);">{{ t('common.details') }}</a>
-        </div>
-    </div>
-</div>
+        </div>{# /col-left #}
 
-{# ── Chart + Quick Actions ─────────────────────────────────── #}
-<div class="row g-3 mb-3">
+        {# ── Column RIGHT (narrow) ── #}
+        <div class="col-xl-4 col-lg-5 col-12 d-flex flex-column gap-3">
 
-    {# Revenue Chart #}
-    <div class="col-lg-8">
-        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
-            <div class="card-header bg-transparent border-bottom d-flex align-items-center justify-content-between py-3">
-                <h6 class="fw-700 mb-0">
-                    <svg class="sa-icon me-2 sa-icon-primary" width="16" height="16"><use href="/themes/smart-tierphysio/icons/sprite.svg#bar-chart-2"></use></svg>
-                    {{ t('dashboard.chart_title') }}
-                </h6>
-                <div class="btn-group btn-group-sm" role="group">
-                    <button class="btn btn-outline-secondary active" data-chart-type="weekly" id="btn-weekly">{{ t('dashboard.weekly') }}</button>
-                    <button class="btn btn-outline-secondary" data-chart-type="monthly" id="btn-monthly">{{ t('dashboard.monthly') }}</button>
+            {# Panel: Activity KPIs #}
+            <div class="panel" id="panel-activity-kpis">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-info me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#activity"></use></svg>
+                        Aktivität
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" title="Vollbild"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#maximize-2"></use></svg></button>
+                    </div>
+                </div>
+                <div class="panel-container">
+                    <div class="panel-content p-0">
+                        <div class="list-group list-group-flush rounded-0">
+                            <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="stat-card-icon" style="--stat-color:#06b6d4;"><svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg></div>
+                                    <span class="stat-card-label">{{ t('dashboard.open_invoices') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-800 fs-4" style="color:#06b6d4;">{{ stats.open_count }}</span>
+                                    <a href="/rechnungen?status=open" class="btn btn-outline-info btn-sm">→</a>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3{% if stats.overdue_count > 0 %} border-start border-danger border-3{% endif %}">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="stat-card-icon" style="--stat-color:{% if stats.overdue_count > 0 %}#ef4444{% else %}var(--bs-secondary-color){% endif %};"><svg width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></div>
+                                    <span class="stat-card-label">{{ t('dashboard.overdue_invoices') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-800 fs-4" style="color:{% if stats.overdue_count > 0 %}#ef4444{% else %}var(--bs-secondary-color){% endif %};">{{ stats.overdue_count }}</span>
+                                    <a href="/rechnungen?status=overdue" class="btn btn-outline-danger btn-sm">→</a>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="stat-card-icon" style="--stat-color:#f59e0b;"><svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                                    <div>
+                                        <span class="stat-card-label d-block">{{ t('dashboard.new_patients') }}</span>
+                                        <span class="fs-nano text-muted">letzte 30 Tage</span>
+                                    </div>
+                                </div>
+                                <span class="fw-800 fs-4" style="color:#f59e0b;">{{ stats.new_patients }}</span>
+                            </div>
+                            <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="stat-card-icon" style="--stat-color:#4f7cff;"><svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></div>
+                                    <span class="stat-card-label">{{ t('dashboard.total_patients') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-800 fs-4" style="color:#4f7cff;">{{ stats.total_patients }}</span>
+                                    <a href="/patienten" class="btn btn-outline-primary btn-sm">→</a>
+                                </div>
+                            </div>
+                            <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="stat-card-icon" style="--stat-color:#a855f7;"><svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></div>
+                                    <span class="stat-card-label">{{ t('dashboard.total_owners') }}</span>
+                                </div>
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="fw-800 fs-4" style="color:#a855f7;">{{ stats.total_owners }}</span>
+                                    <a href="/tierhalter" class="btn btn-sm" style="background:rgba(168,85,247,0.12);color:#a855f7;border:1px solid rgba(168,85,247,0.25);">→</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div class="card-body p-3">
-                <div style="height:240px; position:relative;">
-                    <canvas id="revenue-chart"></canvas>
+
+            {# Panel: Quick Actions #}
+            <div class="panel" id="panel-quick-actions">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-warning me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
+                        {{ t('dashboard.quick_actions') }}
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                    </div>
+                </div>
+                <div class="panel-container">
+                    <div class="panel-content d-flex flex-column gap-2">
+                        <a href="/patienten" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(239,68,68,0.12);color:#ef4444;flex-shrink:0;">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                            </span>
+                            <span class="fw-500 fs-sm">{{ t('dashboard.new_patient') }}</span>
+                        </a>
+                        <a href="/tierhalter" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(168,85,247,0.12);color:#a855f7;flex-shrink:0;">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                            </span>
+                            <span class="fw-500 fs-sm">{{ t('dashboard.new_owner') }}</span>
+                        </a>
+                        <a href="/rechnungen/erstellen" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                            <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(79,124,255,0.12);color:#4f7cff;flex-shrink:0;">
+                                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg>
+                            </span>
+                            <span class="fw-500 fs-sm">{{ t('dashboard.new_invoice') }}</span>
+                        </a>
+                        {% if stats.overdue_count > 0 %}
+                        <a href="/rechnungen?status=overdue" class="btn btn-danger d-flex align-items-center gap-2">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            <span>{{ stats.overdue_count }} {{ t('dashboard.overdue_invoices') }}</span>
+                        </a>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
-        </div>
-    </div>
 
-    {# Quick Actions #}
-    <div class="col-lg-4">
-        <div class="card border-0 shadow-sm h-100" style="border-radius:12px;">
-            <div class="card-header bg-transparent border-bottom py-3">
-                <h6 class="fw-700 mb-0">
-                    <svg class="sa-icon me-2 sa-icon-warning" width="16" height="16"><use href="/themes/smart-tierphysio/icons/sprite.svg#zap"></use></svg>
-                    {{ t('dashboard.quick_actions') }}
-                </h6>
-            </div>
-            <div class="card-body p-3 d-flex flex-column gap-2">
-                <a href="/patienten" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(239,68,68,0.12);color:#ef4444;flex-shrink:0;">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
-                    </span>
-                    <span class="fw-500 fs-sm">{{ t('dashboard.new_patient') }}</span>
-                </a>
-                <a href="/tierhalter" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(168,85,247,0.12);color:#a855f7;flex-shrink:0;">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
-                    </span>
-                    <span class="fw-500 fs-sm">{{ t('dashboard.new_owner') }}</span>
-                </a>
-                <a href="/rechnungen/erstellen" class="btn btn-light d-flex align-items-center gap-2 text-start">
-                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(79,124,255,0.12);color:#4f7cff;flex-shrink:0;">
-                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg>
-                    </span>
-                    <span class="fw-500 fs-sm">{{ t('dashboard.new_invoice') }}</span>
-                </a>
-                {% if stats.overdue_count > 0 %}
-                <a href="/rechnungen?status=overdue" class="btn btn-danger d-flex align-items-center gap-2">
-                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                    <span>{{ stats.overdue_count }} {{ t('dashboard.overdue_invoices') }}</span>
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</div>
+        </div>{# /col-right #}
 
-{# ── Plugin Widgets ─────────────────────────────────────────── #}
-{% if plugin_widgets %}
-<div class="row g-3">
-    {% for widget in plugin_widgets %}
-    <div class="col-md-6 col-xl-4">
-        <div class="card border-0 shadow-sm" style="border-radius:12px;">
-            <div class="card-body p-3">{{ widget|raw }}</div>
-        </div>
-    </div>
-    {% endfor %}
-</div>
-{% endif %}
+    </div>{# /row #}
+</div>{# /main-content #}
 
 {% endblock %}
 
 {% block scripts %}
 <script>
 (function(){
-    var chartEl  = document.getElementById('revenue-chart');
+    /* ── Revenue Chart ── */
+    var chartEl = document.getElementById('revenue-chart');
     if (!chartEl || typeof Chart === 'undefined') return;
 
-    var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark';
-    var gridColor   = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-    var labelColor  = isDark ? '#94a3b8' : '#6b7280';
-    var fontFamily  = getComputedStyle(document.body).fontFamily;
+    var isDark     = document.documentElement.getAttribute('data-bs-theme') === 'dark';
+    var gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    var labelColor = isDark ? '#94a3b8' : '#6b7280';
+    var fontFamily = getComputedStyle(document.body).fontFamily;
 
-    var weeklyData  = {{ stats.chart_weekly|default([])|json_encode|raw }};
-    var monthlyData = {{ stats.chart_monthly|default([])|json_encode|raw }};
-
+    var weeklyData    = {{ stats.chart_weekly|default([])|json_encode|raw }};
+    var monthlyData   = {{ stats.chart_monthly|default([])|json_encode|raw }};
     var weeklyLabels  = weeklyData.map(function(d){ return d.label; });
     var weeklyValues  = weeklyData.map(function(d){ return d.value; });
     var monthlyLabels = monthlyData.map(function(d){ return d.label; });
     var monthlyValues = monthlyData.map(function(d){ return d.value; });
 
-    var gradient = chartEl.getContext('2d').createLinearGradient(0, 0, 0, 240);
+    var gradient = chartEl.getContext('2d').createLinearGradient(0, 0, 0, 260);
     gradient.addColorStop(0, 'rgba(79,124,255,0.35)');
     gradient.addColorStop(1, 'rgba(79,124,255,0.00)');
 
@@ -274,37 +325,37 @@
                 }
             },
             scales: {
-                x: {
-                    grid: { color: gridColor },
-                    ticks: { color: labelColor, font: { size: 11, family: fontFamily } }
-                },
-                y: {
-                    grid: { color: gridColor },
-                    ticks: {
-                        color: labelColor,
-                        font: { size: 11, family: fontFamily },
-                        callback: function(v) { return v.toLocaleString('de-DE') + ' €'; }
-                    }
-                }
+                x: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11, family: fontFamily } } },
+                y: { grid: { color: gridColor }, ticks: { color: labelColor, font: { size: 11, family: fontFamily }, callback: function(v){ return v.toLocaleString('de-DE') + ' €'; } } }
             }
         }
     });
 
-    /* Toggle weekly / monthly */
     document.getElementById('btn-weekly')?.addEventListener('click', function(){
-        chart.data.labels   = weeklyLabels;
+        chart.data.labels = weeklyLabels;
         chart.data.datasets[0].data = weeklyValues;
         chart.update();
-        document.getElementById('btn-weekly').classList.add('active');
+        this.classList.add('active');
         document.getElementById('btn-monthly').classList.remove('active');
     });
     document.getElementById('btn-monthly')?.addEventListener('click', function(){
-        chart.data.labels   = monthlyLabels;
+        chart.data.labels = monthlyLabels;
         chart.data.datasets[0].data = monthlyValues;
         chart.update();
-        document.getElementById('btn-monthly').classList.add('active');
+        this.classList.add('active');
         document.getElementById('btn-weekly').classList.remove('active');
     });
 })();
+
+/* ── Dashboard panel position reset ── */
+function resetPanelState() {
+    if (!confirm('Dashboard-Layout zurücksetzen?')) return;
+    try {
+        var cfg = JSON.parse(localStorage.getItem('layoutSettings') || '{}');
+        delete cfg.panelState;
+        localStorage.setItem('layoutSettings', JSON.stringify(cfg));
+    } catch(e) {}
+    location.reload();
+}
 </script>
 {% endblock %}
