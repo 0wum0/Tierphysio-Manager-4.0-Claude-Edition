@@ -1,0 +1,271 @@
+{% extends 'layouts/base.twig' %}
+
+{% block title %}Theme Manager{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Design & Themes</h1>
+        <p class="page-subtitle">Themes hochladen, aktivieren und verwalten</p>
+    </div>
+    <button class="btn btn-primary" onclick="document.getElementById('upload-modal').classList.add('open')">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+        Theme hochladen
+    </button>
+</div>
+
+{# Theme Grid #}
+<div class="theme-grid">
+    {% for theme in themes %}
+    <div class="theme-card glass {% if theme.active %}theme-card--active{% endif %}">
+
+        {# Preview Image #}
+        <div class="theme-preview">
+            {% if theme.preview_url %}
+                <img src="{{ theme.preview_url }}" alt="{{ theme.name }} Vorschau" loading="lazy">
+            {% else %}
+                <div class="theme-preview-placeholder">
+                    <svg width="48" height="48" fill="none" viewBox="0 0 24 24" style="color:var(--text-muted)">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="1.5"/>
+                        <circle cx="12" cy="12" r="4" stroke="currentColor" stroke-width="1.5"/>
+                        <path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" d="M12 2v4M12 18v4M2 12h4M18 12h4"/>
+                    </svg>
+                    <span>Keine Vorschau</span>
+                </div>
+            {% endif %}
+            {% if theme.active %}
+            <div class="theme-active-badge">
+                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                Aktiv
+            </div>
+            {% endif %}
+        </div>
+
+        {# Info #}
+        <div class="theme-info">
+            <div class="theme-name">{{ theme.name }}</div>
+            <div class="theme-meta">
+                v{{ theme.version ?? '—' }}
+                {% if theme.author is defined and theme.author %} · {{ theme.author }}{% endif %}
+            </div>
+            {% if theme.description is defined and theme.description %}
+            <div class="theme-desc">{{ theme.description }}</div>
+            {% endif %}
+        </div>
+
+        {# Actions #}
+        <div class="theme-actions">
+            {% if not theme.active %}
+                <form method="POST" action="/design/{{ theme.slug }}/aktivieren" style="flex:1;">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-primary btn-sm" style="width:100%;">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                        Aktivieren
+                    </button>
+                </form>
+            {% else %}
+                <button class="btn btn-sm" style="width:100%;cursor:default;opacity:0.6;" disabled>
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    Aktives Theme
+                </button>
+            {% endif %}
+
+            {% if not theme.active and not (theme.builtin is defined and theme.builtin) %}
+                <form method="POST" action="/design/{{ theme.slug }}/loeschen"
+                      onsubmit="return confirm('Theme &quot;{{ theme.name }}&quot; wirklich löschen?')">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                    <button type="submit" class="btn btn-sm btn-secondary" title="Löschen" style="color:#ef4444;">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6M10 11v6M14 11v6M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+                    </button>
+                </form>
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{# Upload Modal #}
+<div class="modal-backdrop" id="upload-modal">
+    <div class="modal" style="max-width:460px;">
+        <div class="modal-header">
+            <div class="modal-title">Theme hochladen</div>
+            <button class="modal-close" onclick="document.getElementById('upload-modal').classList.remove('open')">
+                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+            </button>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="/design/hochladen" enctype="multipart/form-data" id="upload-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+                <div class="form-group">
+                    <label class="form-label">Theme-Paket (.zip)</label>
+                    <div class="upload-dropzone" id="upload-dropzone">
+                        <input type="file" name="theme_zip" id="theme-zip-input" accept=".zip" style="display:none;" required>
+                        <svg width="36" height="36" fill="none" viewBox="0 0 24 24" style="color:var(--accent);margin-bottom:0.75rem;"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        <div id="dropzone-label">ZIP-Datei hier ablegen oder klicken</div>
+                        <div style="font-size:0.78rem;color:var(--text-muted);margin-top:0.35rem;">Maximal 10 MB</div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="padding:1rem;font-size:0.82rem;color:var(--text-muted);margin-bottom:1.25rem;">
+                    <strong style="color:var(--text-secondary);display:block;margin-bottom:0.5rem;">📦 Paketstruktur:</strong>
+                    <code style="color:var(--accent-light);">mein-theme.zip</code><br>
+                    <code style="padding-left:1rem;">├── theme.json</code> <em>(Pflicht)</em><br>
+                    <code style="padding-left:1rem;">├── theme.css</code> <em>(Pflicht)</em><br>
+                    <code style="padding-left:1rem;">├── preview.png</code> <em>(Optional)</em><br>
+                    <code style="padding-left:1rem;">└── layout.twig</code> <em>(Optional, Custom-Layout)</em>
+                </div>
+
+                <div class="flex gap-2" style="justify-content:flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('upload-modal').classList.remove('open')">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary" id="upload-submit-btn" disabled>
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M17 8l-5-5-5 5M12 3v12"/></svg>
+                        Installieren
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+.theme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    transition: var(--transition);
+}
+.theme-card--active {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--accent-glow), var(--glass-shadow);
+}
+.theme-preview {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: var(--bg-elevated);
+    overflow: hidden;
+}
+.theme-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.theme-preview-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+}
+.theme-active-badge {
+    position: absolute;
+    top: 0.6rem;
+    right: 0.6rem;
+    background: var(--accent);
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+.theme-info {
+    padding: 1rem 1rem 0.5rem;
+    flex: 1;
+}
+.theme-name {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.2rem;
+}
+.theme-meta {
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+}
+.theme-desc {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+}
+.theme-actions {
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+}
+.upload-dropzone {
+    border: 2px dashed var(--glass-border);
+    border-radius: var(--radius-md);
+    padding: 2rem 1rem;
+    text-align: center;
+    cursor: pointer;
+    transition: var(--transition);
+    margin-bottom: 1rem;
+    font-size: 0.88rem;
+    color: var(--text-secondary);
+}
+.upload-dropzone:hover,
+.upload-dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(79,124,255,0.06);
+    color: var(--accent);
+}
+.modal-backdrop { display:none; position:fixed; inset:0; z-index:9000; background:rgba(0,0,0,0.55); backdrop-filter:blur(4px); align-items:center; justify-content:center; }
+.modal-backdrop.open { display:flex; }
+</style>
+
+<script>
+/* Dropzone interaction */
+const dropzone  = document.getElementById('upload-dropzone');
+const fileInput = document.getElementById('theme-zip-input');
+const submitBtn = document.getElementById('upload-submit-btn');
+const label     = document.getElementById('dropzone-label');
+
+dropzone.addEventListener('click', () => fileInput.click());
+
+dropzone.addEventListener('dragover', (e) => { e.preventDefault(); dropzone.classList.add('drag-over'); });
+dropzone.addEventListener('dragleave', () => dropzone.classList.remove('drag-over'));
+dropzone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropzone.classList.remove('drag-over');
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+        fileInput.files = files;
+        updateDropzone(files[0]);
+    }
+});
+
+fileInput.addEventListener('change', () => {
+    if (fileInput.files.length > 0) updateDropzone(fileInput.files[0]);
+});
+
+function updateDropzone(file) {
+    label.textContent = '✅ ' + file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
+    label.style.color = 'var(--success)';
+    submitBtn.disabled = false;
+}
+
+/* Close modal on backdrop click */
+document.getElementById('upload-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+});
+</script>
+{% endblock %}

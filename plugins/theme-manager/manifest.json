@@ -1,0 +1,10 @@
+{
+    "name": "Theme Manager",
+    "slug": "theme-manager",
+    "version": "1.0.0",
+    "description": "Vollständiges Theme-System: Themes als ZIP hochladen, aktivieren und verwalten. Ändert das gesamte Design der Anwendung.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "service_provider": "Plugins\\ThemeManager\\ServiceProvider",
+    "hooks": ["registerRoutes", "navItems"]
+}

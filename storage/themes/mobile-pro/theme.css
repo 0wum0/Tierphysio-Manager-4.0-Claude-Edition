@@ -1,0 +1,567 @@
+/* ============================================================
+   Mobile Pro Theme — Tierphysio Manager 3.0
+   Vollständig Mobile-First optimiert
+   Alle Funktionen erhalten, perfekt für Smartphones
+   ============================================================ */
+
+/* ── Custom Properties Override ─────────────────────────── */
+:root {
+  --mobile-nav-height: 64px;
+  --mobile-header-height: 56px;
+  --touch-target: 48px;
+  --card-radius: 16px;
+  --sidebar-width: 260px;
+}
+
+/* ============================================================
+   MOBILE LAYOUT OVERHAUL (≤768px)
+   ============================================================ */
+@media (max-width: 768px) {
+
+  /* ── Hide desktop sidebar completely ───────────────── */
+  .sidebar {
+    position: fixed !important;
+    top: 0 !important;
+    left: -100% !important;
+    width: 80vw !important;
+    max-width: 300px !important;
+    height: 100dvh !important;
+    z-index: 8000 !important;
+    transition: left 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+    overflow-y: auto !important;
+    box-shadow: 4px 0 40px rgba(0,0,0,0.5) !important;
+  }
+
+  .sidebar.open {
+    left: 0 !important;
+  }
+
+  /* ── Main layout: no left margin, bottom padding for nav ── */
+  .app-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto 1fr !important;
+    padding-bottom: var(--mobile-nav-height) !important;
+  }
+
+  .main-content {
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+    min-height: calc(100dvh - var(--mobile-header-height) - var(--mobile-nav-height)) !important;
+  }
+
+  /* ── Compact top header ─────────────────────────────── */
+  .top-header {
+    height: var(--mobile-header-height) !important;
+    padding: 0 1rem !important;
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 500 !important;
+  }
+
+  .header-title {
+    font-size: 1rem !important;
+    font-weight: 700 !important;
+  }
+
+  /* Show sidebar toggle always on mobile */
+  #sidebar-toggle {
+    display: flex !important;
+    width: var(--touch-target) !important;
+    height: var(--touch-target) !important;
+  }
+
+  /* ── Page content padding ───────────────────────────── */
+  .page-content {
+    padding: 1rem !important;
+  }
+
+  /* ── Page header: stack on mobile ──────────────────── */
+  .page-header {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 0.75rem !important;
+    margin-bottom: 1rem !important;
+  }
+
+  .page-header .btn {
+    width: 100% !important;
+    justify-content: center !important;
+    min-height: var(--touch-target) !important;
+  }
+
+  .page-title {
+    font-size: 1.4rem !important;
+  }
+
+  /* ── Cards: full-width, larger radius ──────────────── */
+  .glass-card,
+  .stat-card,
+  .glass {
+    border-radius: var(--card-radius) !important;
+  }
+
+  /* ── Stats grid: 2 columns on mobile ───────────────── */
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+  }
+
+  .stat-card {
+    padding: 1rem !important;
+  }
+
+  .stat-value {
+    font-size: 1.5rem !important;
+  }
+
+  /* ── Tables: horizontal scroll ──────────────────────── */
+  .table-container {
+    border-radius: var(--card-radius) !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+  }
+
+  table {
+    min-width: 600px !important;
+  }
+
+  th, td {
+    padding: 0.75rem 0.875rem !important;
+    font-size: 0.85rem !important;
+    white-space: nowrap !important;
+  }
+
+  /* ── Buttons: larger touch targets ─────────────────── */
+  .btn {
+    min-height: var(--touch-target) !important;
+    padding: 0 1.125rem !important;
+    font-size: 0.9rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .btn-sm {
+    min-height: 36px !important;
+    padding: 0 0.75rem !important;
+    font-size: 0.82rem !important;
+  }
+
+  /* ── Forms: larger inputs ───────────────────────────── */
+  .form-control,
+  .form-select {
+    min-height: var(--touch-target) !important;
+    font-size: 16px !important; /* prevents iOS zoom */
+    padding: 0.75rem 1rem !important;
+    border-radius: var(--radius-md) !important;
+  }
+
+  .form-label {
+    font-size: 0.88rem !important;
+    margin-bottom: 0.4rem !important;
+  }
+
+  .form-group {
+    margin-bottom: 1.1rem !important;
+  }
+
+  /* ── Grid layouts: single column ───────────────────── */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* ── Modals: bottom sheet style ─────────────────────── */
+  .modal-backdrop {
+    align-items: flex-end !important;
+  }
+
+  .modal {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 92dvh !important;
+    border-radius: var(--card-radius) var(--card-radius) 0 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+    animation: slide-up 0.3s cubic-bezier(0.4,0,0.2,1) !important;
+  }
+
+  @keyframes slide-up {
+    from { transform: translateY(100%); opacity: 0; }
+    to   { transform: translateY(0);    opacity: 1; }
+  }
+
+  /* Modal drag handle */
+  .modal::before {
+    content: '';
+    display: block;
+    width: 36px;
+    height: 4px;
+    background: var(--glass-border);
+    border-radius: 2px;
+    margin: 0.5rem auto 0;
+  }
+
+  .modal-header {
+    padding: 0.875rem 1rem 0.75rem !important;
+    position: sticky;
+    top: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+    z-index: 2;
+  }
+
+  .modal-body {
+    padding: 1rem !important;
+  }
+
+  .modal-footer {
+    padding: 0.75rem 1rem 1.5rem !important;
+    position: sticky;
+    bottom: 0;
+    background: var(--glass-bg);
+    backdrop-filter: var(--glass-blur);
+  }
+
+  /* ── Dropdowns: full width ───────────────────────────── */
+  .dropdown-menu {
+    width: calc(100vw - 2rem) !important;
+    right: -0.5rem !important;
+    left: auto !important;
+  }
+
+  .dropdown-item {
+    min-height: var(--touch-target) !important;
+    font-size: 0.9rem !important;
+  }
+
+  /* ── Search bars ─────────────────────────────────────── */
+  .search-bar,
+  input[type="search"] {
+    font-size: 16px !important;
+    min-height: var(--touch-target) !important;
+  }
+
+  /* ── Patient / Owner cards ───────────────────────────── */
+  .patient-card,
+  .owner-card {
+    border-radius: var(--card-radius) !important;
+  }
+
+  /* ── Flex action bars: wrap ──────────────────────────── */
+  .flex.gap-2,
+  .flex.gap-3 {
+    flex-wrap: wrap !important;
+  }
+
+  /* ── Pagination: compact ─────────────────────────────── */
+  .pagination {
+    gap: 0.25rem !important;
+  }
+
+  .pagination a,
+  .pagination span {
+    min-width: 36px !important;
+    min-height: 36px !important;
+    font-size: 0.85rem !important;
+  }
+
+  /* ── Alerts: full-width ──────────────────────────────── */
+  .alert {
+    border-radius: var(--radius-md) !important;
+    font-size: 0.88rem !important;
+  }
+
+  /* ── Hide decorative background on mobile for perf ──── */
+  body::before,
+  body::after,
+  .app-grid-overlay {
+    display: none !important;
+  }
+
+  /* ── Calendar mobile ─────────────────────────────────── */
+  .cal-grid {
+    font-size: 0.75rem !important;
+  }
+
+  .cal-day {
+    min-height: 52px !important;
+    padding: 0.2rem !important;
+  }
+
+  .cal-event {
+    font-size: 0.68rem !important;
+    padding: 0.15rem 0.3rem !important;
+  }
+
+  .cal-header {
+    gap: 0.25rem !important;
+  }
+
+  .cal-nav-btn,
+  .cal-view-btn {
+    min-height: 36px !important;
+    min-width: 36px !important;
+    font-size: 0.8rem !important;
+  }
+
+  /* ── Invoice items: stack ─────────────────────────────── */
+  .invoice-item-row {
+    flex-direction: column !important;
+    gap: 0.5rem !important;
+  }
+
+  /* ── Settings tabs: scroll horizontal ───────────────── */
+  .tabs {
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch !important;
+    flex-wrap: nowrap !important;
+    white-space: nowrap !important;
+  }
+
+  .tab-item {
+    flex-shrink: 0 !important;
+  }
+
+  /* ── Sidebar overlay bigger tap target ───────────────── */
+  #sidebar-overlay.open {
+    display: block !important;
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 7999 !important;
+    background: rgba(0,0,0,0.5) !important;
+  }
+}
+
+/* ============================================================
+   BOTTOM NAVIGATION (mobile only)
+   Replaces the desktop sidebar nav for quick access
+   ============================================================ */
+@media (max-width: 768px) {
+  .mobile-bottom-nav {
+    display: flex !important;
+  }
+}
+
+.mobile-bottom-nav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--mobile-nav-height);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  border-top: 1px solid var(--glass-border);
+  z-index: 900;
+  padding: 0 0.5rem;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  align-items: center;
+  justify-content: space-around;
+}
+
+.mob-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.2rem;
+  min-width: 52px;
+  height: 52px;
+  border-radius: var(--radius-md);
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  transition: color 0.2s, background 0.2s;
+  -webkit-tap-highlight-color: transparent;
+  padding: 0 0.5rem;
+  flex: 1;
+  max-width: 80px;
+}
+
+.mob-nav-item svg {
+  flex-shrink: 0;
+}
+
+.mob-nav-item.active,
+.mob-nav-item:active {
+  color: var(--accent);
+  background: rgba(79,124,255,0.1);
+}
+
+.mob-nav-item .mob-nav-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 8px;
+  height: 8px;
+  background: #ef4444;
+  border-radius: 50%;
+  border: 2px solid var(--bg-base);
+}
+
+.mob-nav-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ============================================================
+   TABLET (768px – 1024px) — minor adjustments
+   ============================================================ */
+@media (min-width: 769px) and (max-width: 1024px) {
+  :root {
+    --sidebar-width: 220px;
+  }
+
+  .page-content {
+    padding: 1.25rem !important;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ============================================================
+   DESKTOP — preserve all original styles, only minor tweaks
+   ============================================================ */
+@media (min-width: 769px) {
+  .mobile-bottom-nav {
+    display: none !important;
+  }
+
+  /* Slightly better sidebar on desktop */
+  .sidebar {
+    position: sticky !important;
+    top: 0 !important;
+    left: auto !important;
+    height: 100dvh !important;
+  }
+}
+
+/* ============================================================
+   UNIVERSAL IMPROVEMENTS (all screen sizes)
+   ============================================================ */
+
+/* Better focus styles for accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* Smoother scrolling */
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
+/* Better tap targets everywhere */
+a, button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Safe area support for notched phones */
+.top-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+.main-content {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + var(--mobile-nav-height, 0px));
+}
+
+/* ── Swipeable horizontal lists ─────────────────────── */
+.swipe-row {
+  display: flex;
+  gap: 0.75rem;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  padding-bottom: 0.5rem;
+}
+
+.swipe-row::-webkit-scrollbar { display: none; }
+
+.swipe-row > * {
+  scroll-snap-align: start;
+  flex-shrink: 0;
+}
+
+/* ── Loading states ─────────────────────────────────── */
+.btn.loading {
+  position: relative;
+  pointer-events: none;
+  color: transparent !important;
+}
+
+.btn.loading::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── Better mobile notification bell ────────────────── */
+@media (max-width: 768px) {
+  #notif-dropdown-wrap .dropdown-menu {
+    width: calc(100vw - 1rem) !important;
+    right: -3rem !important;
+    max-height: 70dvh !important;
+    overflow-y: auto !important;
+  }
+}
+
+/* ── Mob-hide-table helper (already in templates) ────── */
+@media (min-width: 769px) {
+  .mob-hide-table { display: none !important; }
+  .desk-hide-table { display: block !important; }
+}
+
+@media (max-width: 768px) {
+  .mob-hide-table { display: block !important; }
+  .desk-hide-table { display: none !important; }
+}
+
+/* ── Float labels for mobile forms ──────────────────── */
+@media (max-width: 768px) {
+  .form-row {
+    flex-direction: column !important;
+    gap: 0 !important;
+  }
+}
+
+/* ── Patient card grid: single col on mobile ─────────── */
+@media (max-width: 768px) {
+  .patients-grid {
+    grid-template-columns: 1fr !important;
+    gap: 0.75rem !important;
+  }
+
+  .patient-card {
+    padding: 1rem !important;
+  }
+
+  .patient-card-header {
+    gap: 0.75rem !important;
+  }
+}
+
+/* ── Invoice list: condensed on mobile ───────────────── */
+@media (max-width: 768px) {
+  .invoice-badge {
+    font-size: 0.7rem !important;
+    padding: 0.15rem 0.5rem !important;
+  }
+}
