@@ -27,6 +27,9 @@ $router->post('/profil', [ProfileController::class, 'update'], ['auth']);
 $router->post('/profil/password', [ProfileController::class, 'updatePassword'], ['auth']);
 
 $router->get('/patienten', [PatientController::class, 'index'], ['auth']);
+$router->get('/patienten/neu', [PatientController::class, 'wizard'], ['auth']);
+$router->post('/patienten/wizard', [PatientController::class, 'wizardStore'], ['auth']);
+$router->get('/api/tierhalter/suche', [PatientController::class, 'ownerSearch'], ['auth']);
 $router->post('/patienten', [PatientController::class, 'store'], ['auth']);
 $router->get('/patienten/{id}', [PatientController::class, 'show'], ['auth']);
 $router->get('/patienten/{id}/json', [PatientController::class, 'showJson'], ['auth']);

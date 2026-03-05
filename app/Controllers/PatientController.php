@@ -342,6 +342,93 @@ class PatientController extends Controller
         exit;
     }
 
+    public function wizard(array $params = []): void
+    {
+        $this->render('patients/wizard.twig', [
+            'page_title' => 'Neuer Patient',
+        ]);
+    }
+
+    public function ownerSearch(array $params = []): void
+    {
+        $q      = trim($this->get('q', ''));
+        $owners = [];
+        if (strlen($q) >= 2) {
+            $all = $this->ownerService->findAll();
+            foreach ($all as $o) {
+                $name = strtolower(($o['first_name'] ?? '') . ' ' . ($o['last_name'] ?? '') . ' ' . ($o['email'] ?? ''));
+                if (str_contains($name, strtolower($q))) {
+                    $animals = $this->patientService->findByOwner((int)$o['id']);
+                    $o['animal_count'] = count($animals);
+                    $o['animals']      = array_map(fn($a) => ['id' => $a['id'], 'name' => $a['name'], 'species' => $a['species'] ?? ''], $animals);
+                    $owners[] = $o;
+                }
+                if (count($owners) >= 8) break;
+            }
+        }
+        header('Content-Type: application/json');
+        echo json_encode($owners);
+        exit;
+    }
+
+    public function wizardStore(array $params = []): void
+    {
+        $this->validateCsrf();
+
+        $ownerMode = $this->post('owner_mode', 'existing'); // 'existing' | 'new'
+        $ownerId   = 0;
+
+        if ($ownerMode === 'new') {
+            $ownerData = [
+                'first_name' => $this->sanitize($this->post('owner_first_name', '')),
+                'last_name'  => $this->sanitize($this->post('owner_last_name', '')),
+                'email'      => $this->sanitize($this->post('owner_email', '')),
+                'phone'      => $this->sanitize($this->post('owner_phone', '')),
+                'street'     => $this->sanitize($this->post('owner_street', '')),
+                'zip'        => $this->sanitize($this->post('owner_zip', '')),
+                'city'       => $this->sanitize($this->post('owner_city', '')),
+                'notes'      => $this->post('owner_notes', ''),
+            ];
+            if (empty($ownerData['first_name']) || empty($ownerData['last_name'])) {
+                $this->session->flash('error', 'Bitte Vor- und Nachname des Tierhalters angeben.');
+                $this->redirect('/patienten/neu');
+                return;
+            }
+            $ownerId = (int)$this->ownerService->create($ownerData);
+        } else {
+            $ownerId = (int)$this->post('owner_id', 0);
+        }
+
+        if (!$ownerId) {
+            $this->session->flash('error', 'Bitte einen Tierhalter auswählen oder neu anlegen.');
+            $this->redirect('/patienten/neu');
+            return;
+        }
+
+        $patientData = [
+            'name'        => $this->sanitize($this->post('name', '')),
+            'species'     => $this->sanitize($this->post('species', '')),
+            'breed'       => $this->sanitize($this->post('breed', '')),
+            'birth_date'  => $this->post('birth_date', null) ?: null,
+            'gender'      => $this->sanitize($this->post('gender', '')),
+            'color'       => $this->sanitize($this->post('color', '')),
+            'chip_number' => $this->sanitize($this->post('chip_number', '')),
+            'notes'       => $this->post('notes', ''),
+            'status'      => 'aktiv',
+            'owner_id'    => $ownerId,
+        ];
+
+        if (empty($patientData['name'])) {
+            $this->session->flash('error', 'Bitte einen Namen für den Patienten angeben.');
+            $this->redirect('/patienten/neu');
+            return;
+        }
+
+        $patientId = (int)$this->patientService->create($patientData);
+        $this->session->flash('success', 'Patient "' . $patientData['name'] . '" wurde erfolgreich angelegt.');
+        $this->redirect("/patienten/{$patientId}");
+    }
+
     public function downloadPatientPdf(array $params = []): void
     {
         $patient = $this->patientService->findById((int)$params['id']);

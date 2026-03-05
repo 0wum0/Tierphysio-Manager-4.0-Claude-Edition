@@ -1,0 +1,581 @@
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
+
+{% block content %}
+<div class="page-header">
+    <div class="flex items-center gap-3">
+        <a href="/patienten" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+            Zurück
+        </a>
+        <div>
+            <h1 class="page-title">Neuer Patient</h1>
+            <p class="page-subtitle">Tierhalter zuordnen und Tier anlegen</p>
+        </div>
+    </div>
+</div>
+
+<style>
+/* ── Wizard Layout ── */
+.wizard-wrap { max-width: 720px; margin: 0 auto; }
+
+/* ── Step indicator ── */
+.wizard-steps {
+    display: flex;
+    align-items: center;
+    margin-bottom: 2rem;
+    gap: 0;
+}
+.wstep {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    position: relative;
+}
+.wstep:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    top: 18px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: var(--bs-border-color);
+    z-index: 0;
+    transition: background .3s;
+}
+.wstep.done:not(:last-child)::after { background: var(--bs-primary); }
+.wstep-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    border: 2px solid var(--bs-border-color);
+    background: var(--bs-body-bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .8rem; font-weight: 700;
+    color: var(--bs-secondary-color);
+    position: relative; z-index: 1;
+    transition: all .25s;
+}
+.wstep.active .wstep-circle {
+    border-color: var(--bs-primary);
+    background: var(--bs-primary);
+    color: #fff;
+    box-shadow: 0 0 12px 3px color-mix(in srgb, var(--bs-primary) 40%, transparent);
+}
+.wstep.done .wstep-circle {
+    border-color: #22c55e;
+    background: #22c55e;
+    color: #fff;
+}
+.wstep-label {
+    font-size: .72rem;
+    margin-top: .35rem;
+    color: var(--bs-secondary-color);
+    font-weight: 500;
+    white-space: nowrap;
+}
+.wstep.active .wstep-label { color: var(--bs-primary); font-weight: 700; }
+.wstep.done  .wstep-label  { color: #22c55e; }
+
+/* ── Panels ── */
+.wpanel { display: none; }
+.wpanel.active { display: block; animation: wfadeIn .3s ease; }
+@keyframes wfadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ── Owner search ── */
+.owner-search-wrap { position: relative; }
+.owner-results {
+    position: absolute;
+    top: calc(100% + 4px); left: 0; right: 0;
+    background: var(--bs-tertiary-bg);
+    border: 1px solid var(--bs-border-color);
+    border-radius: 10px;
+    z-index: 100;
+    max-height: 280px;
+    overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,.18);
+    display: none;
+}
+.owner-results.open { display: block; }
+.owner-result-item {
+    padding: .65rem .9rem;
+    cursor: pointer;
+    border-bottom: 1px solid var(--bs-border-color);
+    transition: background .15s;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+}
+.owner-result-item:last-child { border-bottom: none; }
+.owner-result-item:hover { background: var(--bs-secondary-bg); }
+.owner-result-item.selected { background: color-mix(in srgb, var(--bs-primary) 12%, transparent); }
+.owner-avatar {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--bs-primary);
+    color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .75rem; font-weight: 700;
+    flex-shrink: 0;
+}
+.owner-result-name { font-weight: 600; font-size: .88rem; }
+.owner-result-meta { font-size: .75rem; color: var(--bs-secondary-color); }
+.owner-animals-chips { display: flex; flex-wrap: wrap; gap: .25rem; margin-top: .2rem; }
+.animal-chip {
+    font-size: .65rem;
+    padding: .1rem .4rem;
+    border-radius: 999px;
+    background: color-mix(in srgb, var(--bs-primary) 15%, transparent);
+    color: var(--bs-primary);
+    border: 1px solid color-mix(in srgb, var(--bs-primary) 30%, transparent);
+}
+
+/* ── Selected owner card ── */
+.selected-owner-card {
+    display: none;
+    background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--bs-primary) 25%, transparent);
+    border-radius: 12px;
+    padding: .9rem 1.1rem;
+    margin-top: .75rem;
+    align-items: center;
+    gap: .75rem;
+}
+.selected-owner-card.show { display: flex; }
+
+/* ── Mode tabs ── */
+.mode-tabs { display: flex; gap: .5rem; margin-bottom: 1.5rem; }
+.mode-tab {
+    flex: 1;
+    padding: .6rem;
+    text-align: center;
+    font-size: .82rem;
+    font-weight: 600;
+    border-radius: 10px;
+    border: 2px solid var(--bs-border-color);
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+    color: var(--bs-secondary-color);
+}
+.mode-tab.active {
+    border-color: var(--bs-primary);
+    color: var(--bs-primary);
+    background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+}
+
+/* ── Species cards ── */
+.species-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: .65rem; margin-bottom: 1rem; }
+@media (max-width: 500px) { .species-grid { grid-template-columns: repeat(2, 1fr); } }
+.species-card {
+    border: 2px solid var(--bs-border-color);
+    border-radius: 12px;
+    padding: .75rem .5rem;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s;
+    background: transparent;
+}
+.species-card:hover { border-color: var(--bs-primary); }
+.species-card.active {
+    border-color: var(--bs-primary);
+    background: color-mix(in srgb, var(--bs-primary) 10%, transparent);
+}
+.species-card .s-icon { font-size: 1.6rem; display: block; margin-bottom: .3rem; }
+.species-card .s-name { font-size: .72rem; font-weight: 600; color: var(--bs-body-color); }
+
+/* ── Summary card ── */
+.summary-row { display: flex; justify-content: space-between; padding: .45rem 0; border-bottom: 1px solid var(--bs-border-color); font-size: .88rem; }
+.summary-row:last-child { border-bottom: none; }
+.summary-label { color: var(--bs-secondary-color); font-size: .8rem; }
+
+/* ── Nav ── */
+.wizard-nav { display: flex; justify-content: space-between; align-items: center; margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--bs-border-color); }
+</style>
+
+<div class="wizard-wrap">
+
+    {# Step indicator #}
+    <div class="wizard-steps" id="wizard-steps">
+        <div class="wstep active" id="wstep-1">
+            <div class="wstep-circle">1</div>
+            <div class="wstep-label">Tierhalter</div>
+        </div>
+        <div class="wstep" id="wstep-2">
+            <div class="wstep-circle">2</div>
+            <div class="wstep-label">Tier</div>
+        </div>
+        <div class="wstep" id="wstep-3">
+            <div class="wstep-circle">3</div>
+            <div class="wstep-label">Bestätigung</div>
+        </div>
+    </div>
+
+    <form action="/patienten/wizard" method="POST" id="wizard-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+        <input type="hidden" name="owner_mode" id="owner_mode" value="existing">
+        <input type="hidden" name="owner_id" id="hidden_owner_id" value="">
+        <input type="hidden" name="species" id="hidden_species" value="">
+
+        {# ══════════ STEP 1: Tierhalter ══════════ #}
+        <div class="wpanel active" id="wpanel-1">
+            <div class="glass-card">
+                <h4 class="fw-700 mb-1" style="font-size:1rem;">Tierhalter zuordnen</h4>
+                <p style="font-size:.82rem;color:var(--bs-secondary-color);margin-bottom:1.25rem;">Suche einen bestehenden Tierhalter oder lege einen neuen an.</p>
+
+                <div class="mode-tabs">
+                    <button type="button" class="mode-tab active" id="tab-existing" onclick="setOwnerMode('existing')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:4px;"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="m21 21-4.35-4.35"/></svg>
+                        Bestehenden suchen
+                    </button>
+                    <button type="button" class="mode-tab" id="tab-new" onclick="setOwnerMode('new')">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" style="vertical-align:-2px;margin-right:4px;"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+                        Neuen anlegen
+                    </button>
+                </div>
+
+                {# ── Existing owner search ── #}
+                <div id="panel-existing">
+                    <div class="owner-search-wrap">
+                        <input type="text" id="owner-search-input" class="form-control" placeholder="Name oder E-Mail suchen…" autocomplete="off">
+                        <div class="owner-results" id="owner-results"></div>
+                    </div>
+                    <div class="selected-owner-card" id="selected-owner-card">
+                        <div class="owner-avatar" id="soc-avatar"></div>
+                        <div style="flex:1">
+                            <div class="fw-700" id="soc-name"></div>
+                            <div style="font-size:.75rem;color:var(--bs-secondary-color);" id="soc-meta"></div>
+                            <div class="owner-animals-chips" id="soc-animals"></div>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="clearOwner()">Ändern</button>
+                    </div>
+                    <p id="no-owner-hint" class="mt-2" style="font-size:.78rem;color:var(--bs-secondary-color);display:none;">Kein Ergebnis — wechsle zu „Neuen anlegen".</p>
+                </div>
+
+                {# ── New owner form ── #}
+                <div id="panel-new" style="display:none;">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Vorname *</label>
+                            <input type="text" name="owner_first_name" id="owner_first_name" class="form-control" placeholder="Max">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Nachname *</label>
+                            <input type="text" name="owner_last_name" id="owner_last_name" class="form-control" placeholder="Mustermann">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">E-Mail</label>
+                            <input type="email" name="owner_email" class="form-control" placeholder="max@beispiel.de">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Telefon</label>
+                            <input type="tel" name="owner_phone" class="form-control" placeholder="+49 123 456789">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Straße &amp; Hausnummer</label>
+                            <input type="text" name="owner_street" class="form-control" placeholder="Musterstraße 1">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">PLZ</label>
+                            <input type="text" name="owner_zip" class="form-control" placeholder="12345">
+                        </div>
+                        <div class="col-md-8">
+                            <label class="form-label">Stadt</label>
+                            <input type="text" name="owner_city" class="form-control" placeholder="Musterstadt">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-nav">
+                <a href="/patienten" class="btn btn-secondary">Abbrechen</a>
+                <button type="button" class="btn btn-primary" onclick="goStep(2)">
+                    Weiter: Tier
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+
+        {# ══════════ STEP 2: Tier ══════════ #}
+        <div class="wpanel" id="wpanel-2">
+            <div class="glass-card">
+                <h4 class="fw-700 mb-1" style="font-size:1rem;">Tier-Daten</h4>
+                <p style="font-size:.82rem;color:var(--bs-secondary-color);margin-bottom:1.25rem;">Alle Angaben außer Name sind optional.</p>
+
+                {# Species picker #}
+                <label class="form-label">Tierart</label>
+                <div class="species-grid" id="species-grid">
+                    <button type="button" class="species-card" onclick="pickSpecies('Hund',this)"><span class="s-icon">🐕</span><span class="s-name">Hund</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Katze',this)"><span class="s-icon">🐈</span><span class="s-name">Katze</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Pferd',this)"><span class="s-icon">🐎</span><span class="s-name">Pferd</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Kaninchen',this)"><span class="s-icon">🐇</span><span class="s-name">Kaninchen</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Vogel',this)"><span class="s-icon">🐦</span><span class="s-name">Vogel</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Reptil',this)"><span class="s-icon">🦎</span><span class="s-name">Reptil</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('Nager',this)"><span class="s-icon">🐹</span><span class="s-name">Nager</span></button>
+                    <button type="button" class="species-card" onclick="pickSpecies('',this,'other')"><span class="s-icon">🐾</span><span class="s-name">Andere</span></button>
+                </div>
+                <div id="species-other-wrap" style="display:none;margin-bottom:1rem;">
+                    <input type="text" id="species-other-input" class="form-control" placeholder="Tierart eingeben…" oninput="document.getElementById('hidden_species').value=this.value">
+                </div>
+
+                <div class="row g-3 mt-1">
+                    <div class="col-12">
+                        <label class="form-label">Name des Tieres *</label>
+                        <input type="text" name="name" id="patient_name" class="form-control" placeholder="Bello" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Rasse</label>
+                        <input type="text" name="breed" class="form-control" placeholder="z.B. Labrador">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Geschlecht</label>
+                        <select name="gender" class="form-control">
+                            <option value="">— wählen —</option>
+                            <option value="männlich">männlich</option>
+                            <option value="weiblich">weiblich</option>
+                            <option value="kastriert">kastriert</option>
+                            <option value="sterilisiert">sterilisiert</option>
+                            <option value="unbekannt">unbekannt</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Geburtsdatum</label>
+                        <input type="date" name="birth_date" class="form-control">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">Farbe / Fellfarbe</label>
+                        <input type="text" name="color" class="form-control" placeholder="z.B. braun-weiß">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Chip-Nummer</label>
+                        <input type="text" name="chip_number" class="form-control" placeholder="15-stellige Transponder-Nr.">
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label">Notizen</label>
+                        <textarea name="notes" class="form-control" rows="3" placeholder="Besonderheiten, Allergien, Vorerkrankungen…"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="wizard-nav">
+                <button type="button" class="btn btn-secondary" onclick="goStep(1)">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+                    Zurück
+                </button>
+                <button type="button" class="btn btn-primary" onclick="goStep(3)">
+                    Weiter: Prüfen
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        </div>
+
+        {# ══════════ STEP 3: Bestätigung ══════════ #}
+        <div class="wpanel" id="wpanel-3">
+            <div class="glass-card">
+                <h4 class="fw-700 mb-3" style="font-size:1rem;">Zusammenfassung</h4>
+
+                <p class="fw-600 mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--bs-secondary-color);">Tierhalter</p>
+                <div class="mb-3 p-3" style="background:var(--bs-secondary-bg);border-radius:10px;" id="summary-owner">—</div>
+
+                <p class="fw-600 mb-1" style="font-size:.78rem;text-transform:uppercase;letter-spacing:.05em;color:var(--bs-secondary-color);">Patient</p>
+                <div style="background:var(--bs-secondary-bg);border-radius:10px;padding:.75rem 1rem;" id="summary-patient"></div>
+            </div>
+
+            <div class="wizard-nav">
+                <button type="button" class="btn btn-secondary" onclick="goStep(2)">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
+                    Zurück
+                </button>
+                <button type="submit" class="btn btn-primary" id="btn-submit">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 6L9 17l-5-5"/></svg>
+                    Patienten anlegen
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+(function () {
+    /* ── State ── */
+    let currentStep = 1;
+    let selectedOwner = null;
+    let ownerMode = 'existing';
+    let searchTimeout = null;
+
+    /* ── Step navigation ── */
+    window.goStep = function (step) {
+        if (step === 2 && !validateStep1()) return;
+        if (step === 3 && !validateStep2()) return;
+        if (step === 3) buildSummary();
+
+        document.getElementById('wpanel-' + currentStep).classList.remove('active');
+        document.getElementById('wpanel-' + step).classList.add('active');
+
+        for (let i = 1; i <= 3; i++) {
+            const el = document.getElementById('wstep-' + i);
+            el.classList.remove('active', 'done');
+            if (i < step)  el.classList.add('done');
+            if (i === step) el.classList.add('active');
+        }
+        currentStep = step;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    function validateStep1() {
+        if (ownerMode === 'existing') {
+            if (!selectedOwner) {
+                alert('Bitte einen Tierhalter auswählen.');
+                return false;
+            }
+        } else {
+            const fn = document.getElementById('owner_first_name').value.trim();
+            const ln = document.getElementById('owner_last_name').value.trim();
+            if (!fn || !ln) {
+                alert('Bitte Vor- und Nachname des Tierhalters angeben.');
+                return false;
+            }
+        }
+        return true;
+    }
+
+    function validateStep2() {
+        const name = document.getElementById('patient_name').value.trim();
+        if (!name) {
+            alert('Bitte einen Namen für den Patienten angeben.');
+            document.getElementById('patient_name').focus();
+            return false;
+        }
+        return true;
+    }
+
+    /* ── Owner mode toggle ── */
+    window.setOwnerMode = function (mode) {
+        ownerMode = mode;
+        document.getElementById('owner_mode').value = mode;
+        document.getElementById('tab-existing').classList.toggle('active', mode === 'existing');
+        document.getElementById('tab-new').classList.toggle('active', mode === 'new');
+        document.getElementById('panel-existing').style.display = mode === 'existing' ? '' : 'none';
+        document.getElementById('panel-new').style.display = mode === 'new' ? '' : 'none';
+    };
+
+    /* ── Owner search ── */
+    const searchInput  = document.getElementById('owner-search-input');
+    const resultsBox   = document.getElementById('owner-results');
+
+    searchInput.addEventListener('input', function () {
+        clearTimeout(searchTimeout);
+        const q = this.value.trim();
+        if (q.length < 2) { resultsBox.classList.remove('open'); return; }
+        searchTimeout = setTimeout(() => fetchOwners(q), 250);
+    });
+
+    document.addEventListener('click', function (e) {
+        if (!e.target.closest('.owner-search-wrap')) resultsBox.classList.remove('open');
+    });
+
+    function fetchOwners(q) {
+        fetch('/api/tierhalter/suche?q=' + encodeURIComponent(q))
+            .then(r => r.json())
+            .then(data => {
+                if (!data.length) {
+                    resultsBox.innerHTML = '<div style="padding:.75rem 1rem;font-size:.82rem;color:var(--bs-secondary-color);">Keine Ergebnisse</div>';
+                } else {
+                    resultsBox.innerHTML = data.map(o => {
+                        const initials = ((o.first_name||'').charAt(0) + (o.last_name||'').charAt(0)).toUpperCase();
+                        const animals  = (o.animals||[]).map(a => `<span class="animal-chip">${a.name}</span>`).join('');
+                        const meta     = [o.phone, o.email].filter(Boolean).join(' · ');
+                        return `<div class="owner-result-item" onclick="selectOwner(${JSON.stringify(o).replace(/"/g,'&quot;')})">
+                            <div class="owner-avatar">${initials}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="owner-result-name">${o.first_name} ${o.last_name} <span style="font-size:.65rem;opacity:.6;">Kunden-Nr. ${String(o.id).padStart(4,'0')}</span></div>
+                                ${meta ? `<div class="owner-result-meta">${meta}</div>` : ''}
+                                ${animals ? `<div class="owner-animals-chips mt-1">${animals}</div>` : ''}
+                            </div>
+                        </div>`;
+                    }).join('');
+                }
+                resultsBox.classList.add('open');
+            });
+    }
+
+    window.selectOwner = function (o) {
+        selectedOwner = o;
+        document.getElementById('hidden_owner_id').value = o.id;
+        resultsBox.classList.remove('open');
+        searchInput.value = o.first_name + ' ' + o.last_name;
+
+        const initials = ((o.first_name||'').charAt(0) + (o.last_name||'').charAt(0)).toUpperCase();
+        const meta = [o.phone, o.email].filter(Boolean).join(' · ');
+        const animalHtml = (o.animals||[]).map(a => `<span class="animal-chip">${a.name}</span>`).join('');
+        document.getElementById('soc-avatar').textContent  = initials;
+        document.getElementById('soc-name').textContent    = o.first_name + ' ' + o.last_name + ' — Kunden-Nr. ' + String(o.id).padStart(4,'0');
+        document.getElementById('soc-meta').textContent    = meta;
+        document.getElementById('soc-animals').innerHTML   = animalHtml ? '<span style="font-size:.7rem;color:var(--bs-secondary-color);">Bestehende Tiere: </span>' + animalHtml : '';
+        document.getElementById('selected-owner-card').classList.add('show');
+        searchInput.style.display = 'none';
+    };
+
+    window.clearOwner = function () {
+        selectedOwner = null;
+        document.getElementById('hidden_owner_id').value = '';
+        document.getElementById('selected-owner-card').classList.remove('show');
+        searchInput.style.display = '';
+        searchInput.value = '';
+        searchInput.focus();
+    };
+
+    /* ── Species picker ── */
+    window.pickSpecies = function (val, btn, type) {
+        document.querySelectorAll('.species-card').forEach(c => c.classList.remove('active'));
+        btn.classList.add('active');
+        const otherWrap = document.getElementById('species-other-wrap');
+        if (type === 'other') {
+            otherWrap.style.display = '';
+            document.getElementById('hidden_species').value = document.getElementById('species-other-input').value;
+        } else {
+            otherWrap.style.display = 'none';
+            document.getElementById('hidden_species').value = val;
+        }
+    };
+
+    /* ── Summary ── */
+    function buildSummary() {
+        // Owner
+        let ownerHtml = '';
+        if (ownerMode === 'existing' && selectedOwner) {
+            const o = selectedOwner;
+            ownerHtml = `<strong>${o.first_name} ${o.last_name}</strong> <span style="font-size:.72rem;opacity:.7;">Kunden-Nr. ${String(o.id).padStart(4,'0')}</span>`;
+            if (o.email) ownerHtml += `<br><span style="font-size:.8rem;color:var(--bs-secondary-color);">${o.email}</span>`;
+            if (o.phone) ownerHtml += ` · ${o.phone}`;
+        } else {
+            const fn = document.getElementById('owner_first_name').value;
+            const ln = document.getElementById('owner_last_name').value;
+            ownerHtml = `<strong>${fn} ${ln}</strong> <span style="font-size:.72rem;background:#22c55e22;color:#22c55e;padding:.1rem .4rem;border-radius:999px;">Neu</span>`;
+        }
+        document.getElementById('summary-owner').innerHTML = ownerHtml;
+
+        // Patient
+        const form = document.getElementById('wizard-form');
+        const get  = name => form.querySelector('[name="' + name + '"]')?.value || '—';
+        const species = document.getElementById('hidden_species').value || '—';
+        const rows = [
+            ['Name',         get('name')],
+            ['Tierart',      species],
+            ['Rasse',        get('breed')],
+            ['Geschlecht',   get('gender')],
+            ['Geburtsdatum', get('birth_date')],
+            ['Chip-Nr.',     get('chip_number')],
+        ].filter(([, v]) => v && v !== '—');
+
+        document.getElementById('summary-patient').innerHTML =
+            rows.map(([l, v]) => `<div class="summary-row"><span class="summary-label">${l}</span><span>${v}</span></div>`).join('');
+    }
+
+    /* ── prevent submit on enter in search ── */
+    searchInput.addEventListener('keydown', e => { if (e.key === 'Enter') e.preventDefault(); });
+
+    /* ── pre-select existing mode ── */
+    setOwnerMode('existing');
+})();
+</script>
+{% endblock %}
