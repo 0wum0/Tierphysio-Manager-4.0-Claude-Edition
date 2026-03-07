@@ -150,13 +150,6 @@
                 }
 
                 function openPatientFromSearch(id){
-                    // If we are on the patient list page, use the existing modal
-                    var modal = document.getElementById('modal-patient-detail');
-                    if(modal && typeof showPatientModal === 'function'){
-                        showPatientModal(id);
-                        return;
-                    }
-                    // Otherwise navigate to the patient page
                     window.location.href = '/patienten/' + id;
                 }
 
