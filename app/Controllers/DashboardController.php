@@ -34,11 +34,14 @@ class DashboardController extends Controller
         $user           = $this->session->getUser();
         $savedLayout    = $user ? $this->dashboardService->loadLayout((int)$user['id']) : null;
 
+        $birthdays = $this->dashboardService->getUpcomingBirthdays(14);
+
         $this->render('dashboard/index.twig', [
-            'page_title'      => $this->translator->trans('nav.dashboard'),
-            'stats'           => $stats,
-            'plugin_widgets'  => $widgets,
-            'saved_layout'    => $savedLayout,
+            'page_title'          => $this->translator->trans('nav.dashboard'),
+            'stats'               => $stats,
+            'plugin_widgets'      => $widgets,
+            'saved_layout'        => $savedLayout,
+            'upcoming_birthdays'  => $birthdays,
         ]);
     }
 

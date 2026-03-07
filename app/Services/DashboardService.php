@@ -37,6 +37,82 @@ class DashboardService
         return $this->invoiceRepository->getChartData($type);
     }
 
+    public function getUpcomingBirthdays(int $days = 14): array
+    {
+        $today    = new \DateTimeImmutable('today');
+        $upcoming = [];
+
+        // Patients with birth_date
+        $patients = $this->db->fetchAll(
+            "SELECT p.id, p.name, p.birth_date, p.species, 'patient' AS type,
+                    CONCAT(o.first_name, ' ', o.last_name) AS owner_name, o.id AS owner_id
+             FROM patients p
+             LEFT JOIN owners o ON p.owner_id = o.id
+             WHERE p.birth_date IS NOT NULL AND p.status != 'verstorben'"
+        );
+
+        foreach ($patients as $row) {
+            $bday = $this->nextBirthday($row['birth_date'], $today);
+            if ($bday === null) continue;
+            $diff = (int)$today->diff($bday)->days;
+            if ($diff <= $days) {
+                $upcoming[] = [
+                    'type'       => 'patient',
+                    'id'         => $row['id'],
+                    'name'       => $row['name'],
+                    'sub'        => $row['species'] ? $row['species'] . ($row['owner_name'] ? ' · ' . $row['owner_name'] : '') : ($row['owner_name'] ?? ''),
+                    'link'       => '/patienten/' . $row['id'],
+                    'birth_date' => $row['birth_date'],
+                    'next_bday'  => $bday->format('Y-m-d'),
+                    'diff_days'  => $diff,
+                    'age_next'   => (int)$bday->format('Y') - (int)substr($row['birth_date'], 0, 4),
+                ];
+            }
+        }
+
+        // Owners with birth_date
+        $owners = $this->db->fetchAll(
+            "SELECT id, first_name, last_name, birth_date FROM owners WHERE birth_date IS NOT NULL"
+        );
+
+        foreach ($owners as $row) {
+            $bday = $this->nextBirthday($row['birth_date'], $today);
+            if ($bday === null) continue;
+            $diff = (int)$today->diff($bday)->days;
+            if ($diff <= $days) {
+                $upcoming[] = [
+                    'type'       => 'owner',
+                    'id'         => $row['id'],
+                    'name'       => $row['first_name'] . ' ' . $row['last_name'],
+                    'sub'        => 'Tierhalter',
+                    'link'       => '/tierhalter/' . $row['id'],
+                    'birth_date' => $row['birth_date'],
+                    'next_bday'  => $bday->format('Y-m-d'),
+                    'diff_days'  => $diff,
+                    'age_next'   => (int)$bday->format('Y') - (int)substr($row['birth_date'], 0, 4),
+                ];
+            }
+        }
+
+        usort($upcoming, fn($a, $b) => $a['diff_days'] <=> $b['diff_days']);
+        return $upcoming;
+    }
+
+    private function nextBirthday(string $birthDate, \DateTimeImmutable $today): ?\DateTimeImmutable
+    {
+        try {
+            $bd   = new \DateTimeImmutable($birthDate);
+            $thisYear = $today->format('Y');
+            $next = new \DateTimeImmutable($thisYear . '-' . $bd->format('m-d'));
+            if ($next < $today) {
+                $next = $next->modify('+1 year');
+            }
+            return $next;
+        } catch (\Throwable) {
+            return null;
+        }
+    }
+
     public function saveLayout(int $userId, array $layout): void
     {
         $this->db->execute(

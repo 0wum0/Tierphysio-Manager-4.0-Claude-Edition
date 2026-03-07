@@ -118,16 +118,17 @@ class PatientController extends Controller
         $this->validateCsrf();
 
         $data = [
-            'name'       => $this->sanitize($this->post('name', '')),
-            'species'    => $this->sanitize($this->post('species', '')),
-            'breed'      => $this->sanitize($this->post('breed', '')),
-            'birth_date' => $this->post('birth_date', null),
-            'gender'     => $this->sanitize($this->post('gender', '')),
-            'color'      => $this->sanitize($this->post('color', '')),
-            'chip_number'=> $this->sanitize($this->post('chip_number', '')),
-            'owner_id'   => (int)$this->post('owner_id', 0),
-            'notes'      => $this->post('notes', ''),
-            'status'     => $this->sanitize($this->post('status', 'aktiv')),
+            'name'          => $this->sanitize($this->post('name', '')),
+            'species'       => $this->sanitize($this->post('species', '')),
+            'breed'         => $this->sanitize($this->post('breed', '')),
+            'birth_date'    => $this->post('birth_date', null),
+            'gender'        => $this->sanitize($this->post('gender', '')),
+            'color'         => $this->sanitize($this->post('color', '')),
+            'chip_number'   => $this->sanitize($this->post('chip_number', '')),
+            'owner_id'      => (int)$this->post('owner_id', 0),
+            'notes'         => $this->post('notes', ''),
+            'status'        => $this->sanitize($this->post('status', 'aktiv')),
+            'deceased_date' => $this->post('deceased_date', null) ?: null,
         ];
 
         if (empty($data['name']) || empty($data['owner_id'])) {
@@ -151,16 +152,17 @@ class PatientController extends Controller
         }
 
         $data = [
-            'name'       => $this->sanitize($this->post('name', '')),
-            'species'    => $this->sanitize($this->post('species', '')),
-            'breed'      => $this->sanitize($this->post('breed', '')),
-            'birth_date' => $this->post('birth_date', null),
-            'gender'     => $this->sanitize($this->post('gender', '')),
-            'color'      => $this->sanitize($this->post('color', '')),
-            'chip_number'=> $this->sanitize($this->post('chip_number', '')),
-            'owner_id'   => (int)$this->post('owner_id', 0),
-            'notes'      => $this->post('notes', ''),
-            'status'     => $this->sanitize($this->post('status', 'aktiv')),
+            'name'          => $this->sanitize($this->post('name', '')),
+            'species'       => $this->sanitize($this->post('species', '')),
+            'breed'         => $this->sanitize($this->post('breed', '')),
+            'birth_date'    => $this->post('birth_date', null),
+            'gender'        => $this->sanitize($this->post('gender', '')),
+            'color'         => $this->sanitize($this->post('color', '')),
+            'chip_number'   => $this->sanitize($this->post('chip_number', '')),
+            'owner_id'      => (int)$this->post('owner_id', 0),
+            'notes'         => $this->post('notes', ''),
+            'status'        => $this->sanitize($this->post('status', 'aktiv')),
+            'deceased_date' => $this->post('deceased_date', null) ?: null,
         ];
 
         $this->patientService->update((int)$params['id'], $data);

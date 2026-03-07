@@ -34,7 +34,7 @@
    ════════════════════════════════════════════════════════════════ #}
 
 {# Build ordered panel list: saved order first, then any new panels appended #}
-{% set all_panels = ['panel-kpi-revenue', 'panel-revenue-chart', 'panel-activity-kpis', 'panel-quick-actions'] %}
+{% set all_panels = ['panel-kpi-revenue', 'panel-revenue-chart', 'panel-activity-kpis', 'panel-quick-actions', 'panel-birthdays'] %}
 {% for w in plugin_widgets %}{% set all_panels = all_panels|merge([w.id]) %}{% endfor %}
 {% set ordered_panels = saved_layout ?? all_panels %}
 {% for id in all_panels %}{% if id not in ordered_panels %}{% set ordered_panels = ordered_panels|merge([id]) %}{% endif %}{% endfor %}
@@ -241,6 +241,63 @@
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                             <span>{{ stats.overdue_count }} {{ t('dashboard.overdue_invoices') }}</span>
                         </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        {# ── Panel: Upcoming Birthdays ── #}
+        {% if panel_id == 'panel-birthdays' %}
+        <div class="col-xl-4 col-lg-5 col-12" data-panel-id="panel-birthdays">
+            <div class="panel" id="panel-birthdays">
+                <div class="panel-hdr">
+                    <h2>
+                        <svg class="sa-icon sa-icon-warning me-2" width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path stroke="currentColor" stroke-width="2" d="M16 3v4M8 3v4M3 11h18"/></svg>
+                        Geburtstage <small class="text-muted fw-normal ms-1" style="font-size:.75rem;">nächste 14 Tage</small>
+                    </h2>
+                    <div class="panel-toolbar">
+                        <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
+                        <button class="btn btn-panel" data-action="panel-fullscreen" title="Vollbild"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#maximize-2"></use></svg></button>
+                    </div>
+                </div>
+                <div class="panel-container">
+                    <div class="panel-content p-0">
+                        {% if upcoming_birthdays is empty %}
+                            <div class="d-flex flex-column align-items-center justify-content-center py-4 text-muted">
+                                <svg width="28" height="28" fill="none" viewBox="0 0 24 24" class="mb-2 opacity-50"><path stroke="currentColor" stroke-width="1.5" d="M20 7H4a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/><path stroke="currentColor" stroke-width="1.5" d="M16 3v4M8 3v4M3 11h18"/></svg>
+                                <span class="fs-sm">Keine Geburtstage in den nächsten 14 Tagen</span>
+                            </div>
+                        {% else %}
+                        <div class="list-group list-group-flush rounded-0">
+                            {% for b in upcoming_birthdays %}
+                            <a href="{{ b.link }}" class="list-group-item list-group-item-action d-flex align-items-center gap-3 px-3 py-2 text-decoration-none">
+                                <div class="d-flex align-items-center justify-content-center rounded-circle flex-shrink-0"
+                                     style="width:36px;height:36px;background:{% if b.diff_days == 0 %}rgba(245,158,11,0.15){% elseif b.diff_days <= 3 %}rgba(239,68,68,0.1){% else %}rgba(79,124,255,0.1){% endif %};">
+                                    {% if b.type == 'patient' %}
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="color:{% if b.diff_days == 0 %}#f59e0b{% elseif b.diff_days <= 3 %}#ef4444{% else %}#4f7cff{% endif %};"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+                                    {% else %}
+                                        <svg width="16" height="16" fill="none" viewBox="0 0 24 24" style="color:{% if b.diff_days == 0 %}#f59e0b{% elseif b.diff_days <= 3 %}#ef4444{% else %}#a855f7{% endif %};"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
+                                    {% endif %}
+                                </div>
+                                <div class="flex-grow-1 min-width-0">
+                                    <div class="fw-600 fs-sm text-truncate">{{ b.name }}</div>
+                                    {% if b.sub %}<div class="text-muted" style="font-size:.72rem;">{{ b.sub }}</div>{% endif %}
+                                </div>
+                                <div class="text-end flex-shrink-0">
+                                    {% if b.diff_days == 0 %}
+                                        <span class="badge bg-warning text-dark">Heute 🎂</span>
+                                    {% elseif b.diff_days == 1 %}
+                                        <span class="badge bg-danger">Morgen</span>
+                                    {% else %}
+                                        <span class="badge bg-light text-muted border">in {{ b.diff_days }}d</span>
+                                    {% endif %}
+                                    <div class="text-muted mt-1" style="font-size:.68rem;">wird {{ b.age_next }}</div>
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
                         {% endif %}
                     </div>
                 </div>

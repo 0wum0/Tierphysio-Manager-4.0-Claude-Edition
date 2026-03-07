@@ -114,10 +114,10 @@
         </form>
     </div>
 
-    {# Right: Timeline #}
+    {# Right: Akte #}
     <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:1rem;">
 
-        {# Add Timeline Entry #}
+        {# Add Akte Entry #}
         <div class="glass-card">
             <h3 class="font-semibold mb-3" style="font-size:0.95rem;">{{ t('patients.add_entry') }}</h3>
             <form action="/patienten/{{ patient.id }}/timeline" method="POST" enctype="multipart/form-data">
@@ -171,9 +171,9 @@
             </form>
         </div>
 
-        {# Timeline #}
+        {# Akte #}
         <div class="glass-card">
-            <h3 class="font-semibold mb-4" style="font-size:0.95rem;">{{ t('patients.timeline') }}</h3>
+            <h3 class="font-semibold mb-4" style="font-size:0.95rem;">Akte</h3>
 
             {% if timeline %}
                 <div class="timeline">
@@ -252,9 +252,7 @@
     <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('common.edit') }}: {{ patient.name }}</h3>
-            <button class="modal-close" data-bs-dismiss="modal" type="button">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
         </div>
         <form action="/patienten/{{ patient.id }}" method="POST" style="display:contents;">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
@@ -300,7 +298,12 @@
                             <option value="schmerzfrei" {{ patient.status == 'schmerzfrei' ? 'selected' : '' }}>Schmerzfrei</option>
                             <option value="kontrolltermin" {{ patient.status == 'kontrolltermin' ? 'selected' : '' }}>Kontrolltermin</option>
                             <option value="inaktiv" {{ patient.status == 'inaktiv' ? 'selected' : '' }}>Inaktiv</option>
+                            <option value="verstorben" {{ patient.status == 'verstorben' ? 'selected' : '' }}>⚫ Verstorben</option>
                         </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Verstorben am</label>
+                        <input type="date" name="deceased_date" class="form-control" value="{{ patient.deceased_date }}">
                     </div>
                 </div>
                 <div class="form-group mt-3">
@@ -334,9 +337,7 @@
                 <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
                 <span class="font-bold" style="font-size:1rem;">Rechnung erstellen</span>
             </div>
-            <button class="modal-close" data-bs-dismiss="modal" type="button">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            </button>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
         </div>
 
         <form action="/rechnungen" method="POST" id="invoice-create-modal-form">
@@ -527,13 +528,16 @@
     }
 })();
 
-/* ── Modal open/close — use global window.openModal/closeModal from layout.twig ── */
+/* ── Auto-open modal from ?open= query param (BS5) ── */
 (function () {
-    /* Auto-open modal from ?open= query param */
     var openParam = new URLSearchParams(window.location.search).get('open');
-    if (openParam === 'invoice') { window.openModal('modal-create-invoice'); }
-    else if (openParam === 'edit') { window.openModal('modal-edit-patient'); }
-    /* Clean URL without reload */
+    if (openParam === 'invoice') {
+        var el = document.getElementById('modal-create-invoice');
+        if (el) bootstrap.Modal.getOrCreateInstance(el).show();
+    } else if (openParam === 'edit') {
+        var el2 = document.getElementById('modal-edit-patient');
+        if (el2) bootstrap.Modal.getOrCreateInstance(el2).show();
+    }
     if (openParam) { history.replaceState(null, '', window.location.pathname); }
 })();
 
