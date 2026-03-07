@@ -6,7 +6,7 @@
 
 {# ── Patient Detail Modal ─────────────────────────────────── #}
 <div class="modal fade" id="modal-patient-detail" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content" style="display:flex;flex-direction:column;">
+    <div class="modal-dialog modal-xl" style="max-height:92dvh;"><div class="modal-content" style="display:flex;flex-direction:column;max-height:92dvh;overflow:hidden;">
 
         <div id="pd-header" style="padding:0.6rem 1rem;border-bottom:1px solid var(--bs-border-color);flex-shrink:0;display:flex;align-items:center;gap:0.65rem;min-width:0;">
             <div id="pd-photo" style="width:38px;height:38px;border-radius:50%;overflow:hidden;flex-shrink:0;background:var(--bs-secondary-bg);display:flex;align-items:center;justify-content:center;">
@@ -44,29 +44,29 @@
             <div style="width:32px;height:32px;border:3px solid var(--bs-border-color);border-top-color:var(--bs-primary);border-radius:50%;animation:spin 0.8s linear infinite;"></div>
         </div>
 
-        <div id="pd-body" style="display:none;overflow-y:auto;flex:1;padding:1.5rem 1.25rem;flex-direction:column;gap:1.5rem;">
+        <div id="pd-body" style="display:none;overflow-y:auto;flex:1;min-height:0;padding:1.5rem 1.25rem;flex-direction:column;gap:1.5rem;">
 
-            <div class="pd-info-card">
-                <div id="pd-photo-full" class="pd-info-photo">
+            <div class="pd-info-card" style="display:flex;align-items:stretch;gap:0;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:10px;overflow:hidden;">
+                <div id="pd-photo-full" class="pd-info-photo" style="width:120px;min-width:120px;min-height:140px;flex-shrink:0;background:var(--bs-secondary-bg);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;">
                     <svg width="36" height="36" fill="none" viewBox="0 0 24 24" style="opacity:0.2;"><path stroke="currentColor" stroke-width="1.5" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
                 </div>
-                <div class="pd-info-divider"></div>
-                <div class="pd-info-col">
-                    <div class="pd-info-col-label">Patient</div>
-                    <div id="pd-details" class="pd-info-grid"></div>
+                <div class="pd-info-divider" style="width:1px;background:var(--bs-border-color);flex-shrink:0;align-self:stretch;"></div>
+                <div class="pd-info-col" style="flex:1;min-width:0;padding:1rem 1.1rem;">
+                    <div class="pd-info-col-label" style="font-size:0.68rem;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;padding-bottom:0.45rem;border-bottom:1px solid var(--bs-border-color);">Patient</div>
+                    <div id="pd-details" class="pd-info-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:0.55rem 1rem;font-size:0.82rem;"></div>
                 </div>
-                <div class="pd-info-divider"></div>
-                <div class="pd-info-col">
-                    <div class="pd-info-col-label">Besitzer</div>
+                <div class="pd-info-divider" style="width:1px;background:var(--bs-border-color);flex-shrink:0;align-self:stretch;"></div>
+                <div class="pd-info-col" style="flex:1;min-width:0;padding:1rem 1.1rem;">
+                    <div class="pd-info-col-label" style="font-size:0.68rem;font-weight:700;color:var(--bs-secondary-color);text-transform:uppercase;letter-spacing:0.08em;margin-bottom:0.6rem;padding-bottom:0.45rem;border-bottom:1px solid var(--bs-border-color);">Besitzer</div>
                     <div id="pd-owner"></div>
                 </div>
             </div>
 
-            <div class="pd-entry-section">
+            <div class="pd-entry-section" style="background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:10px;padding:1rem;">
                 <div class="pd-section-label">Neuer Akte-Eintrag</div>
-                <form id="pd-timeline-form" method="POST" enctype="multipart/form-data" class="pd-entry-form">
+                <form id="pd-timeline-form" method="POST" enctype="multipart/form-data" class="pd-entry-form" style="display:flex;flex-direction:column;gap:0.65rem;">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-                    <div class="pd-form-grid4">
+                    <div class="pd-form-grid4" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;align-items:end;">
                         <div class="pd-field">
                             <label class="pd-label">Typ</label>
                             <select name="type" class="pd-select" data-no-cs>
@@ -109,7 +109,7 @@
                         <div id="pd-quill-editor"></div>
                         <input type="hidden" name="content" id="pd-content-input">
                     </div>
-                    <div class="pd-form-footer">
+                    <div class="pd-form-footer" style="display:flex;align-items:flex-end;gap:0.6rem;">
                         <div class="pd-field" style="flex:1;min-width:0;">
                             <label class="pd-label">Anhang</label>
                             <input type="file" name="attachment" id="pd-attachment" class="pd-file" accept="image/*,application/pdf,.doc,.docx">
@@ -152,7 +152,7 @@
             <input type="hidden" id="te-csrf" value="{{ csrf_token }}">
             <input type="hidden" id="te-entry-id" value="">
             <input type="hidden" id="te-patient-id" value="">
-            <div class="pd-form-grid4" style="margin-bottom:0.65rem;">
+            <div class="pd-form-grid4" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.6rem;align-items:end;margin-bottom:0.65rem;">
                 <div class="pd-field">
                     <label class="pd-label">Typ</label>
                     <select id="te-type" class="pd-select">
