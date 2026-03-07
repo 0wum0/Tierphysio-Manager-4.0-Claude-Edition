@@ -604,17 +604,6 @@ class PdfService
             $pdf->Cell($sidebarW - 6, 5, str_pad((string)($owner['id'] ?? 1), 4, '0', STR_PAD_LEFT), 0, 1, 'C');
         }
 
-        // ── BEZAHLT Stempel in Sidebar ───────────────────────────────────
-        $stampY = $sideY + 26;
-        $pdf->SetFillColor(255, 255, 255);
-        $pdf->SetDrawColor(...$accentColor);
-        $pdf->SetLineWidth(0.6);
-        $pdf->RoundedRect(4, $stampY, $sidebarW - 8, 16, 2.5, '1111', 'DF');
-        $pdf->SetFont($font, 'B', $fontSize + 2);
-        $pdf->SetTextColor(...$accentColor);
-        $pdf->SetXY(4, $stampY + 5);
-        $pdf->Cell($sidebarW - 8, 6, 'BEZAHLT', 0, 1, 'C');
-
         // ── MAIN CONTENT ─────────────────────────────────────────────────
 
         // Company info top right
