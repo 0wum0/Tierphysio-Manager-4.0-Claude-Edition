@@ -811,22 +811,22 @@ class PdfService
         $pdf->Cell($cTotal, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
         // ── POST-TOTALS BLOCK ─────────────────────────────────────────
-        // Fixed layout zones (all within content area, above footer at 248mm):
-        //   - Vielen Dank  : 218-236mm  (fixed)
-        //   - Receipt box  : blockY .. blockY+26mm
-        //   - Barzahlung   : blockY-14  .. blockY  (above box)
-        // blockY is calculated from grossY but clamped so box ends before 218mm
+        // Layout order (top → bottom):
+        //   1. Barzahlung   at $blockStart
+        //   2. Bestätigung box ($receiptBoxH mm tall)
+        //   3. Vielen Dank  ($vdH mm tall)
+        //   4. Footer line  at 248mm
+        // $blockStart is ALWAYS after grossY. If everything fits, Vielen Dank
+        // gets its ideal position. If tight, Vielen Dank is placed right after box.
 
         $footerTopY  = 248;
-        $vdAreaTop   = $footerTopY - 30;  // 218mm — Vielen Dank starts here
         $receiptBoxH = 26;
-        $bzH         = 14;  // barzahlung slot height
+        $bzH         = 14;   // barzahlung slot height (image or text)
         $gap         = 4;
+        $vdH         = 16;   // vielen dank height
 
-        // Earliest start: grossY + 14; latest start: vdAreaTop - receiptBoxH - bzH - gap*2
-        $blockStart = $grossY + 14;
-        $maxStart   = $vdAreaTop - $receiptBoxH - $bzH - $gap * 2;
-        $blockStart = min($blockStart, $maxStart);
+        // Always start AFTER the totals block
+        $blockStart  = $grossY + 14;
 
         // ── BARZAHLUNG Schriftzug ──────────────────────────────────
         $barzahlungImgFile = !empty($settings['pdf_barzahlung_bild'])
@@ -876,18 +876,22 @@ class PdfService
         $pdf->SetXY($receiptBoxX + 3, $receiptBoxY + 20);
         $pdf->Cell($receiptBoxW - 6, 4, 'Rechnung-Nr.: ' . $invoice['invoice_number'], 0, 1, 'C');
 
-        // ── VIELEN DANK — fest bei 218mm (oberhalb Footer) ──────────────
-        $vdY   = $vdAreaTop;
-        $vdImg = !empty($settings['pdf_vielen_dank_bild'])
-            ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_vielen_dank_bild']
-            : $this->resolveAssetImg('vielen-dank-script.png');
-        if (file_exists($vdImg)) {
-            $pdf->Image($vdImg, $contentX, $vdY, 68, 0, '');
-        } else {
-            $pdf->SetFont($font, 'BI', 22);
-            $pdf->SetTextColor(...$darkColor);
-            $pdf->SetXY($contentX, $vdY);
-            $pdf->Cell($contentW, 16, 'Vielen Dank!', 0, 1, 'L');
+        // ── VIELEN DANK — direkt nach der Box, aber vor dem Footer ──────
+        $afterBoxY = $receiptBoxY + $receiptBoxH + $gap;
+        // Only render if there is enough space before the footer
+        $vdY = $afterBoxY;
+        if ($vdY + $vdH < $footerTopY - 2) {
+            $vdImg = !empty($settings['pdf_vielen_dank_bild'])
+                ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_vielen_dank_bild']
+                : $this->resolveAssetImg('vielen-dank-script.png');
+            if (file_exists($vdImg)) {
+                $pdf->Image($vdImg, $contentX, $vdY, 68, 0, '');
+            } else {
+                $pdf->SetFont($font, 'BI', 22);
+                $pdf->SetTextColor(...$darkColor);
+                $pdf->SetXY($contentX, $vdY);
+                $pdf->Cell($contentW, $vdH, 'Vielen Dank!', 0, 1, 'L');
+            }
         }
 
         // ── FOOTER ────────────────────────────────────────────────────────
