@@ -95,29 +95,35 @@
                 <td style="font-size:0.82rem;color:var(--text-muted);">{{ inv.created_by_name ?: '—' }}</td>
                 <td style="font-size:0.82rem;color:var(--text-muted);">{{ inv.expires_at|date_de }}</td>
                 <td>
-                    <div class="flex gap-1" style="justify-content:flex-end;">
+                    <div class="d-flex gap-1 justify-content-end">
                         {% if inv.status == 'angenommen' and inv.accepted_patient_id %}
-                            <a href="/patienten/{{ inv.accepted_patient_id }}" class="btn btn-sm btn-secondary">Zur Akte</a>
+                            <a href="/patienten/{{ inv.accepted_patient_id }}" class="btn btn-sm btn-secondary">
+                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                                <span class="d-none d-lg-inline ms-1">Zur Akte</span>
+                            </a>
                         {% endif %}
                         {% if inv.status == 'offen' %}
-                            <button class="btn btn-sm btn-primary accept-btn" data-id="{{ inv.id }}" title="Annehmen" style="background:#22c55e;border-color:#22c55e;">
+                            <button class="btn btn-sm btn-success accept-btn" data-id="{{ inv.id }}" title="Annehmen">
                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                                Annehmen
+                                <span class="d-none d-lg-inline ms-1">Annehmen</span>
                             </button>
-                            <button class="btn btn-sm btn-secondary reject-btn" data-id="{{ inv.id }}" title="Ablehnen" style="color:#ef4444;">
+                            <button class="btn btn-sm btn-outline-danger reject-btn" data-id="{{ inv.id }}" title="Ablehnen">
                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                                Ablehnen
+                                <span class="d-none d-lg-inline ms-1">Ablehnen</span>
                             </button>
                             <button class="btn btn-sm btn-secondary copy-link-btn" data-id="{{ inv.id }}" title="Link kopieren">
                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                                <span class="d-none d-lg-inline ms-1">Link</span>
                             </button>
                             {% if inv.phone %}
                             <a href="#" class="btn btn-sm btn-secondary wa-btn" data-id="{{ inv.id }}" title="WhatsApp" style="color:#22c55e;">
                                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
+                                <span class="d-none d-lg-inline ms-1">WhatsApp</span>
                             </a>
                             {% endif %}
-                            <button class="btn btn-sm btn-secondary revoke-btn" data-id="{{ inv.id }}" title="Widerrufen" style="color:#f59e0b;">
+                            <button class="btn btn-sm btn-outline-warning revoke-btn" data-id="{{ inv.id }}" title="Pausieren">
                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
+                                <span class="d-none d-lg-inline ms-1">Pausieren</span>
                             </button>
                         {% endif %}
                     </div>
@@ -151,32 +157,29 @@
                 {% if inv.created_by_name %}<span>👤 {{ inv.created_by_name }}</span>{% endif %}
             </div>
             {% if inv.status == 'offen' or (inv.status == 'angenommen' and inv.accepted_patient_id) %}
-            <div class="d-flex flex-wrap gap-2">
+            <div class="d-flex gap-2 mt-1">
                 {% if inv.status == 'angenommen' and inv.accepted_patient_id %}
-                    <a href="/patienten/{{ inv.accepted_patient_id }}" class="btn btn-sm btn-secondary" style="flex:1;justify-content:center;">Zur Akte</a>
+                    <a href="/patienten/{{ inv.accepted_patient_id }}" class="btn btn-sm btn-secondary" title="Zur Akte">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                    </a>
                 {% endif %}
                 {% if inv.status == 'offen' %}
-                    <button class="btn btn-sm btn-primary accept-btn" data-id="{{ inv.id }}" style="flex:1;justify-content:center;background:#22c55e;border-color:#22c55e;">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-                        Annehmen
+                    <button class="btn btn-sm btn-success accept-btn" data-id="{{ inv.id }}" title="Annehmen">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     </button>
-                    <button class="btn btn-sm btn-secondary reject-btn" data-id="{{ inv.id }}" style="flex:1;justify-content:center;color:#ef4444;">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        Ablehnen
+                    <button class="btn btn-sm btn-outline-danger reject-btn" data-id="{{ inv.id }}" title="Ablehnen">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                     </button>
-                    <button class="btn btn-sm btn-secondary copy-link-btn" data-id="{{ inv.id }}" style="flex:1;justify-content:center;">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-                        Link kopieren
+                    <button class="btn btn-sm btn-secondary copy-link-btn" data-id="{{ inv.id }}" title="Link kopieren">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
                     </button>
                     {% if inv.phone %}
-                    <a href="#" class="btn btn-sm btn-secondary wa-btn" data-id="{{ inv.id }}" style="flex:1;justify-content:center;color:#22c55e;">
-                        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
-                        WhatsApp
+                    <a href="#" class="btn btn-sm btn-secondary wa-btn" data-id="{{ inv.id }}" title="WhatsApp" style="color:#22c55e;">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/></svg>
                     </a>
                     {% endif %}
-                    <button class="btn btn-sm btn-secondary revoke-btn" data-id="{{ inv.id }}" style="flex:1;justify-content:center;color:#f59e0b;">
-                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
-                        Pausieren
+                    <button class="btn btn-sm btn-outline-warning revoke-btn" data-id="{{ inv.id }}" title="Pausieren">
+                        <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="16" r="1" fill="currentColor"/></svg>
                     </button>
                 {% endif %}
             </div>
@@ -259,8 +262,8 @@
 
 {% block scripts %}
 <style>
-.via-btn { padding:0.55rem 0.75rem;border-radius:10px;border:1.5px solid var(--glass-border);text-align:center;font-size:0.82rem;font-weight:600;transition:all 0.15s;background:var(--glass-bg); }
-.via-btn.active { border-color:var(--accent);background:rgba(79,124,255,0.12);color:var(--accent); }
+.via-btn { padding:0.55rem 0.75rem;border-radius:8px;border:1.5px solid var(--bs-border-color);text-align:center;font-size:0.82rem;font-weight:600;transition:all 0.15s;background:var(--bs-body-bg);color:var(--bs-body-color); }
+.via-btn.active { border-color:var(--bs-primary);background:rgba(var(--bs-primary-rgb),.1);color:var(--bs-primary); }
 @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
 </style>
 <script>
