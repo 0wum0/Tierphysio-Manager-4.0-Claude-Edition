@@ -1,0 +1,10 @@
+{
+    "name": "Mailbox",
+    "slug": "mailbox",
+    "version": "1.0.0",
+    "description": "E-Mail App: Posteingang lesen (IMAP/POP3) und E-Mails schreiben (SMTP) direkt aus den Systemeinstellungen.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "service_provider": "Plugins\\Mailbox\\ServiceProvider",
+    "hooks": ["registerRoutes", "navItems"]
+}

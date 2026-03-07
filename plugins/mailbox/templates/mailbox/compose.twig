@@ -1,0 +1,241 @@
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
+
+{% block head %}
+<style>
+#compose-editor {
+    min-height: 320px;
+    border: 1px solid var(--bs-border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    font-size: .875rem;
+    line-height: 1.6;
+    outline: none;
+    background: var(--bs-body-bg);
+    color: var(--bs-body-color);
+}
+#compose-editor:focus {
+    border-color: var(--bs-primary);
+    box-shadow: 0 0 0 3px rgba(79,124,255,0.12);
+}
+.editor-toolbar .btn { font-size:.8rem; padding:.2rem .5rem; }
+.compose-field { border: none; border-bottom: 1px solid var(--bs-border-color); border-radius: 0; padding: .6rem 0; background: transparent; color: var(--bs-body-color); }
+.compose-field:focus { outline: none; box-shadow: none; border-color: var(--bs-primary); }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+    <div class="d-flex align-items-center gap-2">
+        <a href="/mailbox/posteingang" class="btn btn-outline-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="15 18 9 12 15 6"/></svg>
+        </a>
+        <h1 class="page-title mb-0">Neue E-Mail</h1>
+    </div>
+</div>
+
+<div class="main-content">
+<div class="row g-3">
+<div class="col-12 col-xl-9">
+
+<div class="panel">
+    <div class="panel-hdr">
+        <h2>
+            <svg class="sa-icon sa-icon-primary me-2"><use href="/themes/smart-tierphysio/icons/sprite.svg#mail"></use></svg>
+            E-Mail verfassen
+        </h2>
+    </div>
+    <div class="panel-container">
+        <div class="panel-content p-0">
+
+            <form action="/mailbox/senden" method="POST" id="compose-form">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <input type="hidden" name="body" id="body-hidden">
+
+                <div class="px-4 pt-3 pb-0">
+
+                    {# To #}
+                    <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                        <label class="text-muted flex-shrink-0" style="width:50px;font-size:.8rem;font-weight:600;">An</label>
+                        <input type="text" name="to" class="form-control compose-field flex-grow-1"
+                               placeholder="empfaenger@beispiel.de"
+                               value="{{ to }}" required>
+                        <button type="button" class="btn btn-link btn-sm text-muted p-0 flex-shrink-0" onclick="toggleCcBcc()" title="CC/BCC einblenden">CC/BCC</button>
+                    </div>
+
+                    {# CC/BCC (hidden by default) #}
+                    <div id="cc-bcc-fields" style="display:none;">
+                        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                            <label class="text-muted flex-shrink-0" style="width:50px;font-size:.8rem;font-weight:600;">CC</label>
+                            <input type="text" name="cc" class="form-control compose-field flex-grow-1" placeholder="cc@beispiel.de, weitere@beispiel.de">
+                        </div>
+                        <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                            <label class="text-muted flex-shrink-0" style="width:50px;font-size:.8rem;font-weight:600;">BCC</label>
+                            <input type="text" name="bcc" class="form-control compose-field flex-grow-1" placeholder="bcc@beispiel.de">
+                        </div>
+                    </div>
+
+                    {# Subject #}
+                    <div class="d-flex align-items-center gap-3 py-2 border-bottom">
+                        <label class="text-muted flex-shrink-0" style="width:50px;font-size:.8rem;font-weight:600;">Betreff</label>
+                        <input type="text" name="subject" class="form-control compose-field flex-grow-1"
+                               placeholder="Betreff der E-Mail"
+                               value="{{ subject }}">
+                    </div>
+
+                </div>
+
+                {# Editor Toolbar #}
+                <div class="editor-toolbar d-flex align-items-center gap-1 px-4 py-2 border-bottom flex-wrap">
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fmt('bold')" title="Fett"><strong>B</strong></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fmt('italic')" title="Kursiv"><em>I</em></button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fmt('underline')" title="Unterstrichen"><u>U</u></button>
+                    <div class="vr mx-1"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fmt('insertUnorderedList')" title="Liste">≡</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fmt('insertOrderedList')" title="Nummeriert">1.</button>
+                    <div class="vr mx-1"></div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="insertLink()" title="Link">🔗</button>
+                    <div class="vr mx-1"></div>
+                    <select class="form-select form-select-sm" style="width:auto;" onchange="fmt('fontSize',false,this.value);this.value=''">
+                        <option value="">Schriftgröße</option>
+                        <option value="1">Klein</option>
+                        <option value="3">Normal</option>
+                        <option value="5">Groß</option>
+                    </select>
+                </div>
+
+                {# Rich Text Editor #}
+                <div class="px-4 py-3">
+                    <div id="compose-editor" contenteditable="true" spellcheck="true">
+                        {% if reply_message %}
+                        <p><br></p>
+                        <p>──────────────────────────────</p>
+                        <p><strong>Von:</strong> {{ reply_message.from_name ?: reply_message.from }} &lt;{{ reply_message.from }}&gt;<br>
+                        <strong>Datum:</strong> {% if reply_message.date_ts > 0 %}{{ reply_message.date_ts|date('d.m.Y H:i') }}{% else %}{{ reply_message.date }}{% endif %}<br>
+                        <strong>Betreff:</strong> {{ reply_message.subject }}</p>
+                        {% if reply_message.body_html %}
+                        <blockquote style="border-left:3px solid #4f7cff;margin:0;padding-left:1rem;color:var(--bs-secondary-color);">
+                            {{ reply_message.body_html|raw }}
+                        </blockquote>
+                        {% elseif reply_message.body_text %}
+                        <blockquote style="border-left:3px solid #4f7cff;margin:0;padding-left:1rem;color:var(--bs-secondary-color);">
+                            <pre style="white-space:pre-wrap;font-family:inherit;font-size:inherit;">{{ reply_message.body_text }}</pre>
+                        </blockquote>
+                        {% endif %}
+                        {% endif %}
+                    </div>
+                </div>
+
+                {# Footer #}
+                <div class="d-flex align-items-center justify-content-between gap-2 px-4 py-3 border-top flex-wrap">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="btn-send">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="me-1"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><polygon stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                            Senden
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary" onclick="saveDraft()">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="me-1"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 21 17 13 7 13 7 21"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 3 7 8 15 8"/></svg>
+                            Entwurf
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                        Abbrechen
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+</div>
+
+</div>
+
+{# ── Sidebar ── #}
+<div class="col-12 col-xl-3">
+    <div class="panel">
+        <div class="panel-hdr"><h2>Hinweise</h2></div>
+        <div class="panel-content p-3">
+            <ul class="list-unstyled d-flex flex-column gap-2" style="font-size:.8rem;color:var(--bs-secondary-color);">
+                <li>
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-1 text-primary"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    Mehrere Empfänger mit Komma trennen
+                </li>
+                <li>
+                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-1 text-primary"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="16" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="8" x2="12.01" y2="8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    SMTP-Einstellungen unter <a href="/einstellungen" class="text-primary">Einstellungen</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function(){
+    var editor  = document.getElementById('compose-editor');
+    var form    = document.getElementById('compose-form');
+    var hidden  = document.getElementById('body-hidden');
+
+    /* Submit: copy editor HTML into hidden input */
+    form.addEventListener('submit', function(e){
+        hidden.value = editor.innerHTML;
+        var btn = document.getElementById('btn-send');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Senden…';
+    });
+
+    /* Format commands */
+    window.fmt = function(cmd, showUI, value) {
+        document.execCommand(cmd, showUI || false, value || null);
+        editor.focus();
+    };
+
+    window.insertLink = function() {
+        var url = prompt('URL eingeben:', 'https://');
+        if (url) document.execCommand('createLink', false, url);
+        editor.focus();
+    };
+
+    /* CC/BCC toggle */
+    window.toggleCcBcc = function() {
+        var el = document.getElementById('cc-bcc-fields');
+        el.style.display = el.style.display === 'none' ? 'block' : 'none';
+    };
+
+    /* Save draft */
+    window.saveDraft = function() {
+        hidden.value = editor.innerHTML;
+        var data = new FormData(form);
+        fetch('/mailbox/entwurf/speichern', { method: 'POST', body: data })
+            .then(function(r){ return r.json(); })
+            .then(function(d){
+                if (d.ok) {
+                    var t = document.createElement('div');
+                    t.className = 'alert alert-success alert-dismissible fade show position-fixed';
+                    t.style.cssText = 'bottom:1rem;right:1rem;z-index:9999;min-width:220px;';
+                    t.innerHTML = 'Entwurf gespeichert <button type="button" class="btn-close" data-bs-dismiss="alert"></button>';
+                    document.body.appendChild(t);
+                    setTimeout(function(){ t.remove(); }, 3000);
+                }
+            });
+    };
+
+    /* Focus editor at start, place cursor before quoted content */
+    if (editor) {
+        editor.focus();
+        var sel = window.getSelection();
+        var range = document.createRange();
+        range.setStart(editor, 0);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
+    }
+})();
+</script>
+{% endblock %}

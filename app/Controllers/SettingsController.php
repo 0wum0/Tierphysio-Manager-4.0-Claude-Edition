@@ -86,6 +86,7 @@ class SettingsController extends Controller
             'pdf_zebra_rows', 'pdf_watermark',
             'pdf_footer_text', 'pdf_intro_text', 'pdf_closing_text',
             'calendar_cron_secret',
+            'mail_imap_host', 'mail_imap_port', 'mail_imap_encrypt', 'mail_imap_user',
         ];
 
         $data = [];

@@ -235,6 +235,37 @@
                 </div>
             </div>
         </div>
+        {# ── IMAP / Mailbox ── #}
+        <div class="glass-card mt-4">
+            <h3 class="section-title">
+                <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="margin-right:6px;vertical-align:-2px;"><path stroke="currentColor" stroke-width="2" d="M22 12h-6l-2 3h-4l-2-3H2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
+                IMAP — Posteingang (Mailbox Plugin)
+            </h3>
+            <p class="text-muted mb-3" style="font-size:.82rem;">Für das Mailbox-Plugin zum Empfangen von E-Mails. Benutzername und Passwort werden vom SMTP-Bereich oben übernommen, wenn hier leer gelassen.</p>
+            <div class="form-grid form-grid-2">
+                <div class="form-group">
+                    <label class="form-label">IMAP-Host</label>
+                    <input type="text" name="mail_imap_host" class="form-control" value="{{ settings.mail_imap_host ?? '' }}" placeholder="imap.example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IMAP-Port</label>
+                    <input type="number" name="mail_imap_port" class="form-control" value="{{ settings.mail_imap_port ?? '993' }}">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Verschlüsselung</label>
+                    <select name="mail_imap_encrypt" class="form-control">
+                        <option value="ssl"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'ssl'  ? 'selected' : '' }}>SSL/TLS — Port 993</option>
+                        <option value="tls"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'tls'  ? 'selected' : '' }}>STARTTLS — Port 143</option>
+                        <option value="none" {{ (settings.mail_imap_encrypt ?? 'ssl') == 'none' ? 'selected' : '' }}>Keine Verschlüsselung</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">IMAP-Benutzername <span class="text-muted fw-normal">(leer = wie SMTP)</span></label>
+                    <input type="text" name="mail_imap_user" class="form-control" value="{{ settings.mail_imap_user ?? '' }}" placeholder="{{ settings.mail_from_address ?? 'benutzer@example.com' }}" autocomplete="off">
+                </div>
+            </div>
+        </div>
+
         <div class="flex justify-end mt-3">
             <button type="submit" class="btn btn-primary">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 21 17 13 7 13 7 21"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 3 7 8 15 8"/></svg>
