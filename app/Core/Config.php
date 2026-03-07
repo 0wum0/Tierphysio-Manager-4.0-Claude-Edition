@@ -37,7 +37,7 @@ class Config
                 'version'  => (int)($_ENV['DB_VERSION'] ?? 0),
             ],
             'session' => [
-                'lifetime' => (int)($_ENV['SESSION_LIFETIME'] ?? 120),
+                'lifetime' => (int)($_ENV['SESSION_LIFETIME'] ?? 10080),
                 'secure'   => filter_var($_ENV['SESSION_SECURE'] ?? false, FILTER_VALIDATE_BOOLEAN),
             ],
             'mail' => [

@@ -21,8 +21,12 @@ class Session
             return;
         }
 
-        $lifetime = $this->config->get('session.lifetime', 120) * 60;
+        $lifetime = $this->config->get('session.lifetime', 10080) * 60;
         $secure   = $this->config->get('session.secure', false);
+
+        ini_set('session.gc_maxlifetime', (string)$lifetime);
+        ini_set('session.gc_probability', '1');
+        ini_set('session.gc_divisor', '100');
 
         session_set_cookie_params([
             'lifetime' => $lifetime,
