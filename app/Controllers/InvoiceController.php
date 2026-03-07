@@ -40,14 +40,16 @@ class InvoiceController extends Controller
         $status = $this->get('status', '');
         $search = $this->get('search', '');
         $page   = (int)$this->get('page', 1);
-        $result = $this->invoiceService->getPaginated($page, 15, $status, $search);
-        $stats  = $this->invoiceService->getStats();
+        $result     = $this->invoiceService->getPaginated($page, 15, $status, $search);
+        $stats      = $this->invoiceService->getStats();
+        $chartData  = $this->invoiceService->getMonthlyChartData();
 
         $this->render('invoices/index.twig', [
             'page_title' => $this->translator->trans('nav.invoices'),
             'invoices'   => $result['items'],
             'pagination' => $result,
             'stats'      => $stats,
+            'chart_data' => $chartData,
             'status'     => $status,
             'search'     => $search,
         ]);

@@ -143,6 +143,23 @@ class InvoiceRepository extends Repository
             [$now]
         );
 
+        $openAmount = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'open'"
+        );
+
+        $overdueAmount = (float)$this->db->fetchColumn(
+            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
+            [$now]
+        );
+
+        $draftCount = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices WHERE status = 'draft'"
+        );
+
+        $paidCount = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices WHERE status = 'paid'"
+        );
+
         return [
             'revenue_week'        => $revenueWeek,
             'revenue_month'       => $revenueMonth,
@@ -152,6 +169,10 @@ class InvoiceRepository extends Repository
             'prev_year_revenue'   => $prevYearRevenue,
             'open_count'          => $openCount,
             'overdue_count'       => $overdueCount,
+            'open_amount'         => $openAmount,
+            'overdue_amount'      => $overdueAmount,
+            'draft_count'         => $draftCount,
+            'paid_count'          => $paidCount,
             'month_change'        => $prevMonthRevenue > 0
                 ? round((($revenueMonth - $prevMonthRevenue) / $prevMonthRevenue) * 100, 1)
                 : 0,
@@ -187,6 +208,42 @@ class InvoiceRepository extends Repository
             'labels' => array_column($rows, 'period'),
             'data'   => array_map('floatval', array_column($rows, 'revenue')),
         ];
+    }
+
+    public function getMonthlyChartData(): array
+    {
+        $months = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $months[] = date('Y-m', strtotime("-{$i} months"));
+        }
+
+        $rows = $this->db->fetchAll(
+            "SELECT DATE_FORMAT(issue_date, '%Y-%m') AS month,
+                    COALESCE(SUM(CASE WHEN status = 'paid' THEN total_gross ELSE 0 END), 0) AS paid,
+                    COALESCE(SUM(CASE WHEN status IN ('open','overdue') THEN total_gross ELSE 0 END), 0) AS open
+             FROM invoices
+             WHERE issue_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
+             GROUP BY month
+             ORDER BY month ASC"
+        );
+
+        $indexed = [];
+        foreach ($rows as $r) {
+            $indexed[$r['month']] = $r;
+        }
+
+        $labels = [];
+        $paid   = [];
+        $open   = [];
+
+        foreach ($months as $m) {
+            $de = \DateTime::createFromFormat('Y-m', $m);
+            $labels[] = $de ? $de->format('M y') : $m;
+            $paid[]   = round((float)($indexed[$m]['paid'] ?? 0), 2);
+            $open[]   = round((float)($indexed[$m]['open'] ?? 0), 2);
+        }
+
+        return ['labels' => $labels, 'paid' => $paid, 'open' => $open];
     }
 
     public function getNextInvoiceNumber(string $prefix = 'RE', int $startNumber = 1000): string

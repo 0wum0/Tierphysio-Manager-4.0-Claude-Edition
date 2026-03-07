@@ -34,6 +34,11 @@ class InvoiceService
         return $this->invoiceRepository->getChartData($type);
     }
 
+    public function getMonthlyChartData(): array
+    {
+        return $this->invoiceRepository->getMonthlyChartData();
+    }
+
     public function getPositions(int $invoiceId): array
     {
         return $this->invoiceRepository->getPositions($invoiceId);

@@ -109,62 +109,111 @@
     </a>
 </div>
 
-{# Stats #}
-<div class="row g-3 mb-4">
-    <div class="col-6 col-md-4 col-lg-2">
+{# ── Stats KPI Karten ─────────────────────────────────────────────── #}
+<div class="row g-3 mb-3">
+
+    <div class="col-6 col-md-4 col-xl-2">
         <div class="card h-100">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('invoices.revenue_week') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#4f7cff;">{{ stats.revenue_week|money }}</div>
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">{{ t('invoices.revenue_week') }}</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#4f7cff;">{{ stats.revenue_week|money }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">letzte 7 Tage</div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
+
+    <div class="col-6 col-md-4 col-xl-2">
         <div class="card h-100">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('invoices.revenue_month') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#a855f7;">{{ stats.revenue_month|money }}</div>
-                <div class="text-muted small mt-1">
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">{{ t('invoices.revenue_month') }}</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#a855f7;">{{ stats.revenue_month|money }}</div>
+                <div style="font-size:.72rem;margin-top:.2rem;">
                     {% if stats.month_change > 0 %}<span class="text-success fw-bold">▲ {{ stats.month_change }}%</span>
                     {% elseif stats.month_change < 0 %}<span class="text-danger fw-bold">▼ {{ stats.month_change|abs }}%</span>
-                    {% else %}<span>—</span>{% endif %}
-                    {{ t('dashboard.vs_last_month') }}
+                    {% else %}<span class="text-muted">±0%</span>{% endif %}
+                    <span class="text-muted"> ggü. Vormonat</span>
                 </div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
+
+    <div class="col-6 col-md-4 col-xl-2">
         <div class="card h-100">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('invoices.revenue_year') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#06b6d4;">{{ stats.revenue_year|money }}</div>
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">{{ t('invoices.revenue_year') }}</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#06b6d4;">{{ stats.revenue_year|money }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">Jahr {{ 'now'|date('Y') }}</div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
+
+    <div class="col-6 col-md-4 col-xl-2">
         <div class="card h-100">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('invoices.revenue_total') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#22c55e;">{{ stats.revenue_total|money }}</div>
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">{{ t('invoices.revenue_total') }}</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#22c55e;">{{ stats.revenue_total|money }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">Gesamt bezahlt</div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
+
+    <div class="col-6 col-md-4 col-xl-2">
         <div class="card h-100">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('dashboard.open_invoices') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#06b6d4;">{{ stats.open_count }}</div>
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">Offen</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#f59e0b;">{{ stats.open_amount|money }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">{{ stats.open_count }} Rechnung{{ stats.open_count != 1 ? 'en' : '' }}</div>
             </div>
         </div>
     </div>
-    <div class="col-6 col-md-4 col-lg-2">
-        <div class="card h-100">
+
+    <div class="col-6 col-md-4 col-xl-2">
+        <div class="card h-100" style="border-left:3px solid #ef4444;">
             <div class="card-body p-3">
-                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.7rem;letter-spacing:.05em;">{{ t('dashboard.overdue_invoices') }}</div>
-                <div class="fw-bold" style="font-size:1.4rem;color:#ef4444;">{{ stats.overdue_count }}</div>
+                <div class="text-muted small text-uppercase fw-semibold mb-1" style="font-size:.68rem;letter-spacing:.06em;">Überfällig</div>
+                <div class="fw-bold" style="font-size:1.3rem;color:#ef4444;">{{ stats.overdue_amount|money }}</div>
+                <div style="font-size:.72rem;color:var(--text-muted);margin-top:.2rem;">{{ stats.overdue_count }} Rechnung{{ stats.overdue_count != 1 ? 'en' : '' }}</div>
             </div>
         </div>
     </div>
+
+</div>
+
+{# ── Charts ───────────────────────────────────────────────────────── #}
+<div class="row g-3 mb-4">
+
+    {# Monatsumsatz — Balkendiagramm #}
+    <div class="col-12 col-xl-8">
+        <div class="card h-100">
+            <div class="card-body p-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div>
+                        <div class="fw-semibold" style="font-size:.9rem;">Umsatz letzte 12 Monate</div>
+                        <div class="text-muted" style="font-size:.75rem;">Bezahlt vs. Offen/Überfällig</div>
+                    </div>
+                </div>
+                <div id="inv-chart-monthly" style="min-height:240px;"></div>
+            </div>
+        </div>
+    </div>
+
+    {# Status-Verteilung — Donut #}
+    <div class="col-12 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body p-3 d-flex flex-column">
+                <div class="fw-semibold mb-1" style="font-size:.9rem;">Rechnungsstatus</div>
+                <div class="text-muted mb-2" style="font-size:.75rem;">Anzahl nach Status</div>
+                <div id="inv-chart-donut" style="flex:1;min-height:200px;"></div>
+                <div class="d-flex flex-wrap gap-3 justify-content-center mt-2" style="font-size:.75rem;">
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#22c55e;margin-right:4px;"></span>Bezahlt ({{ stats.paid_count }})</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#f59e0b;margin-right:4px;"></span>Offen ({{ stats.open_count }})</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#ef4444;margin-right:4px;"></span>Überfällig ({{ stats.overdue_count }})</span>
+                    <span><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#94a3b8;margin-right:4px;"></span>Entwurf ({{ stats.draft_count }})</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 {# Filter #}
@@ -377,6 +426,148 @@
             document.body.style.overflow = '';
         }
     });
+})();
+</script>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts@3/dist/apexcharts.min.js"></script>
+<script>
+(function () {
+    'use strict';
+
+    var isDark = document.documentElement.getAttribute('data-bs-theme') === 'dark'
+              || document.documentElement.classList.contains('dark');
+    var textColor  = isDark ? '#94a3b8' : '#6b7280';
+    var gridColor  = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    var bgCard     = isDark ? '#1e2a3a' : '#ffffff';
+
+    /* ── Monatsumsatz Balkendiagramm ───────────────────────── */
+    var monthlyEl = document.getElementById('inv-chart-monthly');
+    if (monthlyEl) {
+        var chartLabels = {{ chart_data.labels|json_encode|raw }};
+        var chartPaid   = {{ chart_data.paid|json_encode|raw }};
+        var chartOpen   = {{ chart_data.open|json_encode|raw }};
+
+        new ApexCharts(monthlyEl, {
+            chart: {
+                type: 'bar',
+                height: 250,
+                stacked: false,
+                toolbar: { show: false },
+                background: 'transparent',
+                fontFamily: 'inherit',
+                animations: { enabled: true, speed: 400 }
+            },
+            series: [
+                { name: 'Bezahlt', data: chartPaid },
+                { name: 'Offen / Überfällig', data: chartOpen }
+            ],
+            colors: ['#22c55e', '#f59e0b'],
+            plotOptions: {
+                bar: {
+                    borderRadius: 4,
+                    columnWidth: '55%',
+                    dataLabels: { position: 'top' }
+                }
+            },
+            dataLabels: { enabled: false },
+            xaxis: {
+                categories: chartLabels,
+                labels: { style: { colors: textColor, fontSize: '11px' } },
+                axisBorder: { show: false },
+                axisTicks: { show: false }
+            },
+            yaxis: {
+                labels: {
+                    style: { colors: textColor, fontSize: '11px' },
+                    formatter: function (v) {
+                        return v >= 1000 ? (v / 1000).toFixed(1) + 'k €' : v.toFixed(0) + ' €';
+                    }
+                }
+            },
+            grid: { borderColor: gridColor, strokeDashArray: 4 },
+            legend: {
+                position: 'top',
+                horizontalAlign: 'right',
+                labels: { colors: textColor },
+                markers: { radius: 4 }
+            },
+            tooltip: {
+                theme: isDark ? 'dark' : 'light',
+                y: { formatter: function (v) { return v.toFixed(2).replace('.', ',') + ' €'; } }
+            }
+        }).render();
+    }
+
+    /* ── Status-Verteilung Donut ────────────────────────────── */
+    var donutEl = document.getElementById('inv-chart-donut');
+    if (donutEl) {
+        var paid    = {{ stats.paid_count }};
+        var open    = {{ stats.open_count }};
+        var overdue = {{ stats.overdue_count }};
+        var draft   = {{ stats.draft_count }};
+        var total   = paid + open + overdue + draft;
+
+        if (total === 0) {
+            donutEl.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:200px;color:var(--text-muted);font-size:.85rem;">Keine Rechnungen</div>';
+        } else {
+            new ApexCharts(donutEl, {
+                chart: {
+                    type: 'donut',
+                    height: 220,
+                    background: 'transparent',
+                    fontFamily: 'inherit',
+                    animations: { enabled: true, speed: 400 },
+                    toolbar: { show: false }
+                },
+                series: [paid, open, overdue, draft],
+                labels: ['Bezahlt', 'Offen', 'Überfällig', 'Entwurf'],
+                colors: ['#22c55e', '#f59e0b', '#ef4444', '#94a3b8'],
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (val) { return Math.round(val) + '%'; },
+                    style: { fontSize: '11px', colors: ['#fff'] },
+                    dropShadow: { enabled: false }
+                },
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            size: '68%',
+                            labels: {
+                                show: true,
+                                total: {
+                                    show: true,
+                                    label: 'Gesamt',
+                                    color: textColor,
+                                    fontSize: '13px',
+                                    formatter: function () { return total; }
+                                },
+                                value: {
+                                    color: textColor,
+                                    fontSize: '18px',
+                                    fontWeight: 700
+                                }
+                            }
+                        }
+                    }
+                },
+                legend: { show: false },
+                stroke: { width: 2, colors: [bgCard] },
+                tooltip: {
+                    theme: isDark ? 'dark' : 'light',
+                    y: { formatter: function (v) { return v + ' Rechnung' + (v !== 1 ? 'en' : ''); } }
+                }
+            }).render();
+        }
+    }
+
+    /* Theme-Wechsel: Charts neu rendern wenn Nutzer Theme wechselt */
+    var observer = new MutationObserver(function () {
+        location.reload();
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['data-bs-theme'] });
+
 })();
 </script>
 {% endblock %}
