@@ -367,69 +367,8 @@ class PdfService
         $pdf->Cell($totLabelW, 7, 'Total', 0, 0, 'L');
         $pdf->Cell($cTotal, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
-        // ── PAYMENT METHOD + RECEIPT NOTICE ───────────────────────────────
-        $paymentMethodRaw = $invoice['payment_method'] ?? 'ueberweisung';
-        $paymentLabels = [
-            'barzahlung'   => 'Barzahlung',
-            'ueberweisung' => 'Überweisung',
-            'ec_karte'     => 'EC-Karte',
-            'kreditkarte'  => 'Kreditkarte',
-            'paypal'       => 'PayPal',
-            'sonstige'     => 'Sonstige',
-        ];
-        $paymentLabel = $paymentLabels[$paymentMethodRaw] ?? ucfirst($paymentMethodRaw);
-        $isCash = ($paymentMethodRaw === 'barzahlung');
-
-        $pmY = $grossY + 10;
-
-        // Payment method row
-        $pdf->SetFont($font, '', $fontSize - 0.5);
-        $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY($totLabelX, $pmY);
-        $pdf->Cell($totLabelW, 5, 'Zahlungsart:', 0, 0, 'L');
-        $pdf->SetFont($font, 'B', $fontSize - 0.5);
-        $pdf->SetTextColor(...$darkColor);
-        $pdf->Cell($cTotal, 5, $paymentLabel, 0, 1, 'R');
-
-        // Receipt box for cash payments
-        if ($isCash) {
-            $receiptY = $pmY + 8;
-            $receiptH = 18;
-            $receiptX = $totLabelX;
-            $receiptW = $totLabelW + $cTotal;
-
-            // Green-tinted box
-            $pdf->SetFillColor(220, 240, 220);
-            $pdf->SetDrawColor(...$accentColor);
-            $pdf->SetLineWidth(0.4);
-            $pdf->RoundedRect($receiptX, $receiptY, $receiptW, $receiptH, 1.5, '1111', 'DF');
-
-            $pdf->SetFont($font, 'B', $fontSize);
-            $pdf->SetTextColor(...$accentColor);
-            $pdf->SetXY($receiptX + 2, $receiptY + 2.5);
-            $pdf->Cell($receiptW - 4, 5, 'QUITTUNG — Betrag erhalten', 0, 1, 'C');
-
-            $pdf->SetFont($font, '', $fontSize - 1.5);
-            $pdf->SetTextColor(...$colorTableText);
-            $pdf->SetXY($receiptX + 2, $receiptY + 8);
-            $issueDate = !empty($invoice['issue_date']) ? date('d.m.Y', strtotime($invoice['issue_date'])) : date('d.m.Y');
-            $grossFormatted = number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €';
-            $pdf->Cell($receiptW - 4, 4.5,
-                'Betrag von ' . $grossFormatted . ' am ' . $issueDate . ' in bar erhalten.',
-                0, 1, 'C');
-
-            $pdf->SetFont($font, 'I', $fontSize - 2);
-            $pdf->SetTextColor(...$grayColor);
-            $pdf->SetXY($receiptX + 2, $receiptY + 13);
-            $pdf->Cell($receiptW - 4, 3.5, 'Hiermit wird der Eingang des oben genannten Betrags bestätigt.', 0, 1, 'C');
-
-            $grossY = $receiptY + $receiptH;
-        } else {
-            $grossY = $pmY + 6;
-        }
-
         // ── NOTES ─────────────────────────────────────────────────────────
-        $afterContentY = $grossY + 4; // track Y position after all content above Vielen Dank
+        $afterContentY = $grossY + 8; // track Y position after all content above Vielen Dank
         if (!empty($invoice['notes'])) {
             $notesY = $afterContentY;
             $pdf->SetFont($font, '', $fontSize - 1);
