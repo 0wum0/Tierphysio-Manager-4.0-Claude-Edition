@@ -309,7 +309,8 @@ class InvoiceController extends Controller
             $this->invoiceService->markEmailSent((int)$params['id']);
             $this->session->flash('success', $this->translator->trans('invoices.email_sent'));
         } else {
-            $this->session->flash('error', $this->translator->trans('invoices.email_failed'));
+            $err = $this->mailService->getLastError();
+            $this->session->flash('error', $this->translator->trans('invoices.email_failed') . ($err ? ': ' . $err : ''));
         }
 
         $this->redirect("/rechnungen/{$params['id']}");

@@ -11,9 +11,16 @@ use PHPMailer\PHPMailer\Exception;
 
 class MailService
 {
+    private string $lastError = '';
+
     public function __construct(
         private readonly SettingsRepository $settingsRepository
     ) {}
+
+    public function getLastError(): string
+    {
+        return $this->lastError;
+    }
 
     public function sendInvoice(array $invoice, array $owner, string $pdfContent): bool
     {
@@ -35,7 +42,9 @@ class MailService
             );
 
             return $mailer->send();
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->lastError = $e->getMessage();
+            error_log('[MailService::sendInvoice] ' . $e->getMessage());
             return false;
         }
     }
@@ -61,7 +70,9 @@ class MailService
             }
 
             return $mailer->send();
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
+            $this->lastError = $e->getMessage();
+            error_log('[MailService::sendRaw] ' . $e->getMessage());
             return false;
         }
     }
@@ -76,7 +87,14 @@ class MailService
         $mailer->Password   = $this->settingsRepository->get('smtp_password', '');
         $mailer->SMTPAuth   = !empty($mailer->Username);
         $enc = $this->settingsRepository->get('smtp_encryption', 'tls');
-        $mailer->SMTPSecure = $enc === 'ssl' ? PHPMailer::ENCRYPTION_SMTPS : PHPMailer::ENCRYPTION_STARTTLS;
+        if ($enc === 'ssl') {
+            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+        } elseif ($enc === 'none') {
+            $mailer->SMTPSecure = '';
+            $mailer->SMTPAutoTLS = false;
+        } else {
+            $mailer->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        }
         $fromAddress = $this->settingsRepository->get('mail_from_address', 'noreply@tierphysio.local');
         $fromName    = $this->settingsRepository->get('mail_from_name', 'Tierphysio Manager');
         $mailer->setFrom($fromAddress, $fromName);
