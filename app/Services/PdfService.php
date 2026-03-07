@@ -810,64 +810,74 @@ class PdfService
         $pdf->Cell($totLabelW, 7, 'Bezahlter Betrag', 0, 0, 'L');
         $pdf->Cell($cTotal, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
-        // ── BARZAHLUNG Schriftzug (links, unter Bezahlter Betrag) ────────────
-        $afterGrossY = $grossY + 14;
+        // ── POST-TOTALS BLOCK ─────────────────────────────────────────
+        // Fixed layout zones (all within content area, above footer at 248mm):
+        //   - Vielen Dank  : 218-236mm  (fixed)
+        //   - Receipt box  : blockY .. blockY+26mm
+        //   - Barzahlung   : blockY-14  .. blockY  (above box)
+        // blockY is calculated from grossY but clamped so box ends before 218mm
+
+        $footerTopY  = 248;
+        $vdAreaTop   = $footerTopY - 30;  // 218mm — Vielen Dank starts here
+        $receiptBoxH = 26;
+        $bzH         = 14;  // barzahlung slot height
+        $gap         = 4;
+
+        // Earliest start: grossY + 14; latest start: vdAreaTop - receiptBoxH - bzH - gap*2
+        $blockStart = $grossY + 14;
+        $maxStart   = $vdAreaTop - $receiptBoxH - $bzH - $gap * 2;
+        $blockStart = min($blockStart, $maxStart);
+
+        // ── BARZAHLUNG Schriftzug ──────────────────────────────────
         $barzahlungImgFile = !empty($settings['pdf_barzahlung_bild'])
             ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_barzahlung_bild']
             : $this->resolveAssetImg('barzahlung-script.png');
         if (file_exists($barzahlungImgFile)) {
             $bzImgW = 52;
-            $pdf->Image($barzahlungImgFile, $contentX, $afterGrossY, $bzImgW, 0, '');
             [$bw, $bh] = @getimagesize($barzahlungImgFile) ?: [200, 80];
-            $bzImgH = ($bh > 0 && $bw > 0) ? ($bh / $bw) * $bzImgW : 14;
-            $afterGrossY += $bzImgH + 6;
+            $actualBzH = ($bh > 0 && $bw > 0) ? ($bh / $bw) * $bzImgW : $bzH;
+            $pdf->Image($barzahlungImgFile, $contentX, $blockStart, $bzImgW, 0, '');
+            $afterBz = $blockStart + $actualBzH + $gap;
         } else {
-            $pdf->SetFont($font, 'I', $fontSize + 4);
+            // Fallback: italic script-style text (dejavusans supports cursive rendering)
+            $pdf->SetFont('dejavusans', 'I', 20);
             $pdf->SetTextColor(...$darkColor);
-            $pdf->SetXY($contentX, $afterGrossY);
-            $pdf->Cell(70, 12, 'Barzahlung', 0, 1, 'L');
-            $afterGrossY += 16;
+            $pdf->SetXY($contentX, $blockStart);
+            $pdf->Cell(72, $bzH, 'Barzahlung', 0, 0, 'L');
+            $afterBz = $blockStart + $bzH + $gap;
         }
 
-        // ── QUITTUNGSTEXT — volle Contentbreite, mehrzeilig ─────────────────
+        // ── BESTAETIGUNGSBOX (full content width) ───────────────────
         $receiptBoxX = $contentX;
-        $receiptBoxW = $contentW;   // full content width
-        $receiptBoxY = $afterGrossY + 2;
-        $receiptBoxH = 28;
+        $receiptBoxW = $contentW;
+        $receiptBoxY = $afterBz;
 
         $pdf->SetFillColor(235, 247, 235);
         $pdf->SetDrawColor(...$accentColor);
         $pdf->SetLineWidth(0.6);
         $pdf->RoundedRect($receiptBoxX, $receiptBoxY, $receiptBoxW, $receiptBoxH, 3, '1111', 'DF');
 
-        // Title
         $pdf->SetFont($font, 'B', $fontSize + 1.5);
         $pdf->SetTextColor(...$accentColor);
         $pdf->SetXY($receiptBoxX + 3, $receiptBoxY + 4);
         $pdf->Cell($receiptBoxW - 6, 6, 'Hiermit wird der Zahlungseingang bestätigt', 0, 1, 'C');
 
-        // Body text — MultiCell so it wraps if needed
-        $issueDate = !empty($invoice['issue_date']) ? date('d.m.Y', strtotime($invoice['issue_date'])) : date('d.m.Y');
+        $issueDate      = !empty($invoice['issue_date']) ? date('d.m.Y', strtotime($invoice['issue_date'])) : date('d.m.Y');
         $grossFormatted = number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €';
         $pdf->SetFont($font, '', $fontSize + 0.5);
         $pdf->SetTextColor(...$colorTableText);
         $pdf->SetXY($receiptBoxX + 3, $receiptBoxY + 12);
-        $pdf->MultiCell(
-            $receiptBoxW - 6, 5.5,
+        $pdf->MultiCell($receiptBoxW - 6, 5.5,
             'Betrag von ' . $grossFormatted . ' am ' . $issueDate . ' in bar erhalten.',
-            0, 'C', false
-        );
+            0, 'C', false);
 
-        // Invoice ref
         $pdf->SetFont($font, 'I', $fontSize - 1);
         $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY($receiptBoxX + 3, $receiptBoxY + 21);
+        $pdf->SetXY($receiptBoxX + 3, $receiptBoxY + 20);
         $pdf->Cell($receiptBoxW - 6, 4, 'Rechnung-Nr.: ' . $invoice['invoice_number'], 0, 1, 'C');
 
-        // ── VIELEN DANK — fest oberhalb Footer wie in Rechnung ────────────────
-        $footerTopY = 248;
-        $vdImgH     = 18;
-        $vdY        = $footerTopY - 28;   // same fixed Y as invoice PDF
+        // ── VIELEN DANK — fest bei 218mm (oberhalb Footer) ──────────────
+        $vdY   = $vdAreaTop;
         $vdImg = !empty($settings['pdf_vielen_dank_bild'])
             ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_vielen_dank_bild']
             : $this->resolveAssetImg('vielen-dank-script.png');
@@ -877,7 +887,7 @@ class PdfService
             $pdf->SetFont($font, 'BI', 22);
             $pdf->SetTextColor(...$darkColor);
             $pdf->SetXY($contentX, $vdY);
-            $pdf->Cell($contentW, $vdImgH, 'Vielen Dank!', 0, 1, 'L');
+            $pdf->Cell($contentW, 16, 'Vielen Dank!', 0, 1, 'L');
         }
 
         // ── FOOTER ────────────────────────────────────────────────────────
