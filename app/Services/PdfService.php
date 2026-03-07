@@ -151,6 +151,19 @@ class PdfService
             $pdf->Cell($sidebarW - 6, 5, date('d.m.Y', strtotime($invoice['due_date'])), 0, 1, 'C');
         }
 
+        // Sidebar: Kundennummer (if owner given)
+        if ($owner) {
+            $sideY += 22;
+            $pdf->SetFont($font, '', $fontSize - 2);
+            $pdf->SetTextColor(220, 235, 220);
+            $pdf->SetXY(3, $sideY);
+            $pdf->Cell($sidebarW - 6, 4, 'Kunden-Nr.', 0, 1, 'C');
+            $pdf->SetFont($font, 'B', $fontSize - 1);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetXY(3, $sideY + 4);
+            $pdf->Cell($sidebarW - 6, 5, str_pad((string)($owner['id'] ?? 1), 4, '0', STR_PAD_LEFT), 0, 1, 'C');
+        }
+
         // ── MAIN CONTENT ─────────────────────────────────────────────────
 
         // ── Company info top right FIRST ────────────────────────────────
@@ -577,6 +590,19 @@ class PdfService
         $pdf->SetTextColor(255, 255, 255);
         $pdf->SetXY(3, $sideY + 4);
         $pdf->Cell($sidebarW - 6, 5, $invoice['issue_date'] ? date('d.m.Y', strtotime($invoice['issue_date'])) : date('d.m.Y'), 0, 1, 'C');
+
+        // Sidebar: Kundennummer
+        if ($owner) {
+            $sideY += 22;
+            $pdf->SetFont($font, '', $fontSize - 2);
+            $pdf->SetTextColor(220, 235, 220);
+            $pdf->SetXY(3, $sideY);
+            $pdf->Cell($sidebarW - 6, 4, 'Kunden-Nr.', 0, 1, 'C');
+            $pdf->SetFont($font, 'B', $fontSize - 1);
+            $pdf->SetTextColor(255, 255, 255);
+            $pdf->SetXY(3, $sideY + 4);
+            $pdf->Cell($sidebarW - 6, 5, str_pad((string)($owner['id'] ?? 1), 4, '0', STR_PAD_LEFT), 0, 1, 'C');
+        }
 
         // ── BEZAHLT Stempel in Sidebar ───────────────────────────────────
         $stampY = $sideY + 26;
