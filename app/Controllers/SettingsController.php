@@ -163,6 +163,40 @@ class SettingsController extends Controller
         $this->redirect('/einstellungen?tab=pdf');
     }
 
+    public function uploadPdfQuittungBild(array $params = []): void
+    {
+        $this->validateCsrf();
+        $dest     = ROOT_PATH . '/public/assets/img';
+        $filename = $this->uploadFile('pdf_quittung_bild', $dest, ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+        if ($filename === false) {
+            $this->session->flash('error', 'Bild-Upload fehlgeschlagen.');
+            $this->redirect('/einstellungen?tab=pdf');
+            return;
+        }
+        $ext = pathinfo($dest . '/' . $filename, PATHINFO_EXTENSION);
+        rename($dest . '/' . $filename, $dest . '/quittung-script.' . $ext);
+        $this->settingsService->set('pdf_quittung_bild', 'quittung-script.' . $ext);
+        $this->session->flash('success', '"Quittung"-Bild aktualisiert.');
+        $this->redirect('/einstellungen?tab=pdf');
+    }
+
+    public function uploadPdfBarzahlungBild(array $params = []): void
+    {
+        $this->validateCsrf();
+        $dest     = ROOT_PATH . '/public/assets/img';
+        $filename = $this->uploadFile('pdf_barzahlung_bild', $dest, ['image/jpeg', 'image/png', 'image/gif', 'image/webp']);
+        if ($filename === false) {
+            $this->session->flash('error', 'Bild-Upload fehlgeschlagen.');
+            $this->redirect('/einstellungen?tab=pdf');
+            return;
+        }
+        $ext = pathinfo($dest . '/' . $filename, PATHINFO_EXTENSION);
+        rename($dest . '/' . $filename, $dest . '/barzahlung-script.' . $ext);
+        $this->settingsService->set('pdf_barzahlung_bild', 'barzahlung-script.' . $ext);
+        $this->session->flash('success', '"Barzahlung"-Bild aktualisiert.');
+        $this->redirect('/einstellungen?tab=pdf');
+    }
+
     public function plugins(array $params = []): void
     {
         $this->redirect('/einstellungen#plugins');

@@ -579,14 +579,14 @@ class PdfService
         $pdf->Cell($sidebarW - 6, 5, $invoice['issue_date'] ? date('d.m.Y', strtotime($invoice['issue_date'])) : date('d.m.Y'), 0, 1, 'C');
 
         // ── BEZAHLT Stempel in Sidebar ───────────────────────────────────
-        $stampY = $sideY + 36;
+        $stampY = $sideY + 26;
         $pdf->SetFillColor(255, 255, 255);
-        $pdf->SetDrawColor(255, 255, 255);
-        $pdf->SetLineWidth(0.4);
-        $pdf->RoundedRect(4, $stampY, $sidebarW - 8, 14, 2, '1111', 'DF');
-        $pdf->SetFont($font, 'B', $fontSize + 1);
+        $pdf->SetDrawColor(...$accentColor);
+        $pdf->SetLineWidth(0.6);
+        $pdf->RoundedRect(4, $stampY, $sidebarW - 8, 16, 2.5, '1111', 'DF');
+        $pdf->SetFont($font, 'B', $fontSize + 2);
         $pdf->SetTextColor(...$accentColor);
-        $pdf->SetXY(4, $stampY + 4);
+        $pdf->SetXY(4, $stampY + 5);
         $pdf->Cell($sidebarW - 8, 6, 'BEZAHLT', 0, 1, 'C');
 
         // ── MAIN CONTENT ─────────────────────────────────────────────────
@@ -614,18 +614,20 @@ class PdfService
             $infoY += 4;
         }
 
-        // "Quittung" script heading
+        // "Quittung" script heading — use uploaded image or fallback text
         $quittungImgY = $infoY + 4;
-        $quittungImg  = $this->resolveAssetImg('quittung-script.png');
-        if (file_exists($quittungImg)) {
+        $quittungImgFile = !empty($settings['pdf_quittung_bild'])
+            ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_quittung_bild']
+            : $this->resolveAssetImg('quittung-script.png');
+        if (file_exists($quittungImgFile)) {
             $imgW = 72;
-            $pdf->Image($quittungImg, $rightEdge - $imgW, $quittungImgY, $imgW, 0, '');
-            [$pw, $ph] = @getimagesize($quittungImg) ?: [300, 120];
+            $pdf->Image($quittungImgFile, $rightEdge - $imgW, $quittungImgY, $imgW, 0, '');
+            [$pw, $ph] = @getimagesize($quittungImgFile) ?: [300, 120];
             $quittungImgH = ($ph > 0 && $pw > 0) ? ($ph / $pw) * $imgW : 28;
         } else {
             $quittungImgH = 18;
             $pdf->SetFont($font, 'BI', 34);
-            $pdf->SetTextColor(...$darkColor);
+            $pdf->SetTextColor(...$accentColor);
             $pdf->SetXY($contentX, $quittungImgY);
             $pdf->Cell($contentW, $quittungImgH, 'Quittung', 0, 1, 'R');
         }
@@ -782,15 +784,34 @@ class PdfService
         $pdf->Cell($totLabelW, 7, 'Bezahlter Betrag', 0, 0, 'L');
         $pdf->Cell($cTotal, 7, number_format((float)$invoice['total_gross'], 2, ',', '.') . ' €', 0, 1, 'R');
 
+        // ── BARZAHLUNG Schriftzug ─────────────────────────────────────────
+        $afterGrossY = $grossY + 12;
+        $barzahlungImgFile = !empty($settings['pdf_barzahlung_bild'])
+            ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_barzahlung_bild']
+            : $this->resolveAssetImg('barzahlung-script.png');
+        if (file_exists($barzahlungImgFile)) {
+            $bzImgW = 50;
+            $pdf->Image($barzahlungImgFile, $contentX, $afterGrossY, $bzImgW, 0, '');
+            [$bw, $bh] = @getimagesize($barzahlungImgFile) ?: [200, 80];
+            $bzImgH = ($bh > 0 && $bw > 0) ? ($bh / $bw) * $bzImgW : 12;
+            $afterGrossY += $bzImgH + 4;
+        } else {
+            $pdf->SetFont($font, 'I', $fontSize - 1);
+            $pdf->SetTextColor(...$grayColor);
+            $pdf->SetXY($contentX, $afterGrossY);
+            $pdf->Cell(60, 5, 'Barzahlung', 0, 1, 'L');
+            $afterGrossY += 7;
+        }
+
         // ── QUITTUNGSTEXT ─────────────────────────────────────────────────
-        $receiptBoxY = $grossY + 14;
+        $receiptBoxY = $afterGrossY + 2;
         $receiptBoxW = $totLabelW + $cTotal;
-        $receiptBoxH = 20;
+        $receiptBoxH = 22;
 
         $pdf->SetFillColor(235, 247, 235);
         $pdf->SetDrawColor(...$accentColor);
-        $pdf->SetLineWidth(0.4);
-        $pdf->RoundedRect($totLabelX, $receiptBoxY, $receiptBoxW, $receiptBoxH, 2, '1111', 'DF');
+        $pdf->SetLineWidth(0.5);
+        $pdf->RoundedRect($totLabelX, $receiptBoxY, $receiptBoxW, $receiptBoxH, 2.5, '1111', 'DF');
 
         $pdf->SetFont($font, 'B', $fontSize + 0.5);
         $pdf->SetTextColor(...$accentColor);
@@ -802,17 +823,37 @@ class PdfService
 
         $pdf->SetFont($font, '', $fontSize - 0.5);
         $pdf->SetTextColor(...$colorTableText);
-        $pdf->SetXY($totLabelX + 2, $receiptBoxY + 9);
+        $pdf->SetXY($totLabelX + 2, $receiptBoxY + 10);
         $pdf->Cell($receiptBoxW - 4, 5,
             'Betrag von ' . $grossFormatted . ' am ' . $issueDate . ' in bar erhalten.',
             0, 1, 'C');
 
         $pdf->SetFont($font, 'I', $fontSize - 2);
         $pdf->SetTextColor(...$grayColor);
-        $pdf->SetXY($totLabelX + 2, $receiptBoxY + 15);
+        $pdf->SetXY($totLabelX + 2, $receiptBoxY + 16.5);
         $pdf->Cell($receiptBoxW - 4, 4,
             'Rechnung-Nr.: ' . $invoice['invoice_number'],
             0, 1, 'C');
+
+        // ── VIELEN DANK Bild ──────────────────────────────────────────────
+        $afterReceiptY = $receiptBoxY + $receiptBoxH + 6;
+        $footerTopY    = 248;
+        $vdImgH        = 18;
+        $vdImg = !empty($settings['pdf_vielen_dank_bild'])
+            ? ROOT_PATH . '/public/assets/img/' . $settings['pdf_vielen_dank_bild']
+            : $this->resolveAssetImg('vielen-dank-script.png');
+        $vdIdeal = $footerTopY - 14 - $vdImgH;
+        $vdY     = max($vdIdeal, $afterReceiptY + 2);
+        if ($vdY + $vdImgH < $footerTopY) {
+            if (file_exists($vdImg)) {
+                $pdf->Image($vdImg, $contentX, $vdY, 68, 0, '');
+            } else {
+                $pdf->SetFont($font, 'BI', 22);
+                $pdf->SetTextColor(...$darkColor);
+                $pdf->SetXY($contentX, $vdY);
+                $pdf->Cell($contentW, $vdImgH, 'Vielen Dank!', 0, 1, 'L');
+            }
+        }
 
         // ── FOOTER ────────────────────────────────────────────────────────
         $footerTopY = 248;
