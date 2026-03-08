@@ -12,6 +12,7 @@
     </div>
     <div class="flex gap-2 flex-wrap">
         {# ── Rechnungs-Badge ──────────────────────────────────────────── #}
+        <span style="font-size:0.7rem;color:orange;">DEBUG stats: open={{ invoice_stats.open_count ?? 'n/a' }} paid={{ invoice_stats.paid_count ?? 'n/a' }} owner={{ patient.owner_id ?? 'n/a' }}</span>
         {% if invoice_stats is defined %}
             {% if invoice_stats.open_count > 0 %}
                 <a href="/rechnungen?search={{ patient.name|url_encode }}" class="btn btn-sm invoice-badge-open" style="background:rgba(220,53,69,0.15);color:#dc3545;border:1.5px solid #dc3545;font-weight:600;position:relative;overflow:visible;">
