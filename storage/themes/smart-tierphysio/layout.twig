@@ -23,6 +23,8 @@
     {# App custom overrides #}
     <link rel="stylesheet" media="screen, print" href="/themes/smart-tierphysio/bridge.css?v=20260307d">
 
+    {# Per-user UI settings from DB — must be before saveloadscript.js #}
+    <script>window.__serverUiSettings = {{ server_ui_settings ?? 'null' }};</script>
     {# Save/Load functionality — MUST be in <head> so theme is applied before CSS renders #}
     <script src="/themes/smart-tierphysio/scripts/core/saveloadscript.js"></script>
 

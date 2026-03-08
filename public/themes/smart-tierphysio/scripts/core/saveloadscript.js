@@ -1,165 +1,135 @@
 'use strict';
 
-
 var htmlRoot = document.getElementsByTagName('HTML')[0],
-    //save states
     savePanelStateEnabled = true,
 
-    //mobile operator on
     mobileOperator = function () {
-        // Check user agent
-        const userAgent = navigator.userAgent.toLowerCase();
-        const isMobileUserAgent = /iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(userAgent);
-
-        // Check for touch support
-        const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-
-        // Check screen size (optional)
-        const isSmallScreen = window.innerWidth <= 992; // Adjust the breakpoint as needed
-
-        // Return true if any of the conditions are met
+        var userAgent = navigator.userAgent.toLowerCase();
+        var isMobileUserAgent = /iphone|ipad|ipod|android|blackberry|mini|windows\sce|palm/i.test(userAgent);
+        var isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        var isSmallScreen = window.innerWidth <= 992;
         return isMobileUserAgent || isTouchDevice || isSmallScreen;
     },
 
-    //filter
     filterClass = function (t, e) {
         return String(t).split(/[^\w-]+/).filter(function (t) {
-            return e.test(t)
-        }).join(' ')
+            return e.test(t);
+        }).join(' ');
     },
 
-    //load
-    loadSettings = function () {
-        var t = localStorage.getItem('layoutSettings') || '',
-            e = t ? JSON.parse(t) : {};
+    // ── loadThemeStyle: inject a <link id="theme-style"> into <head> ──────────
+    loadThemeStyle = function (themeStyle) {
+        if (!themeStyle || !themeStyle.trim()) return;
+        var existingThemeStyle = document.getElementById('theme-style');
+        if (existingThemeStyle) {
+            existingThemeStyle.href = themeStyle;
+        } else {
+            var linkElement = document.createElement('link');
+            linkElement.id = 'theme-style';
+            linkElement.rel = 'stylesheet';
+            linkElement.media = 'screen';
+            linkElement.href = themeStyle;
+            linkElement.setAttribute('data-loaded-from-storage', 'true');
+            document.head.appendChild(linkElement);
+        }
+    },
 
-        // Load theme setting
+    // ── loadSettings: server DB > localStorage fallback ───────────────────────
+    loadSettings = function () {
+        var e = {};
+
+        // 1. Try server-provided settings (injected by layout.twig as window.__serverUiSettings)
+        try {
+            if (window.__serverUiSettings && typeof window.__serverUiSettings === 'object') {
+                e = window.__serverUiSettings;
+                // Also sync to localStorage so smartApp reads consistent data
+                localStorage.setItem('layoutSettings', JSON.stringify(e));
+            } else {
+                // 2. Fall back to localStorage
+                var t = localStorage.getItem('layoutSettings') || '';
+                e = t ? JSON.parse(t) : {};
+            }
+        } catch (ex) {}
+
         var savedTheme = e.theme || 'dark';
         htmlRoot.setAttribute('data-bs-theme', savedTheme);
 
-        // Load theme style CSS file only if one was saved
         var themeStyle = e.themeStyle || '';
         if (themeStyle) {
             loadThemeStyle(themeStyle);
         }
 
-        return Object.assign({
-            htmlRoot: '',
-            theme: savedTheme,
-            themeStyle: themeStyle
-        }, e)
+        return Object.assign({ htmlRoot: '', theme: savedTheme, themeStyle: themeStyle }, e);
     },
 
-    //save
+    // ── saveSettings: localStorage + AJAX to server DB ────────────────────────
     saveSettings = function () {
-        // Save root HTML classes
-        layoutSettings.htmlRoot = filterClass(htmlRoot.className, /^(set)-/i);
+        layoutSettings.htmlRoot   = filterClass(htmlRoot.className, /^(set)-/i);
+        layoutSettings.theme      = htmlRoot.getAttribute('data-bs-theme') || 'dark';
 
-        // Save theme attribute
-        layoutSettings.theme = htmlRoot.getAttribute('data-bs-theme') || 'dark';
-
-        // Save theme style CSS path
         var themeStyleElement = document.getElementById('theme-style');
-        if (themeStyleElement && themeStyleElement.getAttribute('href')) {
-            // Get complete href attribute
-            layoutSettings.themeStyle = themeStyleElement.getAttribute('href');
-            console.log('Saved theme style:', layoutSettings.themeStyle);
-        } else {
-            layoutSettings.themeStyle = '';
-            console.log('No theme style to save');
-        }
+        layoutSettings.themeStyle = (themeStyleElement && themeStyleElement.getAttribute('href'))
+            ? themeStyleElement.getAttribute('href')
+            : '';
 
-        // Log the full settings object before saving
-        console.log('Saving layout settings:', JSON.stringify(layoutSettings));
+        var json = JSON.stringify(layoutSettings);
 
-        // Save to localStorage
-        localStorage.setItem("layoutSettings", JSON.stringify(layoutSettings));
+        // Always keep localStorage in sync
+        localStorage.setItem('layoutSettings', json);
 
-        // Show saving indicator
+        // Persist to server DB via AJAX (fire-and-forget)
+        try {
+            fetch('/api/ui-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: json,
+                credentials: 'same-origin'
+            });
+        } catch (ex) {}
+
         savingIndicator();
     },
 
-    // reset
+    // ── resetSettings ─────────────────────────────────────────────────────────
     resetSettings = function () {
-        localStorage.setItem("layoutSettings", "");
-        // reset data-bs-theme
-        htmlRoot.setAttribute('data-bs-theme', 'light');
+        localStorage.removeItem('layoutSettings');
 
-        // reset theme style element if it exists
-        const themeStyleElement = document.getElementById('theme-style')
-        if (themeStyleElement) {
-            themeStyleElement.setAttribute('href', '');
-        }
+        // Clear on server too
+        try {
+            fetch('/api/ui-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({}),
+                credentials: 'same-origin'
+            });
+        } catch (ex) {}
 
-        // refresh page
+        htmlRoot.setAttribute('data-bs-theme', 'dark');
+        var themeStyleElement = document.getElementById('theme-style');
+        if (themeStyleElement) { themeStyleElement.setAttribute('href', ''); }
         window.location.reload();
-
-
     },
 
-    //load theme style
-    loadThemeStyle = function (themeStyle) {
-        if (!themeStyle) return;
-
-        // Don't do anything if the URL is empty
-        if (!themeStyle.trim()) return;
-
-        // Get existing theme style if it exists
-        var existingThemeStyle = document.getElementById('theme-style');
-
-        if (existingThemeStyle) {
-            // Update existing theme style's href
-            existingThemeStyle.href = themeStyle;
-        } else {
-            // Create new theme style element if none exists
-            var linkElement = document.createElement('link');
-            linkElement.id = 'theme-style'; // Use the standard ID
-            linkElement.rel = 'stylesheet';
-            linkElement.media = 'screen';
-            linkElement.href = themeStyle;
-            document.head.appendChild(linkElement);
-
-            // Flag to indicate this was loaded from localStorage
-            linkElement.setAttribute('data-loaded-from-storage', 'true');
-        }
-    },
-
-    //get page id
     getPageIdentifier = function () {
-        return window.location.pathname.split('/').pop() || 'index.html';
+        return window.location.pathname.split('/').pop() || 'index';
     },
 
-    //save panel state
     savePanelState = function () {
         if (!savePanelStateEnabled) return;
-
         var state = [];
         var columns = document.querySelectorAll('.main-content > .row > [class^="col-"]');
         columns.forEach(function (column, columnIndex) {
-            var panels = column.querySelectorAll('.panel');
-            panels.forEach(function (panel, position) {
+            column.querySelectorAll('.panel').forEach(function (panel, position) {
                 var panelHeader = panel.querySelector('.panel-hdr');
-
-                // Save panel classes excluding 'panel' and 'panel-fullscreen'
                 var panelClasses = panel.className.split(' ').filter(function (cls) {
                     return cls !== 'panel' && cls !== 'panel-fullscreen';
                 }).join(' ');
-
-                // Save header classes excluding 'panel-hdr'
                 var headerClasses = panelHeader ? panelHeader.className.split(' ').filter(function (cls) {
                     return cls !== 'panel-hdr';
                 }).join(' ') : '';
-
-                state.push({
-                    id: panel.id,
-                    column: columnIndex,
-                    position: position, // Save position within column
-                    classes: panelClasses,
-                    headerClasses: headerClasses
-                });
+                state.push({ id: panel.id, column: columnIndex, position: position, classes: panelClasses, headerClasses: headerClasses });
             });
         });
-
         var pageId = getPageIdentifier();
         var allStates = JSON.parse(localStorage.getItem('allPanelStates') || '{}');
         allStates[pageId] = state;
@@ -171,87 +141,61 @@ var htmlRoot = document.getElementsByTagName('HTML')[0],
         var pageId = getPageIdentifier();
         var allStates = JSON.parse(localStorage.getItem('allPanelStates') || '{}');
         var savedState = allStates[pageId];
-
         if (!savedState) return;
-
-        // Use same selector as save function
         var columns = Array.from(document.querySelectorAll('.main-content > .row > [class^="col-"]'));
-
-        // Store all existing panels in a map before removing them
         var panelMap = {};
         columns.forEach(function (column) {
-            var existingPanels = Array.from(column.querySelectorAll('.panel'));
-            existingPanels.forEach(function (panel) {
+            Array.from(column.querySelectorAll('.panel')).forEach(function (panel) {
                 panelMap[panel.id] = panel;
                 panel.remove();
             });
         });
-
-        // Sort state by column and position
         savedState.sort(function (a, b) {
-            if (a.column === b.column) {
-                return a.position - b.position;
-            }
-            return a.column - b.column;
+            return a.column !== b.column ? a.column - b.column : a.position - b.position;
         });
-
-        // Reinsert panels in correct order
         savedState.forEach(function (item) {
             var panel = panelMap[item.id];
             if (panel && columns[item.column]) {
-                // Update panel classes
                 panel.className = 'panel ' + (item.classes || '');
-
-                // Update header classes
                 var panelHeader = panel.querySelector('.panel-hdr');
                 if (panelHeader && item.headerClasses) {
                     panelHeader.className = 'panel-hdr ' + item.headerClasses;
                 }
-
-                // Append to correct column
                 columns[item.column].appendChild(panel);
             }
         });
     },
 
-    // Reset panel state
     resetPanelState = function () {
         var pageId = getPageIdentifier();
         var allStates = JSON.parse(localStorage.getItem('allPanelStates') || '{}');
         delete allStates[pageId];
         localStorage.setItem('allPanelStates', JSON.stringify(allStates));
-        //refresh page
         window.location.reload();
     },
 
     savingIndicator = function () {
-        // Create or get the indicator element
-        let indicator = document.getElementById('saving-indicator');
+        var indicator = document.getElementById('saving-indicator');
         if (!indicator) {
             indicator = document.createElement('div');
             indicator.id = 'saving-indicator';
             document.body.appendChild(indicator);
         }
-
-        // Show saving animation
-        //indicator.textContent = '';
         indicator.className = 'saving-indicator spinner-border show';
-
-        // After a brief delay, show success and hide
-        setTimeout(() => {
-            //indicator.textContent = '';
+        setTimeout(function () {
             indicator.className = 'saving-indicator spinner-border show success';
-            setTimeout(() => {
+            setTimeout(function () {
                 indicator.className = 'saving-indicator spinner-border success';
             }, 500);
         }, 300);
     },
 
-    //load page layout settings
-layoutSettings = loadSettings();
+    // ── Boot ──────────────────────────────────────────────────────────────────
+    layoutSettings = loadSettings();
+
 layoutSettings.htmlRoot && (htmlRoot.className = layoutSettings.htmlRoot);
 
-// Expose on window so smartApp.js can call them via typeof window.saveSettings
+// Expose on window so smartApp.js can find them
 window.saveSettings   = saveSettings;
 window.loadSettings   = loadSettings;
 window.resetSettings  = resetSettings;

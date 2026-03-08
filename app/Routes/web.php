@@ -9,6 +9,7 @@ use App\Controllers\OwnerController;
 use App\Controllers\InvoiceController;
 use App\Controllers\SettingsController;
 use App\Controllers\ProfileController;
+use App\Controllers\UiSettingsController;
 
 /** @var \App\Core\Router $router */
 
@@ -90,3 +91,6 @@ $router->post('/einstellungen/behandlungsarten', [SettingsController::class, 'cr
 $router->post('/einstellungen/behandlungsarten/{id}', [SettingsController::class, 'updateTreatmentType'], ['admin']);
 $router->post('/einstellungen/behandlungsarten/{id}/loeschen', [SettingsController::class, 'deleteTreatmentType'], ['admin']);
 $router->get('/api/behandlungsarten', [SettingsController::class, 'treatmentTypesJson'], ['auth']);
+
+$router->post('/api/ui-settings', [UiSettingsController::class, 'save'], ['auth']);
+$router->get('/api/ui-settings', [UiSettingsController::class, 'load'], ['auth']);

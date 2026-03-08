@@ -80,6 +80,16 @@ class Application
                 // Also expose settings globally for layout templates
                 $view->addGlobal('global_settings', $settingsRepo->all());
             } catch (\Throwable) {}
+
+            // Load per-user UI layout settings (theme, fixed header, etc.)
+            try {
+                $prefsRepo    = new \App\Repositories\UserPreferencesRepository($this->container->get(Database::class));
+                $userId       = (int)($session->get('user_id') ?? 0);
+                $uiRaw        = $userId ? $prefsRepo->get($userId, 'ui_layout_settings') : null;
+                $view->addGlobal('server_ui_settings', $uiRaw ?? 'null');
+            } catch (\Throwable) {
+                $view->addGlobal('server_ui_settings', 'null');
+            }
         }
 
         $this->router = new Router($this->container);
