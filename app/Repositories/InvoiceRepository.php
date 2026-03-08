@@ -53,13 +53,24 @@ class InvoiceRepository extends Repository
 
     public function getInvoiceStatsByPatientId(int $patientId): array
     {
-        $openCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE patient_id = ? AND status IN ('open','overdue','draft')",
+        /* Find owner_id for this patient */
+        $ownerId = (int)$this->db->fetchColumn(
+            "SELECT owner_id FROM patients WHERE id = ?",
             [$patientId]
         );
+
+        /* Match by patient_id directly OR by owner_id (invoices linked only to owner) */
+        $openCount = (int)$this->db->fetchColumn(
+            "SELECT COUNT(*) FROM invoices
+             WHERE status IN ('open','overdue','draft')
+               AND (patient_id = ? OR (patient_id IS NULL AND owner_id = ?))",
+            [$patientId, $ownerId]
+        );
         $paidCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE patient_id = ? AND status = 'paid'",
-            [$patientId]
+            "SELECT COUNT(*) FROM invoices
+             WHERE status = 'paid'
+               AND (patient_id = ? OR (patient_id IS NULL AND owner_id = ?))",
+            [$patientId, $ownerId]
         );
         return [
             'open_count' => $openCount,
