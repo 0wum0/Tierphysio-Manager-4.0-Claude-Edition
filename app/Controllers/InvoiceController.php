@@ -389,6 +389,27 @@ class InvoiceController extends Controller
         exit;
     }
 
+    public function formData(array $params = []): void
+    {
+        $settings = $this->settingsRepository->all();
+        $owners   = $this->ownerService->findAll();
+        $patients = $this->patientService->findAll();
+
+        $treatmentTypes = [];
+        try { $treatmentTypes = $this->treatmentTypeRepository->findActive(); } catch (\Throwable) {}
+
+        $this->json([
+            'next_number'      => $this->invoiceService->generateInvoiceNumber(),
+            'kleinunternehmer' => ($settings['kleinunternehmer'] ?? '0') === '1',
+            'default_tax_rate' => $settings['default_tax_rate'] ?? '19',
+            'issue_date'       => date('Y-m-d'),
+            'due_date'         => date('Y-m-d', strtotime('+14 days')),
+            'owners'           => array_values($owners),
+            'patients'         => array_values($patients),
+            'treatment_types'  => array_values($treatmentTypes),
+        ]);
+    }
+
     public function sendReceiptEmail(array $params = []): void
     {
         $this->validateCsrf();
