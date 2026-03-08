@@ -885,3 +885,30 @@
 .ql-editor.ql-blank::before { color: var(--text-muted); font-style: normal; }
 .ql-editor p { margin: 0; }
 .ql-view { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; word-break: break-word; }
+
+/* ── Logo Backdrop (SmartAdmin Blob Animation) ── */
+.app-logo {
+    position: relative;
+    overflow: hidden;
+}
+.logo-backdrop {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 0;
+}
+.logo-backdrop .blobs {
+    position: absolute;
+    inset: 0;
+}
+.logo-backdrop .blobs svg {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    opacity: 0.35;
+}
+.app-logo > div:not(.logo-backdrop) {
+    position: relative;
+    z-index: 1;
+}
