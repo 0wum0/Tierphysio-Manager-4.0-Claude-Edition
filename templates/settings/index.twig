@@ -1421,7 +1421,7 @@
                 '{' ~ '{company_name}}'
             ] %}
             {% for ph in placeholders %}
-            <code onclick="navigator.clipboard?.writeText('{{ ph|e('html_attr') }}')" title="Klicken zum Kopieren" style="background:var(--bs-tertiary-bg,rgba(255,255,255,.06));border:1px solid var(--bs-border-color);border-radius:5px;padding:0.2rem 0.55rem;font-size:0.8rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bs-secondary-bg)'" onmouseout="this.style.background='var(--bs-tertiary-bg,rgba(255,255,255,.06))'">{{ ph }}</code>
+            <code data-ph="{{ ph }}" title="Klicken zum Kopieren" style="background:var(--bs-tertiary-bg,rgba(255,255,255,.06));border:1px solid var(--bs-border-color);border-radius:5px;padding:0.2rem 0.55rem;font-size:0.8rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bs-secondary-bg)'" onmouseout="this.style.background='var(--bs-tertiary-bg,rgba(255,255,255,.06))'">{{ ph }}</code>
             {% endfor %}
         </div>
         <p class="text-muted mt-2" style="font-size:0.8rem;">Auf einen Platzhalter klicken um ihn in die Zwischenablage zu kopieren.</p>
@@ -1479,6 +1479,20 @@
 
     </form>
 </div>
+
+<script>
+/* ── E-Mail Template Platzhalter Clipboard ── */
+document.addEventListener('click', function(e) {
+    var el = e.target.closest('[data-ph]');
+    if (!el) return;
+    var ph = el.getAttribute('data-ph');
+    navigator.clipboard?.writeText(ph).then(function() {
+        var orig = el.textContent;
+        el.textContent = '✓ Kopiert';
+        setTimeout(function(){ el.textContent = orig; }, 1200);
+    });
+});
+</script>
 
 <script>
 function openEditTT(tt) {
