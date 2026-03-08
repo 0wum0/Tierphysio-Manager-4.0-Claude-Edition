@@ -118,22 +118,22 @@
 
 /* ── Light Mode: btn-system icons must be dark, not white ── */
 [data-bs-theme="light"] .app-header .btn-system .sa-icon {
-  stroke: rgba(0, 0, 0, 0.65);
-  fill:   rgba(0, 0, 0, 0.0);
+  --sa-icon-color: rgba(0, 0, 0, 0.65) !important;
+  --sa-icon-fill:  rgba(0, 0, 0, 0.0)  !important;
 }
 [data-bs-theme="light"] .app-header .btn-system:hover .sa-icon,
 [data-bs-theme="light"] .app-header .btn-system.show  .sa-icon {
-  stroke: var(--bs-primary);
-  fill:   rgba(var(--bs-primary-rgb), 0.12);
-}
-/* collapse icon (SVG polygon) */
-[data-bs-theme="light"] .app-header .collapse-icon svg polygon {
-  fill: rgba(0, 0, 0, 0.45);
+  --sa-icon-color: var(--bs-primary)                      !important;
+  --sa-icon-fill:  rgba(var(--bs-primary-rgb), 0.12)      !important;
 }
 /* mobile hamburger */
 [data-bs-theme="light"] .app-header .mobile-menu-icon .sa-icon {
-  stroke: rgba(0, 0, 0, 0.65);
-  fill:   none;
+  --sa-icon-color: rgba(0, 0, 0, 0.65) !important;
+  --sa-icon-fill:  none                !important;
+}
+/* collapse icon (SVG polygon, not a sa-icon) */
+[data-bs-theme="light"] .app-header .collapse-icon svg polygon {
+  fill: rgba(0, 0, 0, 0.45) !important;
 }
 
 /* ═══════════════════════════════════════════
