@@ -62,7 +62,7 @@
                 {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
                     <img src="/storage/uploads/{{ global_settings.company_logo }}" alt="{{ app_name }}" class="custom-logo">
                 {% else %}
-                    <svg class="custom-logo" viewBox="-2 -2 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg class="custom-logo" viewBox="-2 -2 36 36" width="32" height="32" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g transform="translate(16,16)">
                             <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg0)" opacity="0.9">
                                 <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
@@ -383,15 +383,15 @@
             {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
                 <img src="/storage/uploads/{{ global_settings.company_logo }}" alt="{{ app_name }}" class="custom-logo">
             {% else %}
-                <svg class="custom-logo" viewBox="-2 -2 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <svg class="custom-logo" viewBox="-2 -2 36 36" width="32" height="32" preserveAspectRatio="xMidYMid meet" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <g transform="translate(16,16)">
-                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg0)" opacity="0.9">
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg0b)" opacity="0.9">
                             <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
                         </ellipse>
-                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg1)" opacity="0.9">
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg1b)" opacity="0.9">
                             <animateTransform attributeName="transform" type="rotate" from="60" to="420" dur="3s" repeatCount="indefinite"/>
                         </ellipse>
-                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg2)" opacity="0.9">
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg2b)" opacity="0.9">
                             <animateTransform attributeName="transform" type="rotate" from="120" to="480" dur="3s" repeatCount="indefinite"/>
                         </ellipse>
                         <circle cx="0" cy="0" r="4.5" fill="white" opacity="0.95"/>
