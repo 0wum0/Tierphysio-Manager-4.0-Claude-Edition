@@ -280,17 +280,25 @@
         <button type="button" data-bs-toggle="dropdown"
                 title="{{ current_user.email ?? current_user.name }}"
                 class="btn-system bg-transparent d-flex flex-shrink-0 align-items-center justify-content-center"
-                style="width:38px;height:38px;border-radius:50%;background:var(--bs-primary)!important;color:#fff;border:none;font-size:.75rem;font-weight:700;"
                 aria-label="Benutzermenü">
-            {{ current_user.name|initials }}
+            <span class="profile-image profile-image-md rounded-circle d-flex align-items-center justify-content-center fw-700"
+                  style="background:var(--bs-primary);color:#fff;font-size:.72rem;width:36px;height:36px;">
+                {{ current_user.name|initials }}
+            </span>
         </button>
         <div class="dropdown-menu dropdown-menu-animated dropdown-menu-end">
             <div class="notification-header rounded-top mb-2">
                 <div class="d-flex flex-row align-items-center mt-1 mb-1 color-white">
-                    <div class="info-card-text ms-2">
+                    <span class="status status-success d-inline-block me-2">
+                        <span class="profile-image rounded-circle d-flex align-items-center justify-content-center fw-700"
+                              style="background:var(--bs-primary);color:#fff;font-size:.72rem;width:40px;height:40px;">
+                            {{ current_user.name|initials }}
+                        </span>
+                    </span>
+                    <div class="info-card-text">
                         <div class="fs-lg text-truncate text-truncate-lg">{{ current_user.name }}</div>
                         <span class="text-truncate text-truncate-md opacity-80 fs-sm">
-                            {{ current_user.role == 'admin' ? 'Administrator' : 'Mitarbeiter' }}
+                            {{ current_user.email ?? (current_user.role == 'admin' ? 'Administrator' : 'Mitarbeiter') }}
                         </span>
                     </div>
                 </div>
@@ -300,12 +308,16 @@
                 <svg class="sa-icon me-1"><use href="/themes/smart-tierphysio/icons/sprite.svg#settings"></use></svg>
                 Einstellungen
             </a>
+            <a href="/profil" class="dropdown-item" role="button">
+                <svg class="sa-icon me-1"><use href="/themes/smart-tierphysio/icons/sprite.svg#user"></use></svg>
+                Profil
+            </a>
             <div class="dropdown-divider m-0"></div>
             <form action="/logout" method="POST" style="margin:0;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-                <button type="submit" class="dropdown-item d-flex align-items-center py-3 fw-500">
+                <button type="submit" class="dropdown-item d-flex justify-content-between align-items-center py-3 fw-500">
                     <span class="text-danger">Abmelden</span>
-                    <span class="d-block text-truncate text-truncate-sm ms-auto text-muted fs-xs">{{ current_user.name }}</span>
+                    <span class="d-block text-truncate text-truncate-sm text-muted fs-xs">{{ current_user.name }}</span>
                 </button>
             </form>
         </div>
@@ -317,61 +329,40 @@
     <aside class="app-sidebar d-flex flex-column">
 
         {# Logo / Brand #}
-        <a href="/dashboard" class="app-logo flex-shrink-0">
-            <div class="logo-backdrop">
-                <div class="blobs">
-                    <svg viewBox="0 0 1200 1200">
-                        <g class="blob blob-1"><path d="M 100 600 q 0 -700, 500 -500 t 500 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-2"><path d="M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-3"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-4"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
-                        <g class="blob blob-1 alt"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
-                        <g class="blob blob-2 alt"><path d="M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-3 alt"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-4 alt"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
-                    </svg>
-                </div>
-            </div>
-            <div class="d-flex align-items-center px-3 py-2 gap-2">
-                {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
-                    <img src="/storage/uploads/{{ global_settings.company_logo }}"
-                         alt="{{ app_name }}"
-                         style="width:32px;height:32px;border-radius:8px;object-fit:contain;background:var(--bs-primary);padding:2px;flex-shrink:0;">
-                {% else %}
-                    <svg width="36" height="36" viewBox="-2 -2 36 36" overflow="visible" fill="none" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0;display:block;">
-                        <g transform="translate(16,16)">
-                            <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg0)" opacity="0.9">
-                                <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
-                            </ellipse>
-                            <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg1)" opacity="0.9">
-                                <animateTransform attributeName="transform" type="rotate" from="60" to="420" dur="3s" repeatCount="indefinite"/>
-                            </ellipse>
-                            <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg2)" opacity="0.9">
-                                <animateTransform attributeName="transform" type="rotate" from="120" to="480" dur="3s" repeatCount="indefinite"/>
-                            </ellipse>
-                            <circle cx="0" cy="0" r="4.5" fill="white" opacity="0.95"/>
-                        </g>
-                        <defs>
-                            <linearGradient id="sg0" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#A8ECF9"/>
-                                <stop offset="1" stop-color="#6EA8FE"/>
-                            </linearGradient>
-                            <linearGradient id="sg1" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#6EA8FE"/>
-                                <stop offset="1" stop-color="#a78bfa"/>
-                            </linearGradient>
-                            <linearGradient id="sg2" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
-                                <stop stop-color="#a78bfa"/>
-                                <stop offset="1" stop-color="#A8ECF9"/>
-                            </linearGradient>
-                        </defs>
-                    </svg>
-                {% endif %}
-                <div class="nav-link-text">
-                    <div class="fw-700 fs-md lh-1">{{ app_name }}</div>
-                    <div class="fs-nano text-muted">v{{ app_version }}</div>
-                </div>
-            </div>
+        <a href="/dashboard" class="app-logo flex-shrink-0" data-prefix="{{ app_version }}">
+            {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
+                <img src="/storage/uploads/{{ global_settings.company_logo }}"
+                     alt="{{ app_name }}"
+                     class="profile-image rounded-circle"
+                     style="width:36px;height:36px;object-fit:contain;">
+            {% else %}
+                <svg class="custom-logo" width="36" height="36" viewBox="-2 -2 36 36" overflow="visible" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <g transform="translate(16,16)">
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg0)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg1)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="60" to="420" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <ellipse cx="0" cy="0" rx="14" ry="5.5" fill="url(#sg2)" opacity="0.9">
+                            <animateTransform attributeName="transform" type="rotate" from="120" to="480" dur="3s" repeatCount="indefinite"/>
+                        </ellipse>
+                        <circle cx="0" cy="0" r="4.5" fill="white" opacity="0.95"/>
+                    </g>
+                    <defs>
+                        <linearGradient id="sg0" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#A8ECF9"/><stop offset="1" stop-color="#6EA8FE"/>
+                        </linearGradient>
+                        <linearGradient id="sg1" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#6EA8FE"/><stop offset="1" stop-color="#a78bfa"/>
+                        </linearGradient>
+                        <linearGradient id="sg2" x1="-14" y1="0" x2="14" y2="0" gradientUnits="userSpaceOnUse">
+                            <stop stop-color="#a78bfa"/><stop offset="1" stop-color="#A8ECF9"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            {% endif %}
+            <span class="nav-link-text">{{ app_name }}</span>
         </a>
 
         {# Nav filter #}
