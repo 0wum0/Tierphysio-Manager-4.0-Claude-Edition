@@ -19,6 +19,7 @@
 
     {# Icons #}
     <link rel="stylesheet" media="screen, print" href="/themes/smart-tierphysio/webfonts/smartadmin/sa-icons.css">
+    <link rel="stylesheet" media="screen, print" href="/themes/smart-tierphysio/webfonts/fontawesome/fontawesome.css">
 
     {# App custom overrides #}
     <link rel="stylesheet" media="screen, print" href="/themes/smart-tierphysio/bridge.css?v=20260307d">
@@ -47,7 +48,21 @@
                 <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#menu"></use></svg>
             </button>
 
-            {# Desktop sidebar collapse #}
+            {# App logo in header (desktop) #}
+        <a href="/dashboard" class="app-logo flex-shrink-0 d-none d-lg-flex me-3" style="text-decoration:none;">
+            <div class="logo-backdrop">
+                <div class="blobs">
+                    <svg viewbox="0 0 1200 1200">
+                        <g class="blob blob-1"><path d="M 100 600 q 0 -700, 500 -500 t 500 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-2"><path d="M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-3"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-4"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
+                    </svg>
+                </div>
+            </div>
+        </a>
+
+        {# Desktop sidebar collapse #}
             <button type="button" class="collapse-icon me-3 d-none d-lg-inline-flex d-xl-inline-flex d-xxl-inline-flex"
                     data-action="toggle" data-class="set-nav-minified"
                     aria-label="Navigation minimieren">
@@ -209,6 +224,15 @@
             </svg>
             <svg class="sa-icon sa-icon-2x sa-mode-dark">
                 <use href="/themes/smart-tierphysio/icons/sprite.svg#moon"></use>
+            </svg>
+        </button>
+
+        {# App Drawer toggle #}
+        <button type="button" class="btn btn-system d-none d-sm-block d-sm-none d-md-none d-lg-block"
+                data-action="toggle-swap" data-toggleclass="open" data-target="aside.js-app-drawer"
+                aria-label="Seitenleiste öffnen">
+            <svg class="sa-icon sa-icon-2x">
+                <use href="/themes/smart-tierphysio/icons/sprite.svg#aperture"></use>
             </svg>
         </button>
 
@@ -496,20 +520,28 @@
 
         <div class="custom-scrollbar h-100">
 
+            <div class="d-flex justify-content-spaced w-100 app-fob-showcase-text" data-prefix="Vorschau">
+                <div class="app-fob app-fob-lg app-fob-showcase">
+                    <div></div>
+                    <div></div>
+                    <div></div>
+                </div>
+            </div>
+
             <div class="mod-status primary-mod" data-prefix="Primäre Einstellungen">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="actionHeaderFixed"
                            data-action="toggle" data-class="set-header-fixed">
                     <label class="form-check-label" for="actionHeaderFixed">Header fixiert</label>
                 </div>
-                <div class="form-check d-none d-lg-block">
+                <div class="form-check d-none d-lg-block d-xl-block d-xxl-block">
                     <input class="form-check-input" type="checkbox" id="actionNavFull"
                            data-action="toggle" data-class="set-nav-full" data-codependence="set-nav-collapsed">
                     <label class="form-check-label" for="actionNavFull">Navigation volle Höhe</label>
                 </div>
             </div>
 
-            <div class="mod-status d-none d-lg-block" data-prefix="Zusätzliche Einstellungen">
+            <div class="mod-status d-none d-lg-block d-xl-block d-xxl-block" data-prefix="Zusätzliche Einstellungen">
                 <div class="form-check">
                     <input class="form-check-input" type="checkbox" id="actionNavFixed"
                            data-action="toggle" data-class="set-nav-fixed">
@@ -569,10 +601,27 @@
                 </div>
             </div>
 
+            <div class="mod-status" data-prefix="Barrierefreiheit">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="actionColorblindMode"
+                           data-action="toggle" data-class="set-colorblind-mode">
+                    <label class="form-check-label" for="actionColorblindMode">Farbenblind-Modus</label>
+                </div>
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="actionHighContrastMode"
+                           data-action="toggle" data-class="set-high-contrast-mode">
+                    <label class="form-check-label" for="actionHighContrastMode">Hoher Kontrast</label>
+                </div>
+            </div>
+
             <div class="d-flex mt-3" style="gap:10px">
                 <button type="button" onclick="if(typeof window.resetSettings==='function'){window.resetSettings();}else{localStorage.removeItem('layoutSettings');location.reload();}"
                         class="btn reset-button btn-outline-danger flex-grow-1">
                     <i class="sa sa-reload align-base me-1"></i> Factory Reset
+                </button>
+                <button type="button" onclick="if(typeof resetPanelState==='function'){resetPanelState();}else{location.reload();}"
+                        class="btn btn-outline-secondary flex-grow-1">
+                    <i class="sa sa-reload align-base me-1"></i> Reset Panel
                 </button>
             </div>
 
@@ -580,6 +629,24 @@
     </aside>
     <div class="backdrop" data-action="toggle-swap" data-toggleclass="open"
          data-target="aside.js-drawer-settings"></div>
+
+    {# ═══════════════════════════════════════════════════════
+       APP DRAWER (rechte Seitenleiste)
+       ═══════════════════════════════════════════════════════ #}
+    <aside class="app-drawer js-app-drawer">
+        <button type="button" class="btn btn-system position-absolute top-0 end-0 z-2 overflow-hidden p-3"
+                data-action="toggle-swap" data-toggleclass="open" data-target="aside.js-app-drawer"
+                aria-label="Schließen">
+            <svg class="sa-icon sa-icon-2x">
+                <use href="/themes/smart-tierphysio/icons/sprite.svg#x"></use>
+            </svg>
+        </button>
+        <div class="custom-scrollbar h-100 p-4">
+            {% block app_drawer %}{% endblock %}
+        </div>
+    </aside>
+    <div class="backdrop" data-action="toggle-swap" data-toggleclass="open"
+         data-target="aside.js-app-drawer"></div>
 
 </div>{# /app-wrap #}
 
@@ -696,7 +763,6 @@
 })();
 </script>
 
-<script src="/themes/smart-tierphysio/plugins/sortablejs/Sortable.min.js"></script>
 {% block scripts %}{% endblock %}
 
 {# Notification polling #}
