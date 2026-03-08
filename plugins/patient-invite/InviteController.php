@@ -12,6 +12,7 @@ use App\Core\View;
 use App\Core\Database;
 use App\Core\Application;
 use App\Repositories\SettingsRepository;
+use App\Services\MailService;
 
 class InviteController extends Controller
 {
@@ -25,12 +26,13 @@ class InviteController extends Controller
         Config $config,
         Translator $translator,
         Database $db,
-        SettingsRepository $settingsRepository
+        SettingsRepository $settingsRepository,
+        MailService $mailService
     ) {
         parent::__construct($view, $session, $config, $translator);
         $this->repo               = new InviteRepository($db);
         $this->settingsRepository = $settingsRepository;
-        $this->mailer             = new InviteMailService($settingsRepository);
+        $this->mailer             = new InviteMailService($settingsRepository, $mailService);
     }
 
     /* ─────────────────────────────────────────────────────────
