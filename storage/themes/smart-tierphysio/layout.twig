@@ -48,21 +48,7 @@
                 <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#menu"></use></svg>
             </button>
 
-            {# App logo in header (desktop) #}
-        <a href="/dashboard" class="app-logo flex-shrink-0 d-none d-lg-flex me-3" style="text-decoration:none;">
-            <div class="logo-backdrop">
-                <div class="blobs">
-                    <svg viewbox="0 0 1200 1200">
-                        <g class="blob blob-1"><path d="M 100 600 q 0 -700, 500 -500 t 500 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-2"><path d="M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-3"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
-                        <g class="blob blob-4"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
-                    </svg>
-                </div>
-            </div>
-        </a>
-
-        {# Desktop sidebar collapse #}
+            {# Desktop sidebar collapse #}
             <button type="button" class="collapse-icon me-3 d-none d-lg-inline-flex d-xl-inline-flex d-xxl-inline-flex"
                     data-action="toggle" data-class="set-nav-minified"
                     aria-label="Navigation minimieren">
@@ -332,6 +318,20 @@
 
         {# Logo / Brand #}
         <a href="/dashboard" class="app-logo flex-shrink-0">
+            <div class="logo-backdrop">
+                <div class="blobs">
+                    <svg viewBox="0 0 1200 1200">
+                        <g class="blob blob-1"><path d="M 100 600 q 0 -700, 500 -500 t 500 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-2"><path d="M 100 600 q -50 -400, 500 -500 t 450 550 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-3"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-4"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
+                        <g class="blob blob-1 alt"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
+                        <g class="blob blob-2 alt"><path d="M 100 600 q 100 -600, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-3 alt"><path d="M 100 600 q 0 -400, 500 -500 t 400 500 t -500 500 T 100 600 z" /></g>
+                        <g class="blob blob-4 alt"><path d="M 150 600 q 0 -600, 500 -500 t 500 550 t -500 500 T 150 600 z" /></g>
+                    </svg>
+                </div>
+            </div>
             <div class="d-flex align-items-center px-3 py-2 gap-2">
                 {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
                     <img src="/storage/uploads/{{ global_settings.company_logo }}"
