@@ -160,23 +160,51 @@ class InvoiceRepository extends Repository
             "SELECT COUNT(*) FROM invoices WHERE status = 'paid'"
         );
 
+        /* migration-006: split paid by payment_method */
+        $paidInvoiceAmount = 0.0;
+        $paidInvoiceCount  = 0;
+        $cashAmount        = 0.0;
+        $cashCount         = 0;
+        try {
+            $paidInvoiceAmount = (float)$this->db->fetchColumn(
+                "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND payment_method = 'rechnung'"
+            );
+            $paidInvoiceCount = (int)$this->db->fetchColumn(
+                "SELECT COUNT(*) FROM invoices WHERE status = 'paid' AND payment_method = 'rechnung'"
+            );
+            $cashAmount = (float)$this->db->fetchColumn(
+                "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND payment_method = 'bar'"
+            );
+            $cashCount = (int)$this->db->fetchColumn(
+                "SELECT COUNT(*) FROM invoices WHERE status = 'paid' AND payment_method = 'bar'"
+            );
+        } catch (\Throwable) {
+            /* migration 006 not yet run — fall back to totals */
+            $paidInvoiceAmount = $revenueTotal;
+            $paidInvoiceCount  = $paidCount;
+        }
+
         return [
-            'revenue_week'        => $revenueWeek,
-            'revenue_month'       => $revenueMonth,
-            'revenue_year'        => $revenueYear,
-            'revenue_total'       => $revenueTotal,
-            'prev_month_revenue'  => $prevMonthRevenue,
-            'prev_year_revenue'   => $prevYearRevenue,
-            'open_count'          => $openCount,
-            'overdue_count'       => $overdueCount,
-            'open_amount'         => $openAmount,
-            'overdue_amount'      => $overdueAmount,
-            'draft_count'         => $draftCount,
-            'paid_count'          => $paidCount,
-            'month_change'        => $prevMonthRevenue > 0
+            'revenue_week'         => $revenueWeek,
+            'revenue_month'        => $revenueMonth,
+            'revenue_year'         => $revenueYear,
+            'revenue_total'        => $revenueTotal,
+            'prev_month_revenue'   => $prevMonthRevenue,
+            'prev_year_revenue'    => $prevYearRevenue,
+            'open_count'           => $openCount,
+            'overdue_count'        => $overdueCount,
+            'open_amount'          => $openAmount,
+            'overdue_amount'       => $overdueAmount,
+            'draft_count'          => $draftCount,
+            'paid_count'           => $paidCount,
+            'paid_invoice_amount'  => $paidInvoiceAmount,
+            'paid_invoice_count'   => $paidInvoiceCount,
+            'cash_amount'          => $cashAmount,
+            'cash_count'           => $cashCount,
+            'month_change'         => $prevMonthRevenue > 0
                 ? round((($revenueMonth - $prevMonthRevenue) / $prevMonthRevenue) * 100, 1)
                 : 0,
-            'year_change'         => $prevYearRevenue > 0
+            'year_change'          => $prevYearRevenue > 0
                 ? round((($revenueYear - $prevYearRevenue) / $prevYearRevenue) * 100, 1)
                 : 0,
         ];
