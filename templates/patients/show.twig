@@ -1,6 +1,9 @@
 ﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
+<div style="background:#222;color:orange;padding:8px 16px;font-size:0.75rem;font-family:monospace;z-index:9999;">
+  DB-DEBUG: open={{ invoice_stats.open_count ?? 'FEHLT' }} | paid={{ invoice_stats.paid_count ?? 'FEHLT' }} | patient_id={{ patient.id ?? '?' }} | owner_id={{ patient.owner_id ?? '?' }}
+</div>
 <div class="page-header">
     <div class="flex items-center gap-3">
         <a href="/patienten" class="btn btn-secondary btn-sm">
