@@ -90,13 +90,22 @@
 }
 .btn-primary:hover::after { opacity: 1; }
 
-/* ── Logo: override SmartAdmin defaults for icon-only logo ── */
+/* ── Logo: icon-only logo sizing ── */
 :root {
   --logo-width: 2rem;
   --logo-height: 2rem;
 }
 .app-logo {
   padding: 0 1.25rem;
+}
+.app-logo > svg.custom-logo,
+.app-logo > img.custom-logo {
+  width: 2rem !important;
+  height: 2rem !important;
+  min-width: 2rem !important;
+  max-width: 2rem !important;
+  flex-shrink: 0;
+  object-fit: contain;
 }
 
 /* ── Header btn-system hover glow ── */
