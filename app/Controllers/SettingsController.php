@@ -59,10 +59,14 @@ class SettingsController extends Controller
             'active_tab'       => $params['tab'] ?? ($_GET['tab'] ?? 'firma'),
             'treatment_types'  => $treatmentTypes,
             'email_tpl_defaults' => [
-                'invoice_subject' => 'Ihre Rechnung {{invoice_number}}',
-                'invoice_body'    => "Sehr geehrte/r {{owner_name}},\n\nanbei erhalten Sie Ihre Rechnung {{invoice_number}} vom {{issue_date}}.\n\nGesamtbetrag: {{total_gross}}\nBitte überweisen Sie den Betrag bis zum {{due_date}}.\n\nMit freundlichen Grüßen\n{{company_name}}",
-                'receipt_subject' => 'Ihre Quittung {{invoice_number}}',
-                'receipt_body'    => "Sehr geehrte/r {{owner_name}},\n\nvielen Dank für Ihre Zahlung. Anbei erhalten Sie Ihre Quittung für Rechnung {{invoice_number}} vom {{issue_date}}.\n\nBezahlter Betrag: {{total_gross}}\n\nMit freundlichen Grüßen\n{{company_name}}",
+                'invoice_subject'  => 'Ihre Rechnung {{invoice_number}}',
+                'invoice_body'     => "Sehr geehrte/r {{owner_name}},\n\nanbei erhalten Sie Ihre Rechnung {{invoice_number}} vom {{issue_date}}.\n\nGesamtbetrag: {{total_gross}}\nBitte überweisen Sie den Betrag bis zum {{due_date}}.\n\nMit freundlichen Grüßen\n{{company_name}}",
+                'receipt_subject'  => 'Ihre Quittung {{invoice_number}}',
+                'receipt_body'     => "Sehr geehrte/r {{owner_name}},\n\nvielen Dank für Ihre Zahlung. Anbei erhalten Sie Ihre Quittung für Rechnung {{invoice_number}} vom {{issue_date}}.\n\nBezahlter Betrag: {{total_gross}}\n\nMit freundlichen Grüßen\n{{company_name}}",
+                'reminder_subject' => 'Terminerinnerung: {{appointment_title}} am {{appointment_date}}',
+                'reminder_body'    => "Hallo {{owner_name}},\n\nwir möchten Sie an Ihren bevorstehenden Termin erinnern:\n\n\u{1F4C5} {{appointment_title}}\nDatum: {{appointment_date}}\nUhrzeit: {{appointment_time}}\n{{appointment_patient}}\n\nFalls Sie den Termin absagen oder verschieben möchten, kontaktieren Sie uns bitte rechtzeitig.\n\nMit freundlichen Grüßen\n{{company_name}}",
+                'invite_subject'   => 'Ihre Einladung zur Anmeldung \u2014 {{company_name}}',
+                'invite_body'      => "Sie wurden eingeladen!\n\n{{from_name}} lädt Sie ein, Ihr Tier und sich als Besitzer direkt in unserem System zu registrieren.\n\n{{note}}\n\nJetzt registrieren:\n{{invite_url}}\n\nDieser Link ist 7 Tage gültig.\n\nMit freundlichen Grüßen\n{{company_name}}",
             ],
         ]);
     }
@@ -93,8 +97,10 @@ class SettingsController extends Controller
             'pdf_footer_text', 'pdf_intro_text', 'pdf_closing_text',
             'calendar_cron_secret',
             'mail_imap_host', 'mail_imap_port', 'mail_imap_encrypt', 'mail_imap_user',
-            'email_invoice_subject', 'email_invoice_body',
-            'email_receipt_subject', 'email_receipt_body',
+            'email_invoice_subject',  'email_invoice_body',
+            'email_receipt_subject',  'email_receipt_body',
+            'email_reminder_subject', 'email_reminder_body',
+            'email_invite_subject',   'email_invite_body',
         ];
 
         $data = [];

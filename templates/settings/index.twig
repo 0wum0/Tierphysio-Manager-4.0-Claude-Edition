@@ -1402,96 +1402,228 @@
 ════════════════════════════════════════════════════ #}
 <div class="settings-tab-content" id="tab-email-templates">
 
-    {# Platzhalter-Referenz #}
+<div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start;" id="email-tpl-layout">
+
+    {# ── LEFT: Editor ── #}
+    <div>
+
+    {# Template Switcher #}
     <div class="glass-card mb-4">
-        <h3 class="section-title" style="display:flex;align-items:center;gap:0.5rem;">
-            <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-            Verfügbare Platzhalter
-        </h3>
-        <div style="display:flex;flex-wrap:wrap;gap:0.4rem;margin-top:0.75rem;">
-            {% set placeholders = [
-                '{' ~ '{invoice_number}}',
-                '{' ~ '{owner_name}}',
-                '{' ~ '{owner_first}}',
-                '{' ~ '{owner_last}}',
-                '{' ~ '{owner_email}}',
-                '{' ~ '{issue_date}}',
-                '{' ~ '{due_date}}',
-                '{' ~ '{total_gross}}',
-                '{' ~ '{company_name}}'
-            ] %}
-            {% for ph in placeholders %}
-            <code data-ph="{{ ph }}" title="Klicken zum Kopieren" style="background:var(--bs-tertiary-bg,rgba(255,255,255,.06));border:1px solid var(--bs-border-color);border-radius:5px;padding:0.2rem 0.55rem;font-size:0.8rem;cursor:pointer;transition:background .15s;" onmouseover="this.style.background='var(--bs-secondary-bg)'" onmouseout="this.style.background='var(--bs-tertiary-bg,rgba(255,255,255,.06))'">{{ ph }}</code>
-            {% endfor %}
-        </div>
-        <p class="text-muted mt-2" style="font-size:0.8rem;">Auf einen Platzhalter klicken um ihn in die Zwischenablage zu kopieren.</p>
-    </div>
-
-    <form action="/einstellungen" method="POST">
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-
-        {# Rechnungs-E-Mail #}
-        <div class="glass-card mb-4">
-            <h3 class="section-title">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="14 2 14 8 20 8"/></svg>
-                Rechnung per E-Mail
-            </h3>
-            <div class="form-group mt-3">
-                <label class="form-label">Betreff</label>
-                <input type="text" name="email_invoice_subject" class="form-control"
-                       value="{{ settings.email_invoice_subject ?? email_tpl_defaults.invoice_subject }}">
-            </div>
-            <div class="form-group mt-3">
-                <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-                    <span>E-Mail Text</span>
-                    <small class="text-muted">Zeilenumbrüche werden als neue Zeile dargestellt</small>
-                </label>
-                <textarea name="email_invoice_body" class="form-control" rows="8" style="font-family:monospace;font-size:0.875rem;resize:vertical;">{{ settings.email_invoice_body ?? email_tpl_defaults.invoice_body }}</textarea>
-            </div>
-        </div>
-
-        {# Quittungs-E-Mail #}
-        <div class="glass-card mb-4">
-            <h3 class="section-title">
-                <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 11l3 3L22 4"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
-                Quittung per E-Mail (Barzahlung)
-            </h3>
-            <div class="form-group mt-3">
-                <label class="form-label">Betreff</label>
-                <input type="text" name="email_receipt_subject" class="form-control"
-                       value="{{ settings.email_receipt_subject ?? email_tpl_defaults.receipt_subject }}">
-            </div>
-            <div class="form-group mt-3">
-                <label class="form-label" style="display:flex;justify-content:space-between;align-items:center;">
-                    <span>E-Mail Text</span>
-                    <small class="text-muted">Zeilenumbrüche werden als neue Zeile dargestellt</small>
-                </label>
-                <textarea name="email_receipt_body" class="form-control" rows="8" style="font-family:monospace;font-size:0.875rem;resize:vertical;">{{ settings.email_receipt_body ?? email_tpl_defaults.receipt_body }}</textarea>
-            </div>
-        </div>
-
-        <div class="flex gap-2">
-            <button type="submit" class="btn btn-primary">
-                <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 21 17 13 7 13 7 21"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="7 3 7 8 15 8"/></svg>
-                Speichern
+        <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
+            <button type="button" class="btn btn-primary btn-sm email-tpl-tab active" data-tpl="invoice">
+                📄 Rechnung
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="receipt">
+                ✅ Quittung
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="reminder">
+                📅 Terminerinnerung
+            </button>
+            <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="invite">
+                🐾 Einladung
             </button>
         </div>
+    </div>
 
+    <form action="/einstellungen" method="POST" id="email-tpl-form">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+        {# ── Rechnung ── #}
+        <div class="email-tpl-panel glass-card mb-4" id="etpl-invoice">
+            <h3 class="section-title mb-3">📄 Rechnung per E-Mail</h3>
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Betreff</label>
+                <input type="text" name="email_invoice_subject" id="etpl-invoice-subject" class="form-control"
+                       value="{{ settings.email_invoice_subject ?? email_tpl_defaults.invoice_subject }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label fw-semibold">Text</label>
+                <textarea name="email_invoice_body" id="etpl-invoice-body" class="form-control" rows="10" style="font-family:monospace;font-size:0.85rem;resize:vertical;">{{ settings.email_invoice_body ?? email_tpl_defaults.invoice_body }}</textarea>
+            </div>
+            <div class="mt-3" style="font-size:0.78rem;color:var(--bs-secondary-color);">
+                <strong>Platzhalter:</strong>
+                {% for ph in ['{' ~ '{invoice_number}}', '{' ~ '{owner_name}}', '{' ~ '{owner_first}}', '{' ~ '{issue_date}}', '{' ~ '{due_date}}', '{' ~ '{total_gross}}', '{' ~ '{company_name}}'] %}
+                <code data-ph="{{ ph }}" style="cursor:pointer;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:4px;padding:1px 6px;margin:2px;">{{ ph }}</code>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Quittung ── #}
+        <div class="email-tpl-panel glass-card mb-4" id="etpl-receipt" style="display:none;">
+            <h3 class="section-title mb-3">✅ Quittung per E-Mail (Barzahlung)</h3>
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Betreff</label>
+                <input type="text" name="email_receipt_subject" id="etpl-receipt-subject" class="form-control"
+                       value="{{ settings.email_receipt_subject ?? email_tpl_defaults.receipt_subject }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label fw-semibold">Text</label>
+                <textarea name="email_receipt_body" id="etpl-receipt-body" class="form-control" rows="10" style="font-family:monospace;font-size:0.85rem;resize:vertical;">{{ settings.email_receipt_body ?? email_tpl_defaults.receipt_body }}</textarea>
+            </div>
+            <div class="mt-3" style="font-size:0.78rem;color:var(--bs-secondary-color);">
+                <strong>Platzhalter:</strong>
+                {% for ph in ['{' ~ '{invoice_number}}', '{' ~ '{owner_name}}', '{' ~ '{issue_date}}', '{' ~ '{total_gross}}', '{' ~ '{company_name}}'] %}
+                <code data-ph="{{ ph }}" style="cursor:pointer;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:4px;padding:1px 6px;margin:2px;">{{ ph }}</code>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Terminerinnerung ── #}
+        <div class="email-tpl-panel glass-card mb-4" id="etpl-reminder" style="display:none;">
+            <h3 class="section-title mb-3">📅 Terminerinnerung</h3>
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Betreff</label>
+                <input type="text" name="email_reminder_subject" id="etpl-reminder-subject" class="form-control"
+                       value="{{ settings.email_reminder_subject ?? email_tpl_defaults.reminder_subject }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label fw-semibold">Text</label>
+                <textarea name="email_reminder_body" id="etpl-reminder-body" class="form-control" rows="10" style="font-family:monospace;font-size:0.85rem;resize:vertical;">{{ settings.email_reminder_body ?? email_tpl_defaults.reminder_body }}</textarea>
+            </div>
+            <div class="mt-3" style="font-size:0.78rem;color:var(--bs-secondary-color);">
+                <strong>Platzhalter:</strong>
+                {% for ph in ['{' ~ '{owner_name}}', '{' ~ '{appointment_title}}', '{' ~ '{appointment_date}}', '{' ~ '{appointment_time}}', '{' ~ '{appointment_patient}}', '{' ~ '{company_name}}', '{' ~ '{company_phone}}'] %}
+                <code data-ph="{{ ph }}" style="cursor:pointer;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:4px;padding:1px 6px;margin:2px;">{{ ph }}</code>
+                {% endfor %}
+            </div>
+        </div>
+
+        {# ── Einladung ── #}
+        <div class="email-tpl-panel glass-card mb-4" id="etpl-invite" style="display:none;">
+            <h3 class="section-title mb-3">🐾 Einladung zur Anmeldung</h3>
+            <div class="form-group mb-3">
+                <label class="form-label fw-semibold">Betreff</label>
+                <input type="text" name="email_invite_subject" id="etpl-invite-subject" class="form-control"
+                       value="{{ settings.email_invite_subject ?? email_tpl_defaults.invite_subject }}">
+            </div>
+            <div class="form-group">
+                <label class="form-label fw-semibold">Text</label>
+                <textarea name="email_invite_body" id="etpl-invite-body" class="form-control" rows="10" style="font-family:monospace;font-size:0.85rem;resize:vertical;">{{ settings.email_invite_body ?? email_tpl_defaults.invite_body }}</textarea>
+            </div>
+            <div class="mt-3" style="font-size:0.78rem;color:var(--bs-secondary-color);">
+                <strong>Platzhalter:</strong>
+                {% for ph in ['{' ~ '{company_name}}', '{' ~ '{from_name}}', '{' ~ '{note}}', '{' ~ '{invite_url}}'] %}
+                <code data-ph="{{ ph }}" style="cursor:pointer;background:var(--bs-tertiary-bg);border:1px solid var(--bs-border-color);border-radius:4px;padding:1px 6px;margin:2px;">{{ ph }}</code>
+                {% endfor %}
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="17 21 17 13 7 13 7 21"/></svg>
+            Alle Templates speichern
+        </button>
     </form>
-</div>
+
+    </div>{# end left #}
+
+    {# ── RIGHT: Live Preview ── #}
+    <div style="position:sticky;top:80px;">
+        <div class="glass-card">
+            <h3 class="section-title mb-3" style="font-size:0.875rem;">
+                <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-1"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                Live-Vorschau
+            </h3>
+            <div id="email-preview-wrap" style="border-radius:8px;overflow:hidden;border:1px solid var(--bs-border-color);">
+                <iframe id="email-preview-frame" style="width:100%;height:500px;border:none;background:#0f0f1a;" srcdoc=""></iframe>
+            </div>
+            <p class="text-muted mt-2" style="font-size:0.75rem;">Vorschau mit Beispieldaten. Sieht in echten E-Mail-Clients ähnlich aus.</p>
+        </div>
+    </div>
+
+</div>{# end grid #}
+
+</div>{# end tab #}
 
 <script>
-/* ── E-Mail Template Platzhalter Clipboard ── */
+(function() {
+/* ── E-Mail Template: Tab Switcher ── */
+var tplTabs = document.querySelectorAll('.email-tpl-tab');
+var tplPanels = document.querySelectorAll('.email-tpl-panel');
+
+function switchTpl(name) {
+    tplTabs.forEach(function(b) {
+        var active = b.getAttribute('data-tpl') === name;
+        b.classList.toggle('btn-primary', active);
+        b.classList.toggle('btn-secondary', !active);
+    });
+    tplPanels.forEach(function(p) {
+        p.style.display = p.id === 'etpl-' + name ? '' : 'none';
+    });
+    updateEmailPreview(name);
+}
+
+tplTabs.forEach(function(b) {
+    b.addEventListener('click', function() { switchTpl(b.getAttribute('data-tpl')); });
+});
+
+/* ── Live Preview ── */
+var companyName = {{ settings.company_name is defined ? ('"' ~ settings.company_name|e('js') ~ '"') : '"Tierphysio Praxis"' }};
+
+var previewIcons = { invoice:'📄', receipt:'✅', reminder:'📅', invite:'🐾' };
+
+function buildPreviewHtml(title, bodyText, icon) {
+    var escaped = bodyText
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/\n/g,'<br>');
+    var titleEsc = title.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    return '<!DOCTYPE html><html lang="de"><head><meta charset="UTF-8">'
+        + '<meta name="viewport" content="width=device-width,initial-scale=1.0"></head>'
+        + '<body style="margin:0;padding:0;background:#0f0f1a;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;">'
+        + '<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#0f0f1a;padding:24px 12px;">'
+        + '<tr><td align="center">'
+        + '<table role="presentation" width="560" cellpadding="0" cellspacing="0" style="max-width:560px;width:100%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:14px;overflow:hidden;">'
+        + '<tr><td style="background:linear-gradient(135deg,rgba(79,124,255,0.35),rgba(139,92,246,0.35));padding:26px 32px;text-align:center;">'
+        + '<div style="font-size:2rem;margin-bottom:8px;">' + icon + '</div>'
+        + '<h1 style="margin:0;color:#fff;font-size:1.2rem;font-weight:700;line-height:1.3;">' + titleEsc + '</h1>'
+        + '<p style="margin:5px 0 0;color:rgba(255,255,255,0.5);font-size:0.75rem;">' + companyName + '</p>'
+        + '</td></tr>'
+        + '<tr><td style="padding:28px 32px;">'
+        + '<div style="color:rgba(255,255,255,0.82);font-size:0.9rem;line-height:1.8;">' + escaped + '</div>'
+        + '</td></tr>'
+        + '<tr><td style="padding:14px 32px 20px;text-align:center;border-top:1px solid rgba(255,255,255,0.08);">'
+        + '<span style="color:rgba(255,255,255,0.25);font-size:0.72rem;">' + companyName + ' &middot; Automatisch generierte Nachricht</span>'
+        + '</td></tr>'
+        + '</table></td></tr></table></body></html>';
+}
+
+function updateEmailPreview(tplName) {
+    var frame = document.getElementById('email-preview-frame');
+    if (!frame) return;
+    var subjectEl = document.getElementById('etpl-' + tplName + '-subject');
+    var bodyEl    = document.getElementById('etpl-' + tplName + '-body');
+    if (!subjectEl || !bodyEl) return;
+    var subject = subjectEl.value || '(Kein Betreff)';
+    var body    = bodyEl.value   || '';
+    var icon    = previewIcons[tplName] || '📧';
+    frame.srcdoc = buildPreviewHtml(subject, body, icon);
+}
+
+/* live update on keystroke */
+['invoice','receipt','reminder','invite'].forEach(function(tpl) {
+    var s = document.getElementById('etpl-' + tpl + '-subject');
+    var b = document.getElementById('etpl-' + tpl + '-body');
+    if (s) s.addEventListener('input', function() { updateEmailPreview(tpl); });
+    if (b) b.addEventListener('input', function() { updateEmailPreview(tpl); });
+});
+
+/* init */
+switchTpl('invoice');
+
+/* ── Platzhalter Clipboard ── */
 document.addEventListener('click', function(e) {
     var el = e.target.closest('[data-ph]');
     if (!el) return;
     var ph = el.getAttribute('data-ph');
     navigator.clipboard?.writeText(ph).then(function() {
         var orig = el.textContent;
-        el.textContent = '✓ Kopiert';
-        setTimeout(function(){ el.textContent = orig; }, 1200);
+        el.textContent = '✓';
+        setTimeout(function(){ el.textContent = orig; }, 1000);
     });
 });
+
+})();
 </script>
 
 <script>

@@ -27,12 +27,7 @@ class ReminderService
                 continue;
             }
 
-            $success = $this->mailService->sendRaw(
-                $a['owner_email'],
-                trim($a['first_name'] . ' ' . $a['last_name']),
-                $this->buildSubject($a),
-                $this->buildBody($a)
-            );
+            $success = $this->mailService->sendReminder($a);
 
             $this->appointmentRepository->markReminderSent((int)$a['id']);
             $success ? $sent++ : $failed++;
