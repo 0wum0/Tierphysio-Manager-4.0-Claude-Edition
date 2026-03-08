@@ -22,20 +22,32 @@ class InvoiceRepository extends Repository
      */
     public function ensurePaymentMethodColumns(): void
     {
+        /* Add payment_method column if missing */
         try {
             $this->db->execute(
                 "ALTER TABLE `invoices`
                     ADD COLUMN IF NOT EXISTS `payment_method` ENUM('rechnung','bar') NOT NULL DEFAULT 'rechnung',
                     ADD COLUMN IF NOT EXISTS `paid_at` DATETIME NULL"
             );
-            $this->db->execute(
-                "ALTER TABLE `invoices` DROP INDEX IF EXISTS `idx_payment_method`"
-            );
-            $this->db->execute(
-                "ALTER TABLE `invoices` ADD INDEX `idx_payment_method` (`payment_method`)"
-            );
         } catch (\Throwable) {
-            /* Already exists or DB doesn't support it — safe to ignore */
+            /* Column already exists or unsupported — safe to ignore */
+        }
+
+        /* Add index only if it doesn't exist yet (MySQL-compatible check) */
+        try {
+            $exists = $this->db->fetchColumn(
+                "SELECT COUNT(*) FROM information_schema.STATISTICS
+                 WHERE table_schema = DATABASE()
+                   AND table_name = 'invoices'
+                   AND index_name = 'idx_payment_method'"
+            );
+            if ((int)$exists === 0) {
+                $this->db->execute(
+                    "ALTER TABLE `invoices` ADD INDEX `idx_payment_method` (`payment_method`)"
+                );
+            }
+        } catch (\Throwable) {
+            /* Index creation failed — non-critical, ignore */
         }
     }
 
