@@ -25,7 +25,7 @@ class InvoiceRepository extends Repository
         /* Add payment_method column if missing */
         try {
             $this->db->execute(
-                "ALTER TABLE `invoices`
+                "ALTER TABLE `{$this->db->t('invoices')}`
                     ADD COLUMN IF NOT EXISTS `payment_method` ENUM('rechnung','bar') NOT NULL DEFAULT 'rechnung',
                     ADD COLUMN IF NOT EXISTS `paid_at` DATETIME NULL"
             );
@@ -38,12 +38,12 @@ class InvoiceRepository extends Repository
             $exists = $this->db->fetchColumn(
                 "SELECT COUNT(*) FROM information_schema.STATISTICS
                  WHERE table_schema = DATABASE()
-                   AND table_name = 'invoices'
+                   AND table_name = '{$this->db->t('invoices')}'
                    AND index_name = 'idx_payment_method'"
             );
             if ((int)$exists === 0) {
                 $this->db->execute(
-                    "ALTER TABLE `invoices` ADD INDEX `idx_payment_method` (`payment_method`)"
+                    "ALTER TABLE `{$this->db->t('invoices')}` ADD INDEX `idx_payment_method` (`payment_method`)"
                 );
             }
         } catch (\Throwable) {
@@ -61,8 +61,8 @@ class InvoiceRepository extends Repository
             "SELECT p.id AS patient_id,
                     SUM(CASE WHEN i.status IN ('open','overdue','draft') THEN 1 ELSE 0 END) AS open_count,
                     SUM(CASE WHEN i.status = 'paid' THEN 1 ELSE 0 END) AS paid_count
-             FROM patients p
-             LEFT JOIN invoices i ON (i.patient_id = p.id OR (i.patient_id IS NULL AND i.owner_id = p.owner_id))
+             FROM {$this->db->t('patients')} p
+             LEFT JOIN {$this->db->t('invoices')} i ON (i.patient_id = p.id OR (i.patient_id IS NULL AND i.owner_id = p.owner_id))
              WHERE p.id IN ({$ids})
              GROUP BY p.id"
         );
@@ -81,19 +81,19 @@ class InvoiceRepository extends Repository
     {
         /* Find owner_id for this patient */
         $ownerId = (int)$this->db->fetchColumn(
-            "SELECT owner_id FROM patients WHERE id = ?",
+            "SELECT owner_id FROM {$this->db->t('patients')} WHERE id = ?",
             [$patientId]
         );
 
         /* Match by patient_id directly OR by owner_id (invoices linked only to owner) */
         $openCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')}
              WHERE status IN ('open','overdue','draft')
                AND (patient_id = ? OR (patient_id IS NULL AND owner_id = ?))",
             [$patientId, $ownerId]
         );
         $paidCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')}
              WHERE status = 'paid'
                AND (patient_id = ? OR (patient_id IS NULL AND owner_id = ?))",
             [$patientId, $ownerId]
@@ -123,9 +123,9 @@ class InvoiceRepository extends Repository
         $offset = ($page - 1) * $perPage;
 
         $total = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices i
-             LEFT JOIN owners o ON i.owner_id = o.id
-             LEFT JOIN patients p ON i.patient_id = p.id
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')} i
+             LEFT JOIN {$this->db->t('owners')} o ON i.owner_id = o.id
+             LEFT JOIN {$this->db->t('patients')} p ON i.patient_id = p.id
              {$where}",
             $params
         );
@@ -134,9 +134,9 @@ class InvoiceRepository extends Repository
             "SELECT i.*,
                     CONCAT(o.first_name, ' ', o.last_name) AS owner_name,
                     p.name AS patient_name
-             FROM invoices i
-             LEFT JOIN owners o ON i.owner_id = o.id
-             LEFT JOIN patients p ON i.patient_id = p.id
+             FROM {$this->db->t('invoices')} i
+             LEFT JOIN {$this->db->t('owners')} o ON i.owner_id = o.id
+             LEFT JOIN {$this->db->t('patients')} p ON i.patient_id = p.id
              {$where}
              ORDER BY i.created_at DESC
              LIMIT ? OFFSET ?",
@@ -157,20 +157,20 @@ class InvoiceRepository extends Repository
     public function getPositions(int $invoiceId): array
     {
         return $this->db->fetchAll(
-            "SELECT * FROM invoice_positions WHERE invoice_id = ? ORDER BY sort_order ASC",
+            "SELECT * FROM {$this->db->t('invoice_positions')} WHERE invoice_id = ? ORDER BY sort_order ASC",
             [$invoiceId]
         );
     }
 
     public function deletePositions(int $invoiceId): void
     {
-        $this->db->execute("DELETE FROM invoice_positions WHERE invoice_id = ?", [$invoiceId]);
+        $this->db->execute("DELETE FROM {$this->db->t('invoice_positions')} WHERE invoice_id = ?", [$invoiceId]);
     }
 
     public function addPosition(int $invoiceId, array $pos, int $sortOrder): void
     {
         $this->db->execute(
-            "INSERT INTO invoice_positions (invoice_id, description, quantity, unit_price, tax_rate, total, sort_order)
+            "INSERT INTO {$this->db->t('invoice_positions')} (invoice_id, description, quantity, unit_price, tax_rate, total, sort_order)
              VALUES (?, ?, ?, ?, ?, ?, ?)",
             [
                 $invoiceId,
@@ -194,58 +194,58 @@ class InvoiceRepository extends Repository
         $prevYear  = date('Y-01-01', strtotime('-1 year'));
 
         $revenueWeek = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND issue_date >= ?",
             [$week]
         );
 
         $revenueMonth = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND issue_date >= ?",
             [$month]
         );
 
         $revenueYear = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ?",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND issue_date >= ?",
             [$year]
         );
 
         $revenueTotal = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid'"
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid'"
         );
 
         $prevMonthRevenue = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
             [$prevMonth, $month]
         );
 
         $prevYearRevenue = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND issue_date >= ? AND issue_date < ?",
             [$prevYear, $year]
         );
 
         $openCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE status = 'open'"
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'open'"
         );
 
         $overdueCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
             [$now]
         );
 
         $openAmount = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'open'"
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'open'"
         );
 
         $overdueAmount = (float)$this->db->fetchColumn(
-            "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
+            "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'overdue' OR (status = 'open' AND due_date < ?)",
             [$now]
         );
 
         $draftCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE status = 'draft'"
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'draft'"
         );
 
         $paidCount = (int)$this->db->fetchColumn(
-            "SELECT COUNT(*) FROM invoices WHERE status = 'paid'"
+            "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'paid'"
         );
 
         /* migration-006: split paid by payment_method */
@@ -255,16 +255,16 @@ class InvoiceRepository extends Repository
         $cashCount         = 0;
         try {
             $paidInvoiceAmount = (float)$this->db->fetchColumn(
-                "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND payment_method = 'rechnung'"
+                "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND payment_method = 'rechnung'"
             );
             $paidInvoiceCount = (int)$this->db->fetchColumn(
-                "SELECT COUNT(*) FROM invoices WHERE status = 'paid' AND payment_method = 'rechnung'"
+                "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND payment_method = 'rechnung'"
             );
             $cashAmount = (float)$this->db->fetchColumn(
-                "SELECT COALESCE(SUM(total_gross), 0) FROM invoices WHERE status = 'paid' AND payment_method = 'bar'"
+                "SELECT COALESCE(SUM(total_gross), 0) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND payment_method = 'bar'"
             );
             $cashCount = (int)$this->db->fetchColumn(
-                "SELECT COUNT(*) FROM invoices WHERE status = 'paid' AND payment_method = 'bar'"
+                "SELECT COUNT(*) FROM {$this->db->t('invoices')} WHERE status = 'paid' AND payment_method = 'bar'"
             );
         } catch (\Throwable) {
             /* migration 006 not yet run — fall back to totals */
@@ -304,7 +304,7 @@ class InvoiceRepository extends Repository
             $rows = $this->db->fetchAll(
                 "SELECT DATE_FORMAT(issue_date, '%Y-%m') AS period,
                         COALESCE(SUM(total_gross), 0) AS revenue
-                 FROM invoices
+                 FROM {$this->db->t('invoices')}
                  WHERE status = 'paid' AND issue_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
                  GROUP BY period
                  ORDER BY period ASC"
@@ -313,7 +313,7 @@ class InvoiceRepository extends Repository
             $rows = $this->db->fetchAll(
                 "SELECT DATE_FORMAT(issue_date, '%Y-%u') AS period,
                         COALESCE(SUM(total_gross), 0) AS revenue
-                 FROM invoices
+                 FROM {$this->db->t('invoices')}
                  WHERE status = 'paid' AND issue_date >= DATE_SUB(NOW(), INTERVAL 12 WEEK)
                  GROUP BY period
                  ORDER BY period ASC"
@@ -337,7 +337,7 @@ class InvoiceRepository extends Repository
             "SELECT DATE_FORMAT(issue_date, '%Y-%m') AS month,
                     COALESCE(SUM(CASE WHEN status = 'paid' THEN total_gross ELSE 0 END), 0) AS paid,
                     COALESCE(SUM(CASE WHEN status IN ('open','overdue') THEN total_gross ELSE 0 END), 0) AS open
-             FROM invoices
+             FROM {$this->db->t('invoices')}
              WHERE issue_date >= DATE_SUB(NOW(), INTERVAL 12 MONTH)
              GROUP BY month
              ORDER BY month ASC"
@@ -365,7 +365,7 @@ class InvoiceRepository extends Repository
     public function getNextInvoiceNumber(string $prefix = 'RE', int $startNumber = 1000): string
     {
         $lastNumber = $this->db->fetchColumn(
-            "SELECT invoice_number FROM invoices ORDER BY id DESC LIMIT 1"
+            "SELECT invoice_number FROM {$this->db->t('invoices')} ORDER BY id DESC LIMIT 1"
         );
 
         if (!$lastNumber) {
@@ -380,7 +380,7 @@ class InvoiceRepository extends Repository
     public function updateTotals(int $id, float $totalNet, float $totalTax, float $totalGross): void
     {
         $this->db->execute(
-            "UPDATE invoices SET total_net = ?, total_tax = ?, total_gross = ? WHERE id = ?",
+            "UPDATE {$this->db->t('invoices')} SET total_net = ?, total_tax = ?, total_gross = ? WHERE id = ?",
             [$totalNet, $totalTax, $totalGross, $id]
         );
     }
@@ -388,7 +388,7 @@ class InvoiceRepository extends Repository
     public function markEmailSent(int $id): void
     {
         $this->db->execute(
-            "UPDATE invoices SET email_sent_at = NOW() WHERE id = ?",
+            "UPDATE {$this->db->t('invoices')} SET email_sent_at = NOW() WHERE id = ?",
             [$id]
         );
     }
