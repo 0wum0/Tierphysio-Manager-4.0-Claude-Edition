@@ -46,10 +46,17 @@ class Application
         $view = new View($this->rootPath . '/templates', $config, $session);
         $this->container->singleton(View::class, fn() => $view);
 
-        if ($config->get('app.installed', false)) {
-            $db = new Database($config);
-            $this->container->singleton(Database::class, fn() => $db);
+        // Always register Database if credentials are present
+        if ($config->get('db.database')) {
+            try {
+                $db = new Database($config);
+                $this->container->singleton(Database::class, fn() => $db);
+            } catch (\Throwable) {
+                // DB unavailable — installer will handle this
+            }
+        }
 
+        if ($config->get('app.installed', false)) {
             // Expose logged-in user to view
             $view->addGlobal('auth_user', $session->get('saas_user'));
             $view->addGlobal('auth_role', $session->get('saas_role'));
@@ -61,11 +68,12 @@ class Application
 
     private function registerRoutes(Config $config): void
     {
-        if (!$config->get('app.installed', false)) {
+        // Load web routes if DB is configured, installer routes otherwise
+        if ($config->get('db.database') && $config->get('db.username')) {
+            $this->router->loadRoutes($this->rootPath . '/app/Routes/web.php');
+        } else {
             $this->router->loadRoutes($this->rootPath . '/app/Routes/installer.php');
-            return;
         }
-        $this->router->loadRoutes($this->rootPath . '/app/Routes/web.php');
     }
 
     public function run(): void
