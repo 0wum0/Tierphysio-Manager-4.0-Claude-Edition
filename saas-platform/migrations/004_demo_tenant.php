@@ -23,29 +23,36 @@ return static function (\Saas\Core\Database $db): void {
 
     $planId = $db->fetchColumn("SELECT id FROM plans WHERE slug = 'demo'");
 
-    // 2. Demo Tenant
+    // 2. Demo Tenant — only use columns present in all schema versions
     $db->execute(
         "INSERT IGNORE INTO `tenants`
            (`uuid`,`practice_name`,`owner_name`,`email`,`phone`,`address`,`city`,`zip`,`country`,
-            `plan_id`,`status`,`table_prefix`,`db_created`,`admin_created`,`notes`)
-         VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+            `plan_id`,`status`,`notes`)
+         VALUES (?,?,?,?,?,?,?,?,?,?,?,?)",
         [
             'demo-0000-0000-0000-000000000001',
             'Demo-Praxis Tierphysio',
             'Demo Nutzer',
             'info@demo.de',
             '+49 800 0000000',
-            'Musterstraße 1',
+            'Musterstrasse 1',
             'Musterstadt',
             '12345',
             'DE',
             (int)$planId,
             'active',
-            'demo_',
-            1, 1,
-            'Demo-Konto — wird nach 24 Stunden automatisch gelöscht.',
+            'Demo-Konto — wird nach 24 Stunden automatisch geloescht.',
         ]
     );
+
+    // Set optional columns if they exist
+    foreach ([
+        "UPDATE `tenants` SET `table_prefix`='demo_'   WHERE email='info@demo.de'",
+        "UPDATE `tenants` SET `db_created`=1            WHERE email='info@demo.de'",
+        "UPDATE `tenants` SET `admin_created`=1         WHERE email='info@demo.de'",
+    ] as $optSql) {
+        try { $db->exec($optSql); } catch (\Throwable) {}
+    }
 
     // 3. Demo Admin user — password: admin123456
     $hash = password_hash('admin123456', PASSWORD_BCRYPT, ['cost' => 10]);
