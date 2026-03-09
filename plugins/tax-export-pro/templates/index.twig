@@ -1,0 +1,486 @@
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
+
+{% block content %}
+
+{# ── Page Header ── #}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">Steuerexport</h1>
+        <p class="page-subtitle">Zeitraum: {{ date_from|date('d.m.Y') }} – {{ date_to|date('d.m.Y') }} &middot; {{ total_items }} Rechnungen</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/rechnungen" class="btn btn-secondary btn-sm">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M19 12H5M12 5l-7 7 7 7"/></svg>
+            Rechnungen
+        </a>
+        <button class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-settings">
+            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            Einstellungen
+        </button>
+    </div>
+</div>
+
+{# ── Filter Panel ── #}
+<div class="panel mb-3">
+    <div class="panel-hdr">
+        <h2>Zeitraum & Filter</h2>
+    </div>
+    <div class="panel-container show">
+        <div class="panel-content">
+            <form method="GET" action="/steuerexport" id="filterForm">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-2">
+                        <label class="form-label fw-500">Jahr</label>
+                        <select name="year" class="form-select form-select-sm" onchange="this.form.submit()">
+                            {% for y in years %}
+                                <option value="{{ y }}" {% if y == year %}selected{% endif %}>{{ y }}</option>
+                            {% endfor %}
+                            {% if year not in years %}
+                                <option value="{{ year }}" selected>{{ year }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-500">Monat <span class="text-muted fw-400">(optional)</span></label>
+                        <select name="month" class="form-select form-select-sm">
+                            <option value="">Ganzes Jahr</option>
+                            {% for m in 1..12 %}
+                                <option value="{{ m }}" {% if m|string == month %}selected{% endif %}>
+                                    {{ ['', 'Januar','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'][m] }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-500">Von</label>
+                        <input type="date" name="date_from" class="form-control form-control-sm" value="{{ date_from }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-500">Bis</label>
+                        <input type="date" name="date_to" class="form-control form-control-sm" value="{{ date_to }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label fw-500">Status</label>
+                        <select name="status" class="form-select form-select-sm">
+                            <option value=""        {% if status_filter == '' %}selected{% endif %}>Alle</option>
+                            <option value="paid"    {% if status_filter == 'paid' %}selected{% endif %}>Bezahlt</option>
+                            <option value="open"    {% if status_filter == 'open' %}selected{% endif %}>Offen</option>
+                            <option value="overdue" {% if status_filter == 'overdue' %}selected{% endif %}>Überfällig</option>
+                            <option value="draft"   {% if status_filter == 'draft' %}selected{% endif %}>Entwurf</option>
+                            <option value="cancelled" {% if status_filter == 'cancelled' %}selected{% endif %}>Storniert</option>
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary btn-sm w-100">Anwenden</button>
+                            <a href="/steuerexport" class="btn btn-outline-secondary btn-sm">✕</a>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# ── Stats Cards ── #}
+<div class="row g-3 mb-3">
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100">
+            <div class="fs-nano text-muted mb-1">Gesamt</div>
+            <div class="fw-700 fs-3">{{ stats.total }}</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100" style="border-left:3px solid var(--bs-success);">
+            <div class="fs-nano text-muted mb-1">Bezahlt</div>
+            <div class="fw-700 fs-3 text-success">{{ stats.paid }}</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100" style="border-left:3px solid var(--bs-warning);">
+            <div class="fs-nano text-muted mb-1">Offen</div>
+            <div class="fw-700 fs-3 text-warning">{{ stats.open }}</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100" style="border-left:3px solid var(--bs-danger);">
+            <div class="fs-nano text-muted mb-1">Überfällig</div>
+            <div class="fw-700 fs-3 text-danger">{{ stats.overdue }}</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100" style="border-left:3px solid var(--bs-primary);">
+            <div class="fs-nano text-muted mb-1">Einnahmen</div>
+            <div class="fw-700 fs-sm">{{ stats.sumPaid|number_format(2, ',', '.') }} €</div>
+        </div>
+    </div>
+    <div class="col-md-2 col-sm-4 col-6">
+        <div class="panel p-3 text-center h-100" style="border-left:3px solid var(--bs-secondary);">
+            <div class="fs-nano text-muted mb-1">Offen (€)</div>
+            <div class="fw-700 fs-sm text-warning">{{ stats.sumOpen|number_format(2, ',', '.') }} €</div>
+        </div>
+    </div>
+</div>
+
+{# ── Second row stats ── #}
+<div class="row g-3 mb-3">
+    <div class="col-md-3 col-sm-6">
+        <div class="panel p-3 h-100">
+            <div class="fs-nano text-muted mb-1">Gesamtsumme (alle Rechnungen)</div>
+            <div class="fw-700 fs-md">{{ stats.sumAll|number_format(2, ',', '.') }} €</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel p-3 h-100">
+            <div class="fs-nano text-muted mb-1">Netto (bezahlt)</div>
+            <div class="fw-700 fs-md">{{ stats.sumNet|number_format(2, ',', '.') }} €</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel p-3 h-100">
+            <div class="fs-nano text-muted mb-1">MwSt (bezahlt)</div>
+            <div class="fw-700 fs-md">{{ stats.sumTax|number_format(2, ',', '.') }} €</div>
+        </div>
+    </div>
+    <div class="col-md-3 col-sm-6">
+        <div class="panel p-3 h-100">
+            <div class="fs-nano text-muted mb-1">Entwürfe</div>
+            <div class="fw-700 fs-md">{{ stats.draft }}</div>
+        </div>
+    </div>
+</div>
+
+{# ── Export Buttons ── #}
+<div class="panel mb-3">
+    <div class="panel-hdr">
+        <h2>Export <span class="fw-300"><i>{{ total_items }} Rechnungen im gewählten Zeitraum</i></span></h2>
+    </div>
+    <div class="panel-container show">
+        <div class="panel-content">
+            <div class="row g-3">
+
+                {# ZIP Export #}
+                <div class="col-md-4">
+                    <div class="d-flex flex-column gap-2 p-3 rounded" style="background:var(--bs-light,#f8fafc);border:1px solid var(--bs-border-color,#dee2e6);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <div class="rounded d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:var(--bs-primary);color:#fff;flex-shrink:0;">
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </div>
+                            <div>
+                                <div class="fw-600 fs-sm">Vollständiges ZIP-Archiv</div>
+                                <div class="fs-nano text-muted">PDFs + CSVs + Steuerbericht</div>
+                            </div>
+                        </div>
+                        <ul class="mb-2 ps-3 fs-nano text-muted" style="line-height:1.8;">
+                            <li>Alle Rechnungs-PDFs</li>
+                            <li>einnahmen.csv</li>
+                            <li>rechnungsjournal.csv</li>
+                            <li>steuerbericht.pdf</li>
+                            <li>README.txt</li>
+                        </ul>
+                        <a href="/steuerexport/export-zip?{{ query_string }}" class="btn btn-primary btn-sm">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            Export als ZIP
+                        </a>
+                    </div>
+                </div>
+
+                {# CSV Export #}
+                <div class="col-md-4">
+                    <div class="d-flex flex-column gap-2 p-3 rounded" style="background:var(--bs-light,#f8fafc);border:1px solid var(--bs-border-color,#dee2e6);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <div class="rounded d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#0ea5e9;color:#fff;flex-shrink:0;">
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="17" x2="16" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            </div>
+                            <div>
+                                <div class="fw-600 fs-sm">CSV-Export</div>
+                                <div class="fs-nano text-muted">Excel / LibreOffice kompatibel</div>
+                            </div>
+                        </div>
+                        <ul class="mb-2 ps-3 fs-nano text-muted" style="line-height:1.8;">
+                            <li>einnahmen.csv</li>
+                            <li>rechnungsjournal.csv</li>
+                            <li>UTF-8 mit BOM</li>
+                            <li>Trennzeichen: <code>{{ settings.csv_delimiter ?? ';' }}</code></li>
+                        </ul>
+                        <a href="/steuerexport/export-csv?{{ query_string }}" class="btn btn-sm" style="background:#0ea5e9;color:#fff;">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            Export als CSV
+                        </a>
+                    </div>
+                </div>
+
+                {# PDF Report #}
+                <div class="col-md-4">
+                    <div class="d-flex flex-column gap-2 p-3 rounded" style="background:var(--bs-light,#f8fafc);border:1px solid var(--bs-border-color,#dee2e6);">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <div class="rounded d-flex align-items-center justify-content-center" style="width:36px;height:36px;background:#f59e0b;color:#fff;flex-shrink:0;">
+                                <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M8 13h8M8 17h5"/></svg>
+                            </div>
+                            <div>
+                                <div class="fw-600 fs-sm">PDF-Steuerbericht</div>
+                                <div class="fs-nano text-muted">Kompakte Übersicht</div>
+                            </div>
+                        </div>
+                        <ul class="mb-2 ps-3 fs-nano text-muted" style="line-height:1.8;">
+                            <li>Zeitraum-Statistiken</li>
+                            <li>Einnahmen- & MwSt-Übersicht</li>
+                            <li>Tabellarische Rechnungsliste</li>
+                            <li>Für Steuerberater geeignet</li>
+                        </ul>
+                        <a href="/steuerexport/export-pdf?{{ query_string }}" class="btn btn-sm" style="background:#f59e0b;color:#fff;">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            Export als PDF
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# ── Preview Table ── #}
+<div class="panel mb-3">
+    <div class="panel-hdr">
+        <h2>Rechnungsvorschau <span class="fw-300"><i>Seite {{ preview_page }} / {{ total_pages }}</i></span></h2>
+        <div class="panel-toolbar">
+            <span class="fs-nano text-muted">{{ total_items }} Rechnungen gesamt</span>
+        </div>
+    </div>
+    <div class="panel-container show">
+        <div class="panel-content p-0">
+
+        {% if invoices %}
+            <table class="table table-hover table-striped table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th>Rechnungsnr.</th>
+                        <th>Datum</th>
+                        <th>Besitzer</th>
+                        <th>Patient</th>
+                        <th class="text-center">Status</th>
+                        <th>Zahlungsart</th>
+                        <th class="text-end">Netto</th>
+                        <th class="text-end">MwSt</th>
+                        <th class="text-end">Brutto</th>
+                        <th class="text-center" style="width:60px;">PDF</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for inv in invoices %}
+                    <tr style="vertical-align:middle;">
+                        <td class="fs-sm fw-500">
+                            <a href="/rechnungen/{{ inv.id }}" class="text-primary">{{ inv.invoice_number }}</a>
+                        </td>
+                        <td class="fs-sm text-nowrap">{{ inv.issue_date|date('d.m.Y') }}</td>
+                        <td class="fs-sm">{{ inv.owner_name ?: '—' }}</td>
+                        <td class="fs-sm">{{ inv.patient_name ?: '—' }}</td>
+                        <td class="text-center">
+                            {% set sc = inv.status %}
+                            <span class="badge {% if sc == 'paid' %}bg-success{% elseif sc == 'open' %}bg-warning text-dark{% elseif sc == 'overdue' %}bg-danger{% elseif sc == 'draft' %}bg-secondary{% else %}bg-light text-dark{% endif %}">
+                                {% if sc == 'paid' %}Bezahlt
+                                {% elseif sc == 'open' %}Offen
+                                {% elseif sc == 'overdue' %}Überfällig
+                                {% elseif sc == 'draft' %}Entwurf
+                                {% elseif sc == 'cancelled' %}Storniert
+                                {% else %}{{ sc }}{% endif %}
+                            </span>
+                        </td>
+                        <td class="fs-sm">
+                            {% if inv.payment_method == 'bar' %}Bar{% else %}Rechnung{% endif %}
+                        </td>
+                        <td class="text-end fs-sm text-nowrap">{{ inv.total_net|number_format(2, ',', '.') }} €</td>
+                        <td class="text-end fs-sm text-nowrap">{{ inv.total_tax|number_format(2, ',', '.') }} €</td>
+                        <td class="text-end fs-sm fw-600 text-nowrap">{{ inv.total_gross|number_format(2, ',', '.') }} €</td>
+                        <td class="text-center">
+                            <a href="/rechnungen/{{ inv.id }}/pdf" class="btn btn-xs btn-secondary" title="PDF" target="_blank">
+                                <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="1.5" points="14 2 14 8 20 8"/></svg>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                    <tr class="fw-600" style="background:var(--bs-light,#f8fafc);">
+                        <td colspan="6" class="fs-sm text-muted">
+                            Summen (Seite {{ preview_page }} — {{ invoices|length }} Einträge)
+                        </td>
+                        <td class="text-end fs-sm text-nowrap">
+                            {{ invoices|map(i => i.total_net)|reduce((a, b) => a + b, 0)|number_format(2, ',', '.') }} €
+                        </td>
+                        <td class="text-end fs-sm text-nowrap">
+                            {{ invoices|map(i => i.total_tax)|reduce((a, b) => a + b, 0)|number_format(2, ',', '.') }} €
+                        </td>
+                        <td class="text-end fs-sm fw-700 text-nowrap">
+                            {{ invoices|map(i => i.total_gross)|reduce((a, b) => a + b, 0)|number_format(2, ',', '.') }} €
+                        </td>
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+
+            {# Pagination #}
+            {% if total_pages > 1 %}
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top">
+                <span class="fs-sm text-muted">Seite {{ preview_page }} / {{ total_pages }} &middot; {{ total_items }} Rechnungen gesamt</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item {% if preview_page <= 1 %}disabled{% endif %}">
+                            <a class="page-link" href="/steuerexport?{{ query_string }}&preview_page={{ preview_page - 1 }}">‹</a>
+                        </li>
+                        {% for p in 1..total_pages %}
+                            {% if p == preview_page %}
+                                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                            {% elseif p == 1 or p == total_pages or (p >= preview_page - 2 and p <= preview_page + 2) %}
+                                <li class="page-item"><a class="page-link" href="/steuerexport?{{ query_string }}&preview_page={{ p }}">{{ p }}</a></li>
+                            {% elseif p == preview_page - 3 or p == preview_page + 3 %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if preview_page >= total_pages %}disabled{% endif %}">
+                            <a class="page-link" href="/steuerexport?{{ query_string }}&preview_page={{ preview_page + 1 }}">›</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="text-center py-5">
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" class="mb-3 text-muted" style="opacity:.3;"><path stroke="currentColor" stroke-width="1.5" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="1.5" points="14 2 14 8 20 8"/></svg>
+                <h5 class="text-muted fw-400">Keine Rechnungen im gewählten Zeitraum</h5>
+                <p class="text-muted fs-sm">Bitte Filter anpassen oder anderen Zeitraum wählen.</p>
+            </div>
+        {% endif %}
+
+        </div>
+    </div>
+</div>
+
+{# ── Export-Log ── #}
+{% if logs %}
+<div class="panel mb-3">
+    <div class="panel-hdr">
+        <h2>Export-Protokoll <span class="fw-300"><i>letzte Exporte</i></span></h2>
+    </div>
+    <div class="panel-container show">
+        <div class="panel-content p-0">
+            <table class="table table-sm table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Typ</th>
+                        <th>Zeitraum</th>
+                        <th>Filter</th>
+                        <th class="text-center">Rechnungen</th>
+                        <th>Exportiert am</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for log in logs %}
+                    <tr>
+                        <td>
+                            <span class="badge {% if log.export_type == 'zip' %}bg-primary{% elseif log.export_type == 'csv' %}bg-info{% else %}bg-warning text-dark{% endif %}">
+                                {{ log.export_type|upper }}
+                            </span>
+                        </td>
+                        <td class="fs-sm text-nowrap">{{ log.date_from|date('d.m.Y') }} – {{ log.date_to|date('d.m.Y') }}</td>
+                        <td class="fs-sm">
+                            {% if log.status_filter == '' or log.status_filter == 'all' %}Alle
+                            {% elseif log.status_filter == 'paid' %}Bezahlt
+                            {% elseif log.status_filter == 'open' %}Offen
+                            {% elseif log.status_filter == 'overdue' %}Überfällig
+                            {% elseif log.status_filter == 'draft' %}Entwurf
+                            {% else %}{{ log.status_filter }}{% endif %}
+                        </td>
+                        <td class="text-center fs-sm">{{ log.row_count }}</td>
+                        <td class="fs-sm text-muted text-nowrap">{{ log.exported_at|date('d.m.Y H:i') }} Uhr</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{# ── Settings Modal ── #}
+<div class="modal fade" id="modal-settings" tabindex="-1" aria-labelledby="modal-settings-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-500" id="modal-settings-label">
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" class="me-2 text-primary" style="vertical-align:-2px;"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path stroke="currentColor" stroke-width="2" d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    Steuerexport-Einstellungen
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Schließen"></button>
+            </div>
+            <form action="/steuerexport/settings" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label fw-500">CSV-Trennzeichen</label>
+                            <select name="csv_delimiter" class="form-select">
+                                <option value=";" {% if (settings.csv_delimiter ?? ';') == ';' %}selected{% endif %}>Semikolon ; (Standard, Excel DE)</option>
+                                <option value="," {% if (settings.csv_delimiter ?? '') == ',' %}selected{% endif %}>Komma , (CSV international)</option>
+                                <option value="	" {% if (settings.csv_delimiter ?? '') == "\t" %}selected{% endif %}>Tab (TSV)</option>
+                            </select>
+                            <div class="fs-nano text-muted mt-1">Semikolon wird für deutsches Excel empfohlen.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label fw-500">Dateinamenschema</label>
+                            <input type="text" name="filename_schema" class="form-control"
+                                   value="{{ settings.filename_schema ?? 'steuerexport-{year}-{month}' }}"
+                                   placeholder="steuerexport-{year}-{month}">
+                            <div class="fs-nano text-muted mt-1">Platzhalter: <code>{year}</code>, <code>{month}</code>, <code>{date}</code></div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-500">Firmen- / Steuerinfo für Berichte <span class="fw-400 text-muted">(optional)</span></label>
+                            <input type="text" name="company_tax_info" class="form-control"
+                                   value="{{ settings.company_tax_info ?? '' }}"
+                                   placeholder="z. B. St.-Nr.: 123/456/789 · USt-IdNr.: DE123456789">
+                            <div class="fs-nano text-muted mt-1">Wird im PDF-Steuerbericht neben dem Firmennamen angezeigt.</div>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="consider_paid_at" value="1" id="consider-paid-at"
+                                       {% if (settings.consider_paid_at ?? '0') == '1' %}checked{% endif %}>
+                                <label class="form-check-label fw-500" for="consider-paid-at">
+                                    „Bezahlt am"-Datum für Datumsfilter verwenden
+                                </label>
+                            </div>
+                            <div class="fs-nano text-muted ms-4 mt-1">
+                                Wenn aktiviert, wird für bezahlte Rechnungen das Zahlungsdatum statt des Rechnungsdatums für den Zeitraumfilter verwendet.
+                                (Vorbereitung — noch nicht aktiv.)
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="my-3">
+
+                    <div class="alert" style="background:var(--bs-light,#f8fafc);border:1px solid var(--bs-border-color,#dee2e6);border-radius:6px;padding:0.75rem 1rem;">
+                        <div class="fw-500 fs-sm mb-1">
+                            <svg width="14" height="14" fill="none" viewBox="0 0 24 24" class="me-1 text-warning"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                            GoBD-Hinweis
+                        </div>
+                        <p class="fs-nano text-muted mb-0">
+                            Dieses Plugin erzeugt steuerrelevante Exportdateien als Buchführungshilfe.
+                            Es stellt keine vollständige GoBD-konforme Archivierungslösung dar.
+                            Rechnungen werden im System <strong>nicht verändert oder gelöscht</strong>.
+                            Exports sind immer nachvollziehbar protokolliert.
+                            Für rechtsverbindliche Archivierung wenden Sie sich an Ihren Steuerberater.
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+                    <button type="submit" class="btn btn-primary">Einstellungen speichern</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

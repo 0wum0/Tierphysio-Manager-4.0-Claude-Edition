@@ -1,0 +1,10 @@
+{
+    "name": "TaxExportPro",
+    "slug": "tax-export-pro",
+    "version": "1.0.0",
+    "description": "Steuerrelevante Export-, Archivierungs- und Finanzfunktionen: ZIP-Archiv, CSV-Export, PDF-Steuerbericht, GoBD-orientierte Buchführungshilfe.",
+    "author": "Tierphysio Manager",
+    "min_app_version": "3.0.0",
+    "service_provider": "Plugins\\TaxExportPro\\ServiceProvider",
+    "hooks": ["registerRoutes", "dashboardWidgets", "navItems", "invoiceTabs"]
+}
