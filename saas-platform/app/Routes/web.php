@@ -13,6 +13,7 @@ use Saas\Controllers\SettingsController;
 use Saas\Controllers\MarketplaceController;
 use Saas\Controllers\AdminMarketplaceController;
 use Saas\Controllers\UpdaterController;
+use Saas\Controllers\DemoCleanupController;
 
 // ── Public Registration ────────────────────────────────────────────────────
 $router->get('/register',          [RegistrationController::class, 'index']);
@@ -79,6 +80,10 @@ $router->post('/admin/marketplace/{id}/grant',             [AdminMarketplaceCont
 $router->post('/admin/marketplace/{id}/revoke',            [AdminMarketplaceController::class, 'revokeManual']);
 $router->post('/admin/marketplace/{id}/toggle',            [AdminMarketplaceController::class, 'toggle']);
 $router->get('/admin/tenants/{id}/plugins',                [AdminMarketplaceController::class, 'tenantPlugins']);
+
+// ── Demo Cleanup ──────────────────────────────────────────────────────────
+$router->get('/api/demo/cleanup',       [DemoCleanupController::class, 'run']);
+$router->post('/admin/demo/cleanup',    [DemoCleanupController::class, 'run']);
 
 // ── Updater ──────────────────────────────────────────────────────────────
 $router->get('/admin/updater',        [UpdaterController::class, 'index']);

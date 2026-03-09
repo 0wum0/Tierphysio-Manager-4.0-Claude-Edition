@@ -23,21 +23,28 @@ class MigrationRunner
      */
     public function getAll(): array
     {
-        $files = glob($this->migrationsPath . '/*.sql');
-        if (!$files) return [];
+        $sql = glob($this->migrationsPath . '/*.sql') ?: [];
+        $php = glob($this->migrationsPath . '/*.php') ?: [];
 
-        sort($files);
-
-        return array_map(function (string $path): array {
+        // Merge and sort by filename (basename without extension)
+        $all = [];
+        foreach (array_merge($sql, $php) as $path) {
             $name = pathinfo($path, PATHINFO_FILENAME);
-            return [
-                'name'    => $name,
-                'file'    => $path,
-                'ran'     => false,
-                'ran_at'  => null,
-                'batch'   => null,
-            ];
-        }, $files);
+            // If both .sql and .php exist for same name, prefer .php
+            if (!isset($all[$name]) || pathinfo($path, PATHINFO_EXTENSION) === 'php') {
+                $all[$name] = [
+                    'name'    => $name,
+                    'file'    => $path,
+                    'type'    => pathinfo($path, PATHINFO_EXTENSION),
+                    'ran'     => false,
+                    'ran_at'  => null,
+                    'batch'   => null,
+                ];
+            }
+        }
+
+        ksort($all);
+        return array_values($all);
     }
 
     /**
@@ -127,6 +134,11 @@ class MigrationRunner
      */
     public function runOne(array $migration, int $batch): array
     {
+        // PHP migrations
+        if (($migration['type'] ?? 'sql') === 'php') {
+            return $this->runPhpMigration($migration, $batch);
+        }
+
         $sql = file_get_contents($migration['file']);
         if (!$sql) {
             return [
@@ -153,7 +165,21 @@ class MigrationRunner
 
         try {
             foreach ($statements as $stmt) {
-                $this->db->exec($stmt . ';');
+                try {
+                    $this->db->exec($stmt . ';');
+                } catch (\Throwable $e) {
+                    // Ignore: duplicate column (1060), duplicate key/index (1061),
+                    // table already exists (1050) — safe to continue
+                    $code = $e->getCode();
+                    $msg  = $e->getMessage();
+                    $ignorable = in_array((string)$code, ['1060','1061','1050','42S01'], true)
+                        || str_contains($msg, 'Duplicate column')
+                        || str_contains($msg, 'already exists')
+                        || str_contains($msg, "Can't DROP");
+                    if (!$ignorable) {
+                        throw $e;
+                    }
+                }
             }
 
             // Mark as run
@@ -190,6 +216,39 @@ class MigrationRunner
               `ran_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+    }
+
+    private function runPhpMigration(array $migration, int $batch): array
+    {
+        try {
+            $fn = require $migration['file'];
+            if (!is_callable($fn)) {
+                return [
+                    'name'    => $migration['name'],
+                    'status'  => 'error',
+                    'message' => 'PHP-Migration muss eine callable zurückgeben.',
+                ];
+            }
+
+            $fn($this->db);
+
+            $this->db->execute(
+                "INSERT IGNORE INTO saas_migrations (migration, batch) VALUES (?, ?)",
+                [$migration['name'], $batch]
+            );
+
+            return [
+                'name'    => $migration['name'],
+                'status'  => 'success',
+                'message' => 'PHP-Migration erfolgreich ausgeführt.',
+            ];
+        } catch (\Throwable $e) {
+            return [
+                'name'    => $migration['name'],
+                'status'  => 'error',
+                'message' => $e->getMessage(),
+            ];
+        }
     }
 
     /**
