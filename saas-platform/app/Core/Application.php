@@ -115,16 +115,11 @@ class Application
             exit;
         }
 
-        if ($debug) {
-            echo '<pre style="background:#1a1a2e;color:#e94560;padding:20px;font-family:monospace;">';
-            echo '<strong>Exception:</strong> ' . htmlspecialchars($e->getMessage()) . "\n\n";
-            echo '<strong>File:</strong> ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . "\n\n";
-            echo '<strong>Trace:</strong>' . "\n" . htmlspecialchars($e->getTraceAsString());
-            echo '</pre>';
-        } else {
-            echo '<!DOCTYPE html><html><body style="background:#0f172a;color:#fff;font-family:sans-serif;text-align:center;padding:100px;">';
-            echo '<h1>500 - Interner Serverfehler</h1><p>Bitte versuchen Sie es später erneut.</p>';
-            echo '</body></html>';
-        }
+        // Temporary: always show error for debugging
+        echo '<pre style="background:#1a1a2e;color:#e94560;padding:20px;font-family:monospace;">';
+        echo '<strong>' . get_class($e) . '</strong>: ' . htmlspecialchars($e->getMessage()) . "\n\n";
+        echo '<strong>File:</strong> ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . "\n\n";
+        echo '<strong>Trace:</strong>' . "\n" . htmlspecialchars($e->getTraceAsString());
+        echo '</pre>';
     }
 }
