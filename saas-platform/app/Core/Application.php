@@ -113,18 +113,10 @@ class Application
             FILE_APPEND
         );
 
-        http_response_code(500);
+        // Temporary debug: use 200 so browser renders the error output
+        http_response_code(200);
 
-        $isAjax = strtolower($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '') === 'xmlhttprequest'
-               || str_contains($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json');
-        if ($isAjax) {
-            header('Content-Type: application/json; charset=utf-8');
-            echo json_encode(['error' => $e->getMessage()]);
-            exit;
-        }
-
-        // Temporary: always show error for debugging
-        echo '<pre style="background:#1a1a2e;color:#e94560;padding:20px;font-family:monospace;">';
+        echo '<pre style="background:#1a1a2e;color:#e94560;padding:20px;font-family:monospace;white-space:pre-wrap;">';
         echo '<strong>' . get_class($e) . '</strong>: ' . htmlspecialchars($e->getMessage()) . "\n\n";
         echo '<strong>File:</strong> ' . htmlspecialchars($e->getFile()) . ':' . $e->getLine() . "\n\n";
         echo '<strong>Trace:</strong>' . "\n" . htmlspecialchars($e->getTraceAsString());
