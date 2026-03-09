@@ -307,12 +307,14 @@ class TenantController extends Controller
             return '';
         }
 
-        $appHost  = parse_url($this->config->get('app.url', ''), PHP_URL_HOST) ?? '';
+        $appUrl   = $this->config->get('app.url', '');
+        $scheme   = parse_url($appUrl, PHP_URL_SCHEME) ?? 'https';
+        $appHost  = parse_url($appUrl, PHP_URL_HOST) ?? '';
         $parts    = explode('.', $appHost);
         // Strip the SaaS subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
         $baseHost = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
 
-        return 'https://' . $tenant['subdomain'] . '.' . $baseHost;
+        return $scheme . '://' . $tenant['subdomain'] . '.' . $baseHost;
     }
 
     private function getTenantPdo(): \PDO

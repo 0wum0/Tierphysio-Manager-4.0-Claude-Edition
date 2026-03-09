@@ -104,11 +104,13 @@ class TenantProvisioningService
             // 7. Send welcome email with tenant-specific subdomain login URL
             try {
                 $subdomain = rtrim($tablePrefix, '_');
-                $appHost   = parse_url($this->config->get('app.url', ''), PHP_URL_HOST) ?? '';
+                $appUrl    = $this->config->get('app.url', '');
+                $scheme    = parse_url($appUrl, PHP_URL_SCHEME) ?? 'https';
+                $appHost   = parse_url($appUrl, PHP_URL_HOST) ?? '';
                 // Strip saas subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
                 $parts     = explode('.', $appHost);
                 $baseHost  = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
-                $loginUrl  = 'https://' . $subdomain . '.' . $baseHost;
+                $loginUrl  = $scheme . '://' . $subdomain . '.' . $baseHost;
 
                 $this->mailService->sendWelcome(
                     $data['email'],
