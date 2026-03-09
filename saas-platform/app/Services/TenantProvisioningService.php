@@ -101,15 +101,23 @@ class TenantProvisioningService
             // 6. Issue license token
             $licenseToken = $this->licenseService->issueToken($tenantId);
 
-            // 7. Send welcome email
+            // 7. Send welcome email with tenant-specific subdomain login URL
             try {
+                $subdomain = rtrim($tablePrefix, '_');
+                $appHost   = parse_url($this->config->get('app.url', ''), PHP_URL_HOST) ?? '';
+                // Strip saas subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
+                $parts     = explode('.', $appHost);
+                $baseHost  = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
+                $loginUrl  = 'https://' . $subdomain . '.' . $baseHost;
+
                 $this->mailService->sendWelcome(
                     $data['email'],
                     $data['owner_name'],
                     $data['practice_name'],
                     $data['email'],
                     $adminPassword,
-                    $licenseToken
+                    $licenseToken,
+                    $loginUrl
                 );
             } catch (\Throwable) {
                 // Mail failure should not block provisioning
