@@ -34,8 +34,9 @@ class View
 
     private function registerGlobals(): void
     {
-        $this->twig->addGlobal('app_name',  $this->config->get('app.name', 'Tierphysio SaaS'));
-        $this->twig->addGlobal('app_url',   $this->config->get('app.url', ''));
+        $this->twig->addGlobal('app_name',     $this->config->get('app.name', 'Tierphysio SaaS'));
+        $this->twig->addGlobal('app_url',      $this->config->get('app.url', ''));
+        $this->twig->addGlobal('practice_url', rtrim($this->config->get('practice.url', ''), '/'));
         $this->twig->addGlobal('flash_success', $this->session->getFlash('success'));
         $this->twig->addGlobal('flash_error',   $this->session->getFlash('error'));
         $this->twig->addGlobal('flash_info',    $this->session->getFlash('info'));
