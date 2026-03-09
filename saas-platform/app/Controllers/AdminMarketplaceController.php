@@ -183,7 +183,7 @@ class AdminMarketplaceController extends Controller
         $this->requireAuth();
 
         $tenantId = (int)($params['id'] ?? 0);
-        $tenant   = $this->tenantRepo->findById($tenantId);
+        $tenant   = $this->tenantRepo->find($tenantId);
         if (!$tenant) { $this->notFound(); }
 
         $allPlugins = [];
