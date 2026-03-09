@@ -75,4 +75,60 @@ class AuthController extends Controller
         $this->session->destroy();
         $this->redirect('/login');
     }
+
+    /**
+     * SaaS admin impersonation endpoint.
+     * Called via: /admin-login?token=<hex>
+     * The token was written into `_impersonate_token` in this tenant's settings table
+     * by the SaaS platform. It is valid for 5 minutes, single-use.
+     */
+    public function adminLogin(array $params = []): void
+    {
+        $token = trim($_GET['token'] ?? '');
+
+        if ($token === '') {
+            $this->redirect('/login');
+            return;
+        }
+
+        $stored = $this->settingsRepository->get('_impersonate_token');
+
+        if (!$stored) {
+            $this->session->flash('error', 'Ungültiger oder abgelaufener Login-Link.');
+            $this->redirect('/login');
+            return;
+        }
+
+        [$storedToken, $expiresAt] = explode('|', $stored, 2) + ['', ''];
+
+        if (!hash_equals($storedToken, $token)) {
+            $this->session->flash('error', 'Ungültiger Login-Token.');
+            $this->redirect('/login');
+            return;
+        }
+
+        if (strtotime($expiresAt) < time()) {
+            $this->session->flash('error', 'Login-Link abgelaufen (gültig 5 Minuten).');
+            $this->redirect('/login');
+            return;
+        }
+
+        // Invalidate token immediately (single-use)
+        $this->settingsRepository->set('_impersonate_token', '');
+
+        // Find the first admin user in this tenant
+        $admin = $this->userRepository->findFirstAdmin();
+
+        if (!$admin) {
+            $this->session->flash('error', 'Kein Admin-Benutzer gefunden.');
+            $this->redirect('/login');
+            return;
+        }
+
+        $this->session->setUser($admin);
+        $this->session->set('impersonated_by_saas', true);
+        $this->userRepository->updateLastLogin($admin['id']);
+        $this->session->flash('success', 'Als SaaS-Admin eingeloggt: ' . $admin['name']);
+        $this->redirect('/dashboard');
+    }
 }

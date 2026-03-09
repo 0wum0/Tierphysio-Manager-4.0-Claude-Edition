@@ -13,6 +13,7 @@ use Saas\Repositories\PlanRepository;
 use Saas\Repositories\LicenseRepository;
 use Saas\Services\TenantProvisioningService;
 use Saas\Services\LicenseService;
+use Saas\Core\Config;
 
 class TenantController extends Controller
 {
@@ -24,7 +25,8 @@ class TenantController extends Controller
         private PlanRepository         $planRepo,
         private LicenseRepository      $licenseRepo,
         private TenantProvisioningService $provisioningService,
-        private LicenseService         $licenseService
+        private LicenseService         $licenseService,
+        private Config                 $config
     ) {
         parent::__construct($view, $session);
     }
@@ -45,6 +47,12 @@ class TenantController extends Controller
             $tenants = $this->tenantRepo->all($perPage, $offset);
             $total   = $this->tenantRepo->count();
         }
+
+        // Attach practice_url to each tenant
+        foreach ($tenants as &$t) {
+            $t['practice_url'] = $this->buildPracticeUrl($t);
+        }
+        unset($t);
 
         $this->render('admin/tenants/index.twig', [
             'tenants'    => $tenants,
@@ -72,12 +80,13 @@ class TenantController extends Controller
         $plans        = $this->planRepo->allActive();
 
         $this->render('admin/tenants/show.twig', [
-            'tenant'       => $tenant,
-            'subscription' => $subscription,
-            'all_subs'     => $allSubs,
-            'licenses'     => $licenses,
-            'plans'        => $plans,
-            'page_title'   => $tenant['practice_name'],
+            'tenant'        => $tenant,
+            'subscription'  => $subscription,
+            'all_subs'      => $allSubs,
+            'licenses'      => $licenses,
+            'plans'         => $plans,
+            'practice_url'  => $this->buildPracticeUrl($tenant),
+            'page_title'    => $tenant['practice_name'],
         ]);
     }
 
@@ -247,6 +256,78 @@ class TenantController extends Controller
 
         $this->session->flash('success', "Praxis '{$tenant['practice_name']}' wurde gelöscht.");
         $this->redirect('/admin/tenants');
+    }
+
+    /**
+     * Impersonate: generate a one-time admin-login token, store it in the
+     * tenant's prefixed settings table, then redirect to their Praxissoftware
+     * with the token in the URL so they get auto-logged-in as admin.
+     */
+    public function impersonate(array $params = []): void
+    {
+        $this->requireRole('superadmin', 'admin');
+
+        $id     = (int)($params['id'] ?? 0);
+        $tenant = $this->tenantRepo->find($id);
+        if (!$tenant || empty($tenant['table_prefix'])) {
+            $this->session->flash('error', 'Tenant nicht gefunden oder keine Tabellen angelegt.');
+            $this->redirect('/admin/tenants/' . $id);
+        }
+
+        $prefix  = $tenant['table_prefix'];
+        $token   = bin2hex(random_bytes(32));
+        $expires = date('Y-m-d H:i:s', time() + 300); // 5 minutes
+
+        // Store token in tenant's settings table
+        try {
+            $pdo = $this->getTenantPdo();
+            $pdo->prepare(
+                "INSERT INTO `{$prefix}settings` (`key`, `value`) VALUES ('_impersonate_token', ?)
+                 ON DUPLICATE KEY UPDATE `value` = ?"
+            )->execute([$token . '|' . $expires, $token . '|' . $expires]);
+        } catch (\Throwable $e) {
+            $this->session->flash('error', 'Impersonation fehlgeschlagen: ' . $e->getMessage());
+            $this->redirect('/admin/tenants/' . $id);
+        }
+
+        $practiceUrl = $this->buildPracticeUrl($tenant);
+        $loginUrl    = rtrim($practiceUrl, '/') . '/admin-login?token=' . urlencode($token);
+
+        header('Location: ' . $loginUrl);
+        exit;
+    }
+
+    /**
+     * Build the subdomain-based practice URL for a tenant.
+     * e.g. subdomain="tpm5" → https://tpm5.tp.makeit.uno
+     */
+    private function buildPracticeUrl(array $tenant): string
+    {
+        if (empty($tenant['subdomain'])) {
+            return '';
+        }
+
+        $appHost  = parse_url($this->config->get('app.url', ''), PHP_URL_HOST) ?? '';
+        $parts    = explode('.', $appHost);
+        // Strip the SaaS subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
+        $baseHost = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
+
+        return 'https://' . $tenant['subdomain'] . '.' . $baseHost;
+    }
+
+    private function getTenantPdo(): \PDO
+    {
+        $host = $this->config->get('tenant_db.host', 'localhost');
+        $port = (int)$this->config->get('tenant_db.port', 3306);
+        $db   = $this->config->get('tenant_db.database', '');
+        $user = $this->config->get('tenant_db.username', '');
+        $pass = $this->config->get('tenant_db.password', '');
+
+        return new \PDO(
+            "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
+            $user, $pass,
+            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
+        );
     }
 
     private function validateTenantData(array $data): array

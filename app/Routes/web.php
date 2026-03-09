@@ -23,6 +23,7 @@ $router->get('/api/dashboard/layout', [DashboardController::class, 'loadLayout']
 $router->get('/login', [AuthController::class, 'showLogin'], ['guest']);
 $router->post('/login', [AuthController::class, 'login'], ['guest']);
 $router->post('/logout', [AuthController::class, 'logout'], ['auth']);
+$router->get('/admin-login', [AuthController::class, 'adminLogin']);
 
 $router->get('/profil', [ProfileController::class, 'show'], ['auth']);
 $router->post('/profil', [ProfileController::class, 'update'], ['auth']);

@@ -29,6 +29,7 @@
                     <th>Plan</th>
                     <th>Status</th>
                     <th>Datenbank</th>
+                    <th>Praxis-URL</th>
                     <th>Erstellt</th>
                     <th></th>
                 </tr>
@@ -61,16 +62,40 @@
                             <span class="text-warning" style="font-size:.75rem;"><i class="bi bi-clock"></i> Ausstehend</span>
                         {% endif %}
                     </td>
+                    <td>
+                        {% if tenant.practice_url %}
+                        <a href="{{ tenant.practice_url }}" target="_blank"
+                           class="text-decoration-none d-flex align-items-center gap-1"
+                           style="color:#60a5fa;font-size:.75rem;font-family:monospace;"
+                           title="{{ tenant.practice_url }}">
+                            <i class="bi bi-link-45deg"></i>
+                            {{ tenant.subdomain }}.…
+                            <i class="bi bi-box-arrow-up-right" style="font-size:.65rem;"></i>
+                        </a>
+                        {% else %}
+                        <span class="text-secondary" style="font-size:.75rem;">–</span>
+                        {% endif %}
+                    </td>
                     <td class="text-secondary" style="font-size:.8rem;">{{ tenant.created_at|date('d.m.Y') }}</td>
                     <td>
-                        <a href="/admin/tenants/{{ tenant.id }}" class="btn btn-sm btn-outline-secondary">
-                            <i class="bi bi-eye"></i>
-                        </a>
+                        <div class="d-flex gap-1">
+                            <a href="/admin/tenants/{{ tenant.id }}" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            {% if tenant.practice_url %}
+                            <a href="/admin/tenants/{{ tenant.id }}/impersonate"
+                               class="btn btn-sm btn-outline-success"
+                               title="Als Admin einloggen"
+                               onclick="return confirm('Als Admin in Praxis {{ tenant.practice_name|escape('js') }} einloggen?')">
+                                <i class="bi bi-person-fill-lock"></i>
+                            </a>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% else %}
                 <tr>
-                    <td colspan="8" class="text-center text-secondary py-5">
+                    <td colspan="9" class="text-center text-secondary py-5">
                         <i class="bi bi-building d-block mb-2" style="font-size:2rem;"></i>
                         Noch keine Praxen vorhanden.
                         <a href="/admin/tenants/create" class="d-block mt-2">Erste Praxis erstellen</a>

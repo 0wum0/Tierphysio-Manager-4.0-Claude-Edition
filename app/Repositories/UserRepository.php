@@ -35,4 +35,11 @@ class UserRepository extends Repository
             "SELECT id, name, email, role, active, last_login, created_at FROM {$this->db->t('users')} ORDER BY `{$orderBy}` {$direction}"
         );
     }
+
+    public function findFirstAdmin(): array|false
+    {
+        return $this->db->fetch(
+            "SELECT * FROM {$this->db->t('users')} WHERE role = 'admin' AND active = 1 ORDER BY id ASC LIMIT 1"
+        );
+    }
 }

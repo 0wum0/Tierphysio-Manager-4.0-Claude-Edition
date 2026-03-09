@@ -49,7 +49,8 @@ $router->post('/admin/tenants/{id}/suspend',    [TenantController::class, 'suspe
 $router->post('/admin/tenants/{id}/reactivate', [TenantController::class, 'reactivate']);
 $router->post('/admin/tenants/{id}/cancel',     [TenantController::class, 'cancel']);
 $router->post('/admin/tenants/{id}/license',    [TenantController::class, 'issueLicense']);
-$router->post('/admin/tenants/{id}/delete',     [TenantController::class, 'delete']);
+$router->post('/admin/tenants/{id}/delete',       [TenantController::class, 'delete']);
+$router->get('/admin/tenants/{id}/impersonate',   [TenantController::class, 'impersonate']);
 
 // ── Plans Management ───────────────────────────────────────────────────────
 $router->get('/admin/plans',            [PlansController::class, 'index']);
