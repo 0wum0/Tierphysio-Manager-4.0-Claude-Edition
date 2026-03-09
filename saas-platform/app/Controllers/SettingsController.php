@@ -59,6 +59,8 @@ class SettingsController extends Controller
             'STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET',
             // PayPal
             'PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_MODE',
+            // Praxissoftware & Demo
+            'PRACTICE_SOFTWARE_URL', 'DEMO_EMAIL', 'DEMO_PASSWORD', 'CRON_SECRET',
         ];
 
         $current = $this->readEnv();

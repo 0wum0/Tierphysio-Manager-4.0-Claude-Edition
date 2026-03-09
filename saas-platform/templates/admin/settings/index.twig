@@ -262,6 +262,50 @@
             </div>
         </div>
 
+        {# ── Praxissoftware & Demo ───────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-building me-2 text-primary"></i>Praxissoftware & Demo</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">URL der Praxissoftware</label>
+                            <input type="url" name="PRACTICE_SOFTWARE_URL" class="form-control"
+                                   value="{{ env.PRACTICE_SOFTWARE_URL ?? '' }}"
+                                   placeholder="https://tp.makeit.uno">
+                            <div class="form-text">Wird auf der Landingpage als Demo-Link verwendet. Z.B. <code>https://tp.makeit.uno</code></div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Demo E-Mail</label>
+                            <input type="email" name="DEMO_EMAIL" class="form-control"
+                                   value="{{ env.DEMO_EMAIL ?? 'info@demo.de' }}"
+                                   placeholder="info@demo.de">
+                            <div class="form-text">Wird auf der Landingpage als Demo-Login angezeigt.</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Demo Passwort</label>
+                            <input type="text" name="DEMO_PASSWORD" class="form-control"
+                                   value="{{ env.DEMO_PASSWORD ?? 'admin123456' }}"
+                                   placeholder="admin123456">
+                            <div class="form-text">Wird auf der Landingpage sichtbar angezeigt.</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Cron-Secret (Demo-Cleanup)</label>
+                            <input type="text" name="CRON_SECRET" class="form-control"
+                                   value="{{ env.CRON_SECRET ?? '' }}"
+                                   placeholder="zufälliger_geheimer_schlüssel">
+                            <div class="form-text">
+                                Cron-URL: <code>{{ env.APP_URL ?? '' }}/api/demo/cleanup?secret=DEIN_SECRET</code>
+                                — löscht abgelaufene Demo-Konten automatisch.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="mt-4 d-flex gap-2">
