@@ -1,180 +1,308 @@
 ﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
-<div class="page-header">
-    <div>
-        <h1 class="page-title">{{ t('owners.title') }}</h1>
-        <p class="page-subtitle">{{ pagination.total }} {{ t('common.entries') }}</p>
+
+{# ── Page Header ── #}
+<div class="subheader">
+    <h1 class="subheader-title">
+        <i class="sa sa-users me-2 text-primary"></i>
+        {{ t('owners.title') }}
+        <small>{{ pagination.total }} {{ t('common.entries') }}</small>
+    </h1>
+    <div class="subheader-action">
+        <button class="btn btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
+            <i class="sa sa-plus me-1"></i>
+            {{ t('owners.new_owner') }}
+        </button>
     </div>
-    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
-        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-        {{ t('owners.new_owner') }}
-    </button>
 </div>
 
-<form method="GET" action="/tierhalter">
-    <div class="glass-card" style="padding:1rem;">
-        <div class="search-bar">
-            <div class="search-input-wrapper" style="flex:1;">
-                <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                <input type="text" name="search" class="form-control" placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
-            </div>
-            <button type="submit" class="btn btn-secondary">{{ t('common.search') }}</button>
-            {% if search %}<a href="/tierhalter" class="btn btn-secondary">{{ t('common.reset') }}</a>{% endif %}
-        </div>
-    </div>
-</form>
+{# ── Panel ── #}
+<div class="row">
+    <div class="col-xl-12">
+        <div id="panel-owners" class="panel">
 
-{% if owners %}
-    <div class="table-container">
-        <table class="data-table">
-            <thead>
-                <tr>
-                    <th>{{ t('owners.last_name') }}, {{ t('owners.first_name') }}</th>
-                    <th>{{ t('owners.email') }}</th>
-                    <th>{{ t('owners.phone') }}</th>
-                    <th>{{ t('owners.city') }}</th>
-                    <th>{{ t('owners.animal_count') }}</th>
-                    <th style="text-align:right;">{{ t('common.actions') }}</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for owner in owners %}
-                <tr>
-                    <td>
-                        <a href="/tierhalter/{{ owner.id }}" class="flex items-center gap-3" style="text-decoration:none;color:var(--text-primary);">
-                            <div class="avatar-placeholder" style="width:34px;height:34px;font-size:0.75rem;flex-shrink:0;">{{ owner.first_name|first ~ owner.last_name|first }}</div>
-                            <div>
-                                <div class="font-semibold" style="display:flex;align-items:center;gap:0.4rem;">
-                                    {{ owner.last_name }}, {{ owner.first_name }}
-                                    <span style="font-size:0.65rem;font-weight:700;color:var(--accent,#6366f1);background:rgba(99,102,241,0.1);padding:0.05rem 0.4rem;border-radius:999px;border:1px solid rgba(99,102,241,0.2);white-space:nowrap;">{{ '%04d'|format(owner.id) }}</span>
-                                </div>
-                                {% if owner.street %}<div class="text-xs text-muted">{{ owner.street }}</div>{% endif %}
-                            </div>
-                        </a>
-                    </td>
-                    <td>
-                        {% if owner.email %}
-                            <a href="mailto:{{ owner.email }}" style="color:var(--accent);">{{ owner.email }}</a>
-                        {% else %}—{% endif %}
-                    </td>
-                    <td>{{ owner.phone ?: '—' }}</td>
-                    <td>{{ owner.zip ? owner.zip ~ ' ' ~ owner.city : (owner.city ?: '—') }}</td>
-                    <td>
-                        <span class="badge badge-primary">{{ owner.animal_count ?? 0 }}</span>
-                    </td>
-                    <td>
-                        <div class="flex gap-2" style="justify-content:flex-end;">
-                            <a href="/tierhalter/{{ owner.id }}" class="btn btn-secondary btn-sm">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+            {# Panel Toolbar #}
+            <div class="panel-hdr">
+                <h2>Tierhalter <span class="fw-300"><i>Übersicht</i></span></h2>
+                <div class="panel-toolbar ms-auto d-flex align-items-center gap-2">
+                    <form method="GET" action="/tierhalter" class="d-flex align-items-center gap-2 mb-0">
+                        <div class="input-group input-group-sm" style="width:260px;">
+                            <span class="input-group-text bg-transparent border-end-0">
+                                <i class="sa sa-search text-muted" style="font-size:0.8rem;"></i>
+                            </span>
+                            <input type="text" name="search" class="form-control form-control-sm border-start-0 ps-0"
+                                   placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
+                            {% if search %}
+                            <a href="/tierhalter" class="btn btn-sm btn-outline-secondary">
+                                <i class="sa sa-x"></i>
                             </a>
-                            <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-secondary btn-sm">
-                                <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
-                            </a>
+                            {% endif %}
                         </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-    </div>
+                        <button type="submit" class="btn btn-sm btn-secondary waves-effect">
+                            {{ t('common.search') }}
+                        </button>
+                    </form>
+                    <button class="btn btn-sm btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
+                        <i class="sa sa-plus me-1"></i> Neu
+                    </button>
+                </div>
+            </div>
 
-    {% if pagination.last_page > 1 %}
-        <div class="pagination">
-            {% if pagination.has_prev %}<a href="?page={{ pagination.page - 1 }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg></a>{% endif %}
-            {% for p in 1..pagination.last_page %}
-                {% if p == pagination.page %}<span class="page-link active">{{ p }}</span>
-                {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}<a href="?page={{ p }}&search={{ search }}" class="page-link">{{ p }}</a>
-                {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}<span class="page-link disabled">…</span>{% endif %}
-            {% endfor %}
-            {% if pagination.has_next %}<a href="?page={{ pagination.page + 1 }}&search={{ search }}" class="page-link"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg></a>{% endif %}
-        </div>
-    {% endif %}
+            <div class="panel-container show">
+                <div class="panel-content p-0">
 
-{% else %}
-    <div class="empty-state">
-        <div class="empty-state-icon"><svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></div>
-        <div class="empty-state-title">{{ t('owners.no_owners') }}</div>
-        <div class="empty-state-text mb-4">{{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}</div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-owner">{{ t('owners.new_owner') }}</button>
+                {% if owners %}
+                    <table class="table table-hover table-striped mb-0">
+                        <thead class="thead-themed">
+                            <tr>
+                                <th class="ps-4">Tierhalter</th>
+                                <th>E-Mail</th>
+                                <th>Telefon</th>
+                                <th>Ort</th>
+                                <th class="text-center">Tiere</th>
+                                <th class="text-end pe-4">Aktionen</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for owner in owners %}
+                            <tr class="odd:bg-transparent even:bg-faded" style="vertical-align:middle;">
+                                <td class="ps-4">
+                                    <a href="/tierhalter/{{ owner.id }}" class="d-flex align-items-center gap-3 text-decoration-none">
+                                        {# Avatar #}
+                                        <span class="profile-image rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-700 fs-sm"
+                                              style="width:38px;height:38px;background:linear-gradient(135deg,var(--theme-primary,#4f7cff),var(--theme-secondary,#8b5cf6));color:#fff;font-size:0.8rem;">
+                                            {{ owner.first_name|first|upper }}{{ owner.last_name|first|upper }}
+                                        </span>
+                                        <div class="d-flex flex-column">
+                                            <span class="fw-500 fs-md text-body d-flex align-items-center gap-2">
+                                                {{ owner.last_name }}, {{ owner.first_name }}
+                                                <span class="badge bg-primary-500 badge-pill fs-nano fw-700">#{{ '%04d'|format(owner.id) }}</span>
+                                            </span>
+                                            {% if owner.street %}
+                                            <span class="fs-nano text-muted">{{ owner.street }}</span>
+                                            {% endif %}
+                                        </div>
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if owner.email %}
+                                        <a href="mailto:{{ owner.email }}" class="text-primary fs-sm">
+                                            <i class="sa sa-mail me-1 opacity-50"></i>{{ owner.email }}
+                                        </a>
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fs-sm">
+                                    {% if owner.phone %}
+                                        <i class="sa sa-phone me-1 opacity-50"></i>{{ owner.phone }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="fs-sm">
+                                    {% if owner.city %}
+                                        <i class="sa sa-map-pin me-1 opacity-50"></i>
+                                        {{ owner.zip ? owner.zip ~ ' ' ~ owner.city : owner.city }}
+                                    {% else %}
+                                        <span class="text-muted">—</span>
+                                    {% endif %}
+                                </td>
+                                <td class="text-center">
+                                    {% set cnt = owner.animal_count ?? 0 %}
+                                    <span class="badge {% if cnt > 0 %}bg-success{% else %}bg-secondary{% endif %} rounded-pill">
+                                        {{ cnt }}
+                                    </span>
+                                </td>
+                                <td class="text-end pe-4">
+                                    <div class="d-flex align-items-center justify-content-end gap-1">
+                                        <a href="/tierhalter/{{ owner.id }}" class="btn btn-sm btn-outline-secondary waves-effect" title="Ansehen">
+                                            <i class="sa sa-eye"></i>
+                                        </a>
+                                        <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-sm btn-outline-primary waves-effect" title="Rechnung erstellen">
+                                            <i class="sa sa-file-text"></i>
+                                        </a>
+                                        <div class="dropdown d-inline-block">
+                                            <button class="btn btn-sm btn-outline-secondary waves-effect dropdown-toggle no-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mehr">
+                                                <i class="sa sa-more-vertical"></i>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animated">
+                                                <li>
+                                                    <a class="dropdown-item" href="/tierhalter/{{ owner.id }}">
+                                                        <i class="sa sa-eye me-2 text-muted"></i> Profil anzeigen
+                                                    </a>
+                                                </li>
+                                                <li>
+                                                    <a class="dropdown-item" href="/rechnungen/erstellen?owner_id={{ owner.id }}">
+                                                        <i class="sa sa-file-text me-2 text-muted"></i> Rechnung erstellen
+                                                    </a>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li>
+                                                    <a class="dropdown-item text-danger" href="/einladungen?prefill_owner={{ owner.id }}" title="Einladen">
+                                                        <i class="sa sa-send me-2"></i> Einladung senden
+                                                    </a>
+                                                </li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+
+                    {# Pagination #}
+                    {% if pagination.last_page > 1 %}
+                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
+                        <span class="fs-sm text-muted">
+                            Seite {{ pagination.page }} von {{ pagination.last_page }}
+                            &middot; {{ pagination.total }} Einträge
+                        </span>
+                        <nav>
+                            <ul class="pagination pagination-sm mb-0">
+                                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ pagination.page - 1 }}&search={{ search }}">
+                                        <i class="sa sa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                {% for p in 1..pagination.last_page %}
+                                    {% if p == pagination.page %}
+                                        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                                    {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ p }}&search={{ search }}">{{ p }}</a></li>
+                                    {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
+                                        <li class="page-item disabled"><span class="page-link">…</span></li>
+                                    {% endif %}
+                                {% endfor %}
+                                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                                    <a class="page-link" href="?page={{ pagination.page + 1 }}&search={{ search }}">
+                                        <i class="sa sa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    {% endif %}
+
+                {% else %}
+                    {# Empty State #}
+                    <div class="d-flex flex-column align-items-center justify-content-center py-5 text-center">
+                        <i class="sa sa-users sa-5x text-muted mb-3" style="opacity:0.25;font-size:3.5rem;"></i>
+                        <h5 class="fw-400 text-muted">{{ t('owners.no_owners') }}</h5>
+                        <p class="text-muted fs-sm mb-4">
+                            {{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}
+                        </p>
+                        <button class="btn btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
+                            <i class="sa sa-plus me-1"></i> {{ t('owners.new_owner') }}
+                        </button>
+                    </div>
+                {% endif %}
+
+                </div>
+            </div>{# end panel-container #}
+
+        </div>{# end panel #}
     </div>
-{% endif %}
+</div>
 
 {# New Owner Modal #}
-<div class="modal fade" id="modal-new-owner" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable"><div class="modal-content">
-        <div class="modal-header">
-            <h3 class="modal-title">{{ t('owners.new_owner') }}</h3>
-            <button class="modal-close" data-bs-dismiss="modal" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
-        </div>
-        <form action="/tierhalter" method="POST" class="modal-body">
-            <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <div class="form-grid form-grid-2">
-                <div class="form-group">
-                    <label class="form-label">{{ t('owners.first_name') }} *</label>
-                    <input type="text" name="first_name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">{{ t('owners.last_name') }} *</label>
-                    <input type="text" name="last_name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label">{{ t('owners.email') }}</label>
-                    <input type="email" name="email" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">{{ t('owners.phone') }}</label>
-                    <input type="tel" name="phone" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label class="form-label">{{ t('owners.street') }}</label>
-                    <input type="text" name="street" class="form-control">
-                </div>
-                <div class="form-group">
-                    <div class="form-grid form-grid-2" style="gap:0.5rem;">
-                        <div class="form-group">
+<div class="modal fade" id="modal-new-owner" tabindex="-1" aria-labelledby="modal-new-owner-label" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h4 class="modal-title fw-500" id="modal-new-owner-label">
+                    <i class="sa sa-user-plus me-2 text-primary"></i>
+                    {{ t('owners.new_owner') }}
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <form action="/tierhalter" method="POST">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
+
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('owners.first_name') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="first_name" class="form-control" required autofocus>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('owners.last_name') }} <span class="text-danger">*</span></label>
+                            <input type="text" name="last_name" class="form-control" required>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('owners.email') }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="sa sa-mail fs-xs"></i></span>
+                                <input type="email" name="email" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">{{ t('owners.phone') }}</label>
+                            <div class="input-group">
+                                <span class="input-group-text"><i class="sa sa-phone fs-xs"></i></span>
+                                <input type="tel" name="phone" class="form-control">
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">{{ t('owners.street') }}</label>
+                            <input type="text" name="street" class="form-control">
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label">{{ t('owners.zip') }}</label>
                             <input type="text" name="zip" class="form-control" maxlength="10">
                         </div>
-                        <div class="form-group">
+                        <div class="col-md-8">
                             <label class="form-label">{{ t('owners.city') }}</label>
                             <input type="text" name="city" class="form-control">
                         </div>
-                    </div>
-                </div>
-            </div>
-            <div class="form-group mt-3">
-                <label class="form-label">{{ t('owners.notes') }}</label>
-                <textarea name="notes" class="form-control" rows="2"></textarea>
-            </div>
-            <div style="border-top:1px solid var(--glass-border);margin-top:1rem;padding-top:1rem;">
-                <label style="display:flex;align-items:center;gap:0.5rem;cursor:pointer;font-size:0.875rem;color:var(--text-secondary);">
-                    <input type="checkbox" name="create_animal" value="1" id="create-animal-cb" style="width:16px;height:16px;">
-                    {{ t('owners.create_animal') }}
-                </label>
-                <div id="animal-fields" style="display:none;margin-top:1rem;">
-                    <div class="form-grid form-grid-3">
-                        <div class="form-group">
-                            <label class="form-label">{{ t('owners.animal_name') }}</label>
-                            <input type="text" name="animal_name" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ t('owners.animal_species') }}</label>
-                            <input type="text" name="animal_species" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">{{ t('owners.animal_breed') }}</label>
-                            <input type="text" name="animal_breed" class="form-control">
+                        <div class="col-12">
+                            <label class="form-label">{{ t('owners.notes') }}</label>
+                            <textarea name="notes" class="form-control" rows="2"></textarea>
                         </div>
                     </div>
+
+                    <hr class="my-3">
+
+                    <div class="form-check form-switch mb-2">
+                        <input class="form-check-input" type="checkbox" name="create_animal" value="1" id="create-animal-cb">
+                        <label class="form-check-label fw-500" for="create-animal-cb">
+                            {{ t('owners.create_animal') }}
+                        </label>
+                    </div>
+                    <div id="animal-fields" style="display:none;">
+                        <div class="row g-3 mt-1">
+                            <div class="col-md-4">
+                                <label class="form-label">{{ t('owners.animal_name') }}</label>
+                                <input type="text" name="animal_name" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ t('owners.animal_species') }}</label>
+                                <input type="text" name="animal_species" class="form-control">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">{{ t('owners.animal_breed') }}</label>
+                                <input type="text" name="animal_breed" class="form-control">
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer" style="padding:1rem 0 0;margin-top:1rem;border-top:1px solid var(--glass-border);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{{ t('common.cancel') }}</button>
-                <button type="submit" class="btn btn-primary">{{ t('common.create') }}</button>
-            </div>
-        </form>
-    </div></div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary waves-effect" data-bs-dismiss="modal">
+                        {{ t('common.cancel') }}
+                    </button>
+                    <button type="submit" class="btn btn-primary waves-effect waves-themed">
+                        <i class="sa sa-check me-1"></i> {{ t('common.create') }}
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
 </div>
 {% endblock %}
 
