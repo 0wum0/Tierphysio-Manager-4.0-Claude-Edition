@@ -14,6 +14,7 @@ use Saas\Repositories\LicenseRepository;
 use Saas\Services\TenantProvisioningService;
 use Saas\Services\LicenseService;
 use Saas\Core\Config;
+use Saas\Core\Database;
 
 class TenantController extends Controller
 {
@@ -26,7 +27,8 @@ class TenantController extends Controller
         private LicenseRepository      $licenseRepo,
         private TenantProvisioningService $provisioningService,
         private LicenseService         $licenseService,
-        private Config                 $config
+        private Config                 $config,
+        private Database               $db
     ) {
         parent::__construct($view, $session);
     }
@@ -278,13 +280,13 @@ class TenantController extends Controller
         $token   = bin2hex(random_bytes(32));
         $expires = date('Y-m-d H:i:s', time() + 300); // 5 minutes
 
-        // Store token in tenant's settings table
+        // Store token in tenant's settings table (same shared DB)
         try {
-            $pdo = $this->getTenantPdo();
-            $pdo->prepare(
+            $this->db->execute(
                 "INSERT INTO `{$prefix}settings` (`key`, `value`) VALUES ('_impersonate_token', ?)
-                 ON DUPLICATE KEY UPDATE `value` = ?"
-            )->execute([$token . '|' . $expires, $token . '|' . $expires]);
+                 ON DUPLICATE KEY UPDATE `value` = ?",
+                [$token . '|' . $expires, $token . '|' . $expires]
+            );
         } catch (\Throwable $e) {
             $this->session->flash('error', 'Impersonation fehlgeschlagen: ' . $e->getMessage());
             $this->redirect('/admin/tenants/' . $id);
@@ -315,21 +317,6 @@ class TenantController extends Controller
         $baseHost = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
 
         return $scheme . '://' . $tenant['subdomain'] . '.' . $baseHost;
-    }
-
-    private function getTenantPdo(): \PDO
-    {
-        $host = $this->config->get('tenant_db.host', 'localhost');
-        $port = (int)$this->config->get('tenant_db.port', 3306);
-        $db   = $this->config->get('tenant_db.database', '');
-        $user = $this->config->get('tenant_db.username', '');
-        $pass = $this->config->get('tenant_db.password', '');
-
-        return new \PDO(
-            "mysql:host={$host};port={$port};dbname={$db};charset=utf8mb4",
-            $user, $pass,
-            [\PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION]
-        );
     }
 
     private function validateTenantData(array $data): array
