@@ -14,6 +14,7 @@ use Saas\Controllers\MarketplaceController;
 use Saas\Controllers\AdminMarketplaceController;
 use Saas\Controllers\UpdaterController;
 use Saas\Controllers\DemoCleanupController;
+use Saas\Controllers\LandingController;
 
 // ── Public Registration ────────────────────────────────────────────────────
 $router->get('/register',          [RegistrationController::class, 'index']);
@@ -94,8 +95,5 @@ $router->post('/admin/updater/reset', [UpdaterController::class, 'reset']);
 $router->get('/admin/settings',  [SettingsController::class, 'index']);
 $router->post('/admin/settings', [SettingsController::class, 'save']);
 
-// ── Root redirect ──────────────────────────────────────────────────────────
-$router->get('/', function (array $params): void {
-    header('Location: /admin');
-    exit;
-});
+// ── Root redirect ────────────────────────────────────────────────────────
+$router->get('/', [LandingController::class, 'index']);

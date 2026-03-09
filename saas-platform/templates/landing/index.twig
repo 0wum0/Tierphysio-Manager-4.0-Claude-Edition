@@ -1,0 +1,318 @@
+{% extends 'layouts/public.twig' %}
+
+{% block styles %}
+<style>
+.hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    padding: 100px 0 80px;
+    position: relative;
+    overflow: hidden;
+}
+.hero::before {
+    content: '';
+    position: absolute;
+    width: 600px; height: 600px;
+    background: radial-gradient(circle, rgba(37,99,235,.18) 0%, transparent 70%);
+    top: -100px; right: -100px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.hero::after {
+    content: '';
+    position: absolute;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(124,58,237,.12) 0%, transparent 70%);
+    bottom: -80px; left: -80px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.hero-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3);
+    color: #93c5fd; border-radius: 50px; padding: 6px 16px;
+    font-size: .8rem; font-weight: 600; letter-spacing: .03em;
+    margin-bottom: 24px;
+}
+.hero h1 {
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 800; line-height: 1.15;
+    background: linear-gradient(135deg, #fff 0%, #93c5fd 100%);
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.hero .lead { color: #94a3b8; font-size: 1.15rem; max-width: 560px; }
+
+.demo-card {
+    background: linear-gradient(135deg, rgba(37,99,235,.12), rgba(124,58,237,.08));
+    border: 1px solid rgba(37,99,235,.3);
+    border-radius: 16px; padding: 28px 32px;
+}
+.demo-card .demo-label { color: #93c5fd; font-size: .75rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; }
+.demo-cred { background: rgba(15,23,42,.6); border: 1px solid #334155; border-radius: 8px; padding: 10px 16px; font-family: monospace; font-size: .9rem; color: #e2e8f0; }
+
+.feature-icon {
+    width: 52px; height: 52px; border-radius: 14px;
+    background: rgba(37,99,235,.12); border: 1px solid rgba(37,99,235,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.4rem; color: #60a5fa; flex-shrink: 0;
+}
+.section-eyebrow { color: #60a5fa; font-size: .8rem; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; }
+
+.pricing-card {
+    background: #1e293b; border: 1px solid #334155; border-radius: 16px;
+    padding: 36px 32px; transition: transform .2s, border-color .2s;
+}
+.pricing-card:hover { transform: translateY(-4px); }
+.pricing-card.featured {
+    background: linear-gradient(135deg, #1e3a8a 0%, #1e293b 100%);
+    border-color: #3b82f6;
+}
+.price-amount { font-size: 2.8rem; font-weight: 800; color: #fff; line-height: 1; }
+.price-period { color: #64748b; font-size: .9rem; }
+.feature-check { color: #22c55e; }
+
+.trust-bar { background: #1e293b; border-top: 1px solid #334155; border-bottom: 1px solid #334155; }
+.trust-item { color: #64748b; font-size: .875rem; }
+.trust-item i { color: #22c55e; }
+
+.step-num {
+    width: 40px; height: 40px; border-radius: 50%;
+    background: rgba(37,99,235,.15); border: 1px solid rgba(37,99,235,.3);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; color: #60a5fa; font-size: .9rem; flex-shrink: 0;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ── HERO ── #}
+<section class="hero">
+    <div class="container position-relative" style="z-index:1;">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6">
+                <div class="hero-badge">
+                    <i class="bi bi-stars"></i> Speziell für Tierphysiotherapeuten
+                </div>
+                <h1>Die Praxissoftware für moderne Tierphysio-Praxen</h1>
+                <p class="lead mt-3 mb-4">
+                    Patienten verwalten, Termine planen, Rechnungen schreiben — alles in einer modernen, DSGVO-konformen Software. Direkt im Browser, ohne Installation.
+                </p>
+                <div class="d-flex flex-wrap gap-3">
+                    <a href="/register" class="btn btn-primary btn-lg px-4 fw-semibold">
+                        <i class="bi bi-rocket-takeoff me-2"></i>Kostenlos starten
+                    </a>
+                    <a href="/admin/login?demo=1" class="btn btn-outline-secondary btn-lg px-4"
+                       onclick="document.cookie='demo_prefill=1;path=/';return true;">
+                        <i class="bi bi-play-circle me-2"></i>Demo ansehen
+                    </a>
+                </div>
+                <p class="mt-3" style="color:#64748b;font-size:.8rem;">
+                    <i class="bi bi-shield-check text-success me-1"></i>Keine Kreditkarte · DSGVO-konform · Jederzeit kündbar
+                </p>
+            </div>
+            <div class="col-lg-6">
+                <div class="demo-card">
+                    <div class="demo-label mb-3"><i class="bi bi-display me-1"></i>Live Demo — sofort testen</div>
+                    <p style="color:#94a3b8;font-size:.875rem;margin-bottom:20px;">
+                        Testen Sie den vollen Funktionsumfang ohne Registrierung. Die Demo-Daten werden alle 24 Stunden zurückgesetzt.
+                    </p>
+                    <div class="d-flex flex-column gap-2 mb-4">
+                        <div class="demo-cred d-flex justify-content-between align-items-center">
+                            <span style="color:#64748b;font-size:.75rem;">E-MAIL</span>
+                            <span>info@demo.de</span>
+                        </div>
+                        <div class="demo-cred d-flex justify-content-between align-items-center">
+                            <span style="color:#64748b;font-size:.75rem;">PASSWORT</span>
+                            <span>admin123456</span>
+                        </div>
+                    </div>
+                    <a href="/admin/login" class="btn btn-primary w-100 fw-semibold">
+                        <i class="bi bi-box-arrow-in-right me-2"></i>Demo jetzt öffnen
+                    </a>
+                    <p class="text-center mt-2 mb-0" style="color:#475569;font-size:.75rem;">
+                        <i class="bi bi-clock me-1"></i>Demo-Daten werden täglich zurückgesetzt
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ── TRUST BAR ── #}
+<div class="trust-bar py-3">
+    <div class="container">
+        <div class="row g-3 justify-content-center text-center">
+            <div class="col-auto trust-item"><i class="bi bi-shield-check me-2"></i>DSGVO-konform</div>
+            <div class="col-auto trust-item"><i class="bi bi-server me-2"></i>EU-Hosting (Deutschland)</div>
+            <div class="col-auto trust-item"><i class="bi bi-lock me-2"></i>SSL-verschlüsselt</div>
+            <div class="col-auto trust-item"><i class="bi bi-arrow-repeat me-2"></i>Automatische Backups</div>
+            <div class="col-auto trust-item"><i class="bi bi-headset me-2"></i>Deutscher Support</div>
+        </div>
+    </div>
+</div>
+
+{# ── FEATURES ── #}
+<section class="py-6" style="padding:80px 0;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow mb-2">Funktionen</div>
+            <h2 class="fw-bold text-white">Alles was Ihre Praxis braucht</h2>
+            <p class="text-secondary" style="max-width:520px;margin:auto;">Von der Patientenakte bis zur Rechnung — komplett in einer Software.</p>
+        </div>
+        <div class="row g-4">
+            {% set features = [
+                {'icon': 'bi-people', 'title': 'Patientenverwaltung', 'desc': 'Vollständige digitale Patientenakten mit Fotos, Diagnosen, Behandlungsverläufen und Anamnese.'},
+                {'icon': 'bi-calendar3', 'title': 'Terminkalender', 'desc': 'Tages-, Wochen- und Monatsansicht, wiederkehrende Termine, Warteliste und iCal-Export.'},
+                {'icon': 'bi-receipt', 'title': 'Rechnungen', 'desc': 'Professionelle Rechnungen erstellen, als PDF exportieren und direkt per E-Mail versenden.'},
+                {'icon': 'bi-graph-up', 'title': 'Statistiken', 'desc': 'Umsatz, Patienten, Behandlungsarten — übersichtlich aufbereitet im Dashboard.'},
+                {'icon': 'bi-envelope-paper', 'title': 'Einladungslinks', 'desc': 'Neue Patienten per Link oder WhatsApp einladen — sie tragen ihre Daten selbst ein.'},
+                {'icon': 'bi-clipboard2-pulse', 'title': 'Online-Anmeldung', 'desc': 'Öffentliches Anmeldeformular für neue Patienten direkt auf Ihrer Website einbinden.'},
+                {'icon': 'bi-file-earmark-spreadsheet', 'title': 'Steuerexport', 'desc': 'CSV, PDF-Steuerbericht und ZIP-Archiv für den Steuerberater — GoBD-orientiert.'},
+                {'icon': 'bi-envelope', 'title': 'Integrierte Mailbox', 'desc': 'E-Mails direkt in der Software lesen und schreiben — über IMAP/POP3 und SMTP.'},
+                {'icon': 'bi-puzzle', 'title': 'Plugin-System', 'desc': 'Erweitern Sie die Software mit Plugins aus dem Marktplatz — nur was Sie brauchen.'}
+            ] %}
+            {% for f in features %}
+            <div class="col-md-6 col-lg-4">
+                <div class="d-flex gap-3">
+                    <div class="feature-icon">
+                        <i class="{{ f.icon }}"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-semibold text-white mb-1">{{ f.title }}</h6>
+                        <p class="text-secondary mb-0" style="font-size:.875rem;">{{ f.desc }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{# ── HOW IT WORKS ── #}
+<section style="background:#1e293b;border-top:1px solid #334155;border-bottom:1px solid #334155;padding:80px 0;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow mb-2">So einfach geht's</div>
+            <h2 class="fw-bold text-white">In 3 Schritten startklar</h2>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-md-4 text-center">
+                <div class="step-num mx-auto mb-3">1</div>
+                <h5 class="fw-semibold text-white">Tarif wählen</h5>
+                <p class="text-secondary" style="font-size:.875rem;">Wählen Sie den passenden Tarif für Ihre Praxis — ab sofort verfügbar, keine Wartezeit.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-num mx-auto mb-3">2</div>
+                <h5 class="fw-semibold text-white">Zugangsdaten erhalten</h5>
+                <p class="text-secondary" style="font-size:.875rem;">Sie erhalten sofort Ihre persönlichen Zugangsdaten per E-Mail — direkt einsatzbereit.</p>
+            </div>
+            <div class="col-md-4 text-center">
+                <div class="step-num mx-auto mb-3">3</div>
+                <h5 class="fw-semibold text-white">Loslegen</h5>
+                <p class="text-secondary" style="font-size:.875rem;">Praxis einrichten, Patienten anlegen, Termine planen — alles im Browser, ohne Installation.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+{# ── PRICING ── #}
+<section style="padding:80px 0;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <div class="section-eyebrow mb-2">Preise</div>
+            <h2 class="fw-bold text-white">Transparent & fair</h2>
+            <p class="text-secondary" style="max-width:480px;margin:auto;">Keine versteckten Kosten. Jederzeit kündbar. Alle Preise inkl. MwSt.</p>
+        </div>
+
+        {% if plans is empty %}
+        <div class="text-center text-secondary py-4">Pläne werden geladen…</div>
+        {% else %}
+        <div class="row g-4 justify-content-center">
+            {% for plan in plans %}
+            {% if plan.slug != 'demo' %}
+            {% set isPro = plan.slug == 'pro' %}
+            <div class="col-md-5 col-lg-4">
+                <div class="pricing-card {{ isPro ? 'featured' : '' }} position-relative">
+                    {% if isPro %}
+                    <div class="position-absolute top-0 start-50 translate-middle">
+                        <span class="badge bg-primary px-3 py-2" style="font-size:.75rem;">⭐ Beliebtester Tarif</span>
+                    </div>
+                    {% endif %}
+                    <div class="mb-4">
+                        <h4 class="fw-bold text-white mb-1">{{ plan.name }}</h4>
+                        <p class="text-secondary mb-0" style="font-size:.875rem;">{{ plan.description }}</p>
+                    </div>
+                    <div class="mb-4">
+                        <div class="price-amount">{{ plan.price_month|number_format(0,',','.') }} <span style="font-size:1.2rem;">€</span></div>
+                        <div class="price-period">pro Monat · inkl. MwSt.</div>
+                        {% if plan.price_year > 0 %}
+                        <div class="mt-1" style="color:#22c55e;font-size:.8rem;">
+                            <i class="bi bi-tag me-1"></i>Jahrestarif: {{ plan.price_year|number_format(0,',','.') }} € (2 Monate gespart)
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% set features = plan.features|json_decode|default([]) %}
+                    <ul class="list-unstyled mb-4">
+                        <li class="mb-2" style="font-size:.875rem;">
+                            <i class="bi bi-check-lg feature-check me-2"></i>
+                            {% if plan.max_users == -1 %}Unbegrenzte Benutzer{% else %}Bis zu {{ plan.max_users }} Benutzer{% endif %}
+                        </li>
+                        {% set featureNames = {
+                            'invoices': 'Rechnungsverwaltung',
+                            'appointments': 'Terminkalender',
+                            'patients': 'Patientenverwaltung',
+                            'owners': 'Besitzerverwaltung',
+                            'dashboard': 'Dashboard & Statistiken',
+                            'waitlist': 'Warteliste',
+                            'intake': 'Online-Patientenanmeldung',
+                            'staff': 'Mitarbeiterverwaltung',
+                            'reports': 'Erweiterte Berichte',
+                            'premium': 'Premium-Funktionen',
+                            'marketplace': 'Plugin-Marktplatz'
+                        } %}
+                        {% for f in features %}
+                        <li class="mb-2" style="font-size:.875rem;">
+                            <i class="bi bi-check-lg feature-check me-2"></i>{{ featureNames[f] ?? f }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                    <a href="/register/{{ plan.slug }}"
+                       class="btn {{ isPro ? 'btn-primary' : 'btn-outline-primary' }} w-100 fw-semibold">
+                        Mit {{ plan.name }} starten
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="text-center mt-5">
+            <p class="text-secondary" style="font-size:.875rem;">
+                Oder testen Sie erst kostenlos mit der
+                <a href="/admin/login" class="text-primary text-decoration-none fw-semibold">Demo-Version →</a>
+            </p>
+        </div>
+    </div>
+</section>
+
+{# ── CTA ── #}
+<section style="background:linear-gradient(135deg,#1e3a8a,#1e1b4b);border-top:1px solid #334155;padding:80px 0;">
+    <div class="container text-center">
+        <h2 class="fw-bold text-white mb-3">Bereit für die moderne Praxisverwaltung?</h2>
+        <p class="text-secondary mb-4" style="max-width:480px;margin:auto;">
+            Starten Sie noch heute und erleben Sie, wie einfach Praxisverwaltung sein kann.
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            <a href="/register" class="btn btn-primary btn-lg px-5 fw-semibold">
+                <i class="bi bi-rocket-takeoff me-2"></i>Jetzt kostenlos starten
+            </a>
+            <a href="/admin/login" class="btn btn-outline-light btn-lg px-4">
+                <i class="bi bi-play-circle me-2"></i>Demo testen
+            </a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
