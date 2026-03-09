@@ -9,6 +9,7 @@ use Saas\Controllers\PlansController;
 use Saas\Controllers\LegalController;
 use Saas\Controllers\LicenseApiController;
 use Saas\Controllers\RegistrationController;
+use Saas\Controllers\SettingsController;
 
 // ── Public Registration ────────────────────────────────────────────────────
 $router->get('/register',          [RegistrationController::class, 'index']);
@@ -54,6 +55,10 @@ $router->post('/admin/plans/{id}/edit', [PlansController::class, 'update']);
 $router->get('/admin/legal',            [LegalController::class, 'index']);
 $router->get('/admin/legal/{id}/edit',  [LegalController::class, 'edit']);
 $router->post('/admin/legal/{id}/edit', [LegalController::class, 'update']);
+
+// ── Settings ──────────────────────────────────────────────────────────────
+$router->get('/admin/settings',  [SettingsController::class, 'index']);
+$router->post('/admin/settings', [SettingsController::class, 'save']);
 
 // ── Root redirect ──────────────────────────────────────────────────────────
 $router->get('/', function (array $params): void {

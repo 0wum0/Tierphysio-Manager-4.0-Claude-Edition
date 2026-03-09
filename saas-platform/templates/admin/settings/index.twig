@@ -1,0 +1,230 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Einstellungen</h4>
+        <p class="text-secondary mb-0" style="font-size:.875rem;">Alle Werte werden in der <code>.env</code>-Datei gespeichert.</p>
+    </div>
+</div>
+
+<form method="POST" action="/admin/settings">
+    <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+
+    <div class="row g-4">
+
+        {# ── App ───────────────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-gear me-2 text-primary"></i>Anwendung</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">App-Name</label>
+                            <input type="text" name="APP_NAME" class="form-control" value="{{ env.APP_NAME ?? 'Tierphysio SaaS' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">App-URL</label>
+                            <input type="url" name="APP_URL" class="form-control" value="{{ env.APP_URL ?? '' }}" placeholder="https://saas.domain.de">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Umgebung</label>
+                            <select name="APP_ENV" class="form-select">
+                                <option value="production" {% if (env.APP_ENV ?? '') == 'production' %}selected{% endif %}>Production</option>
+                                <option value="development" {% if (env.APP_ENV ?? '') == 'development' %}selected{% endif %}>Development</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="APP_DEBUG" id="appDebug"
+                                    {% if (env.APP_DEBUG ?? 'false') == 'true' %}checked{% endif %}>
+                                <label class="form-check-label" for="appDebug">Debug-Modus</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── SaaS Datenbank ────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-database me-2 text-info"></i>SaaS-Datenbank</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Host</label>
+                            <input type="text" name="DB_HOST" class="form-control" value="{{ env.DB_HOST ?? 'localhost' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Port</label>
+                            <input type="number" name="DB_PORT" class="form-control" value="{{ env.DB_PORT ?? '3306' }}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Datenbankname</label>
+                            <input type="text" name="DB_DATABASE" class="form-control" value="{{ env.DB_DATABASE ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Benutzername</label>
+                            <input type="text" name="DB_USERNAME" class="form-control" value="{{ env.DB_USERNAME ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Passwort</label>
+                            <input type="password" name="DB_PASSWORD" class="form-control" value="{{ env.DB_PASSWORD ?? '' }}"
+                                   autocomplete="new-password">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Tenant Datenbank ──────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-diagram-3 me-2 text-success"></i>Tenant-Datenbank <small class="text-secondary fw-normal">(gemeinsam, Tabellen-Präfix)</small></h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">Host</label>
+                            <input type="text" name="TENANT_DB_HOST" class="form-control" value="{{ env.TENANT_DB_HOST ?? 'localhost' }}">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Port</label>
+                            <input type="number" name="TENANT_DB_PORT" class="form-control" value="{{ env.TENANT_DB_PORT ?? '3306' }}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Datenbankname</label>
+                            <input type="text" name="TENANT_DB_DATABASE" class="form-control" value="{{ env.TENANT_DB_DATABASE ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Benutzername</label>
+                            <input type="text" name="TENANT_DB_USERNAME" class="form-control" value="{{ env.TENANT_DB_USERNAME ?? '' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Passwort</label>
+                            <input type="password" name="TENANT_DB_PASSWORD" class="form-control" value="{{ env.TENANT_DB_PASSWORD ?? '' }}"
+                                   autocomplete="new-password">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Präfix-Basis</label>
+                            <input type="text" name="TENANT_TABLE_PREFIX" class="form-control" value="{{ env.TENANT_TABLE_PREFIX ?? 'tpm' }}"
+                                   placeholder="tpm" maxlength="10">
+                            <div class="form-text">z.B. <code>tpm</code> → tpm1_, tpm2_</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── E-Mail ────────────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-envelope me-2 text-warning"></i>E-Mail (SMTP)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-5">
+                            <label class="form-label">SMTP-Host</label>
+                            <input type="text" name="MAIL_HOST" class="form-control" value="{{ env.MAIL_HOST ?? '' }}" placeholder="smtp.gmail.com">
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Port</label>
+                            <input type="number" name="MAIL_PORT" class="form-control" value="{{ env.MAIL_PORT ?? '587' }}">
+                        </div>
+                        <div class="col-md-5">
+                            <label class="form-label">Verschlüsselung</label>
+                            <select name="MAIL_ENCRYPTION" class="form-select">
+                                <option value="tls" {% if (env.MAIL_ENCRYPTION ?? 'tls') == 'tls' %}selected{% endif %}>TLS</option>
+                                <option value="ssl" {% if (env.MAIL_ENCRYPTION ?? '') == 'ssl' %}selected{% endif %}>SSL</option>
+                                <option value="" {% if (env.MAIL_ENCRYPTION ?? '') == '' %}selected{% endif %}>Keine</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">SMTP-Benutzername</label>
+                            <input type="text" name="MAIL_USERNAME" class="form-control" value="{{ env.MAIL_USERNAME ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">SMTP-Passwort</label>
+                            <input type="password" name="MAIL_PASSWORD" class="form-control" value="{{ env.MAIL_PASSWORD ?? '' }}"
+                                   autocomplete="new-password">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Absender-Adresse</label>
+                            <input type="email" name="MAIL_FROM_ADDRESS" class="form-control" value="{{ env.MAIL_FROM_ADDRESS ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Absender-Name</label>
+                            <input type="text" name="MAIL_FROM_NAME" class="form-control" value="{{ env.MAIL_FROM_NAME ?? '' }}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── Lizenz ────────────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-shield-lock me-2 text-danger"></i>Lizenz-Geheimnis</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">LICENSE_SECRET <small class="text-secondary">(mind. 32 Zeichen)</small></label>
+                            <div class="input-group">
+                                <input type="password" name="LICENSE_SECRET" id="licenseSecret" class="form-control font-monospace"
+                                       value="{{ env.LICENSE_SECRET ?? '' }}" autocomplete="new-password">
+                                <button class="btn btn-outline-secondary" type="button"
+                                        onclick="var f=document.getElementById('licenseSecret');f.type=f.type==='password'?'text':'password'">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-outline-primary" type="button" onclick="generateSecret()">
+                                    <i class="bi bi-arrow-repeat"></i> Generieren
+                                </button>
+                            </div>
+                            <div class="form-text text-warning"><i class="bi bi-exclamation-triangle me-1"></i>Änderung macht alle ausgestellten Lizenz-Token ungültig!</div>
+                        </div>
+                        <div class="col-md-4 d-flex align-items-end">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="SESSION_SECURE" id="sessionSecure"
+                                    {% if (env.SESSION_SECURE ?? 'true') == 'true' %}checked{% endif %}>
+                                <label class="form-check-label" for="sessionSecure">Session nur über HTTPS (SESSION_SECURE)</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="mt-4 d-flex gap-2">
+        <button type="submit" class="btn btn-primary px-4">
+            <i class="bi bi-floppy me-2"></i>Einstellungen speichern
+        </button>
+        <a href="/admin" class="btn btn-outline-secondary">Abbrechen</a>
+    </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script>
+function generateSecret() {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let secret = '';
+    for (let i = 0; i < 48; i++) {
+        secret += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    const field = document.getElementById('licenseSecret');
+    field.value = secret;
+    field.type = 'text';
+}
+</script>
+{% endblock %}
