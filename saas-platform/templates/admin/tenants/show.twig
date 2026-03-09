@@ -15,7 +15,10 @@
         <i class="bi bi-arrow-left me-1"></i>Zurück
     </a>
     <div class="d-flex gap-2">
-        <a href="/admin/tenants/{{ tenant.id }}/edit" class="btn btn-sm btn-outline-primary">
+        <a href="/admin/tenants/{{ tenant.id }}/plugins" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-puzzle me-1"></i>Plugins verwalten
+        </a>
+        <a href="/admin/tenants/{{ tenant.id }}/edit" class="btn btn-sm btn-outline-secondary">
             <i class="bi bi-pencil me-1"></i>Bearbeiten
         </a>
         {% if tenant.status == 'active' or tenant.status == 'paused' %}

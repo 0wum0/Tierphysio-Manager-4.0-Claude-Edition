@@ -9,6 +9,7 @@ use Saas\Core\View;
 use Saas\Core\Session;
 use Saas\Repositories\MarketplaceRepository;
 use Saas\Repositories\TenantRepository;
+use Saas\Core\Config;
 
 class AdminMarketplaceController extends Controller
 {
@@ -16,7 +17,8 @@ class AdminMarketplaceController extends Controller
         View                          $view,
         Session                       $session,
         private MarketplaceRepository $marketplaceRepo,
-        private TenantRepository      $tenantRepo
+        private TenantRepository      $tenantRepo,
+        private Config                $config
     ) {
         parent::__construct($view, $session);
     }
@@ -137,7 +139,8 @@ class AdminMarketplaceController extends Controller
             $this->session->flash('info', 'Tenant hat Plugin bereits.');
         }
 
-        $this->redirect('/admin/marketplace');
+        $redirect = $this->post('redirect', '/admin/marketplace');
+        $this->redirect($redirect);
     }
 
     public function revokeManual(array $params = []): void
@@ -150,7 +153,76 @@ class AdminMarketplaceController extends Controller
 
         $this->marketplaceRepo->cancelPurchase($tenantId, $pluginId);
         $this->session->flash('success', 'Plugin-Zugang entzogen.');
-        $this->redirect('/admin/marketplace');
+
+        $redirect = $this->post('redirect', '/admin/marketplace');
+        $this->redirect($redirect);
+    }
+
+    public function toggle(array $params = []): void
+    {
+        $this->requireAuth();
+        $this->verifyCsrf();
+
+        $tenantId = (int)$this->post('tenant_id');
+        $pluginId = (int)($params['id'] ?? 0);
+        $enabled  = (bool)(int)$this->post('enabled', 0);
+
+        if (!$tenantId || !$pluginId) { $this->notFound(); }
+
+        $this->marketplaceRepo->togglePlugin($tenantId, $pluginId, $enabled);
+        $this->session->flash('success', 'Plugin ' . ($enabled ? 'aktiviert' : 'deaktiviert') . '.');
+
+        $redirect = $this->post('redirect', '/admin/marketplace');
+        $this->redirect($redirect);
+    }
+
+    public function tenantPlugins(array $params = []): void
+    {
+        $this->requireAuth();
+
+        $tenantId = (int)($params['id'] ?? 0);
+        $tenant   = $this->tenantRepo->findById($tenantId);
+        if (!$tenant) { $this->notFound(); }
+
+        $allPlugins = [];
+        $purchases  = [];
+        $needsUpdate = false;
+
+        try {
+            $allPlugins = $this->marketplaceRepo->allPlugins(true);
+            $purchases  = $this->marketplaceRepo->getPurchasesForTenantWithDetails($tenantId);
+        } catch (\Throwable) {
+            $needsUpdate = true;
+        }
+
+        // Map purchases by plugin_id for quick lookup
+        $purchaseMap = [];
+        foreach ($purchases as $p) {
+            $purchaseMap[(int)$p['plugin_id']] = $p;
+        }
+
+        // Merge: mark which plugins tenant has / enabled
+        foreach ($allPlugins as &$plugin) {
+            $pid = (int)$plugin['id'];
+            if (isset($purchaseMap[$pid])) {
+                $plugin['purchase']       = $purchaseMap[$pid];
+                $plugin['tenant_has']     = true;
+                $plugin['plugin_enabled'] = (bool)$purchaseMap[$pid]['plugin_enabled'];
+            } else {
+                $plugin['purchase']       = null;
+                $plugin['tenant_has']     = false;
+                $plugin['plugin_enabled'] = false;
+            }
+        }
+        unset($plugin);
+
+        $this->render('admin/marketplace/tenant_plugins.twig', [
+            'page_title'  => 'Plugins: ' . $tenant['practice_name'],
+            'active_nav'  => 'tenants',
+            'tenant'      => $tenant,
+            'plugins'     => $allPlugins,
+            'needs_update'=> $needsUpdate,
+        ]);
     }
 
     private function buildPluginData(): array

@@ -77,6 +77,8 @@ $router->post('/admin/marketplace/{id}/edit',              [AdminMarketplaceCont
 $router->post('/admin/marketplace/{id}/delete',            [AdminMarketplaceController::class, 'delete']);
 $router->post('/admin/marketplace/{id}/grant',             [AdminMarketplaceController::class, 'grantManual']);
 $router->post('/admin/marketplace/{id}/revoke',            [AdminMarketplaceController::class, 'revokeManual']);
+$router->post('/admin/marketplace/{id}/toggle',            [AdminMarketplaceController::class, 'toggle']);
+$router->get('/admin/tenants/{id}/plugins',                [AdminMarketplaceController::class, 'tenantPlugins']);
 
 // ── Updater ──────────────────────────────────────────────────────────────
 $router->get('/admin/updater',     [UpdaterController::class, 'index']);

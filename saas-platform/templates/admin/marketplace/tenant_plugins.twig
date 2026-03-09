@@ -1,0 +1,123 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/tenants/{{ tenant.id }}" class="text-secondary text-decoration-none" style="font-size:.875rem;">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zur Praxis
+    </a>
+</div>
+
+<div class="d-flex align-items-center gap-3 mb-4">
+    <div class="rounded-3 d-flex align-items-center justify-content-center"
+         style="width:52px;height:52px;background:rgba(37,99,235,.15);flex-shrink:0;">
+        <i class="bi bi-building text-primary" style="font-size:1.4rem;"></i>
+    </div>
+    <div>
+        <h4 class="mb-0 fw-bold">{{ tenant.practice_name }}</h4>
+        <p class="text-secondary mb-0" style="font-size:.875rem;">Plugins verwalten — freischalten, deaktivieren oder entziehen</p>
+    </div>
+</div>
+
+{% if needs_update %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Datenbank-Update erforderlich.</strong>
+    <a href="/admin/updater" class="alert-link ms-2">Jetzt updaten →</a>
+</div>
+{% else %}
+
+<div class="row g-3">
+    {% for plugin in plugins %}
+    <div class="col-md-6 col-xl-4">
+        <div class="card h-100">
+            <div class="card-body p-4">
+                {# Header #}
+                <div class="d-flex align-items-center gap-3 mb-3">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:44px;height:44px;background:rgba(37,99,235,.12);flex-shrink:0;">
+                        <i class="{{ plugin.icon }} text-primary" style="font-size:1.2rem;"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold">{{ plugin.name }}</div>
+                        <span class="badge bg-secondary bg-opacity-25 text-secondary" style="font-size:.7rem;">{{ plugin.category }}</span>
+                    </div>
+                    {# Status badge #}
+                    {% if plugin.tenant_has %}
+                        {% if plugin.plugin_enabled %}
+                            <span class="badge badge-active">Aktiv</span>
+                        {% else %}
+                            <span class="badge badge-inactive">Deaktiviert</span>
+                        {% endif %}
+                    {% else %}
+                        <span class="badge badge-cancelled">Nicht vorhanden</span>
+                    {% endif %}
+                </div>
+
+                <p class="text-secondary mb-3" style="font-size:.8rem;">{{ plugin.description }}</p>
+
+                {# Price info #}
+                <div class="mb-3" style="font-size:.8rem;color:#64748b;">
+                    {% if plugin.price_type == 'free' or plugin.price == 0 %}
+                        <i class="bi bi-tag me-1"></i>Kostenlos
+                    {% elseif plugin.price_type == 'monthly' %}
+                        <i class="bi bi-tag me-1"></i>{{ plugin.price|number_format(2,',','.') }} € / Monat
+                    {% else %}
+                        <i class="bi bi-tag me-1"></i>{{ plugin.price|number_format(2,',','.') }} € einmalig
+                    {% endif %}
+                </div>
+
+                {# Actions #}
+                <div class="d-flex flex-column gap-2 pt-2" style="border-top:1px solid #1e293b;">
+                    {% if not plugin.tenant_has %}
+                        {# Grant access #}
+                        <form method="POST" action="/admin/marketplace/{{ plugin.id }}/grant">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
+                            <input type="hidden" name="redirect" value="/admin/tenants/{{ tenant.id }}/plugins">
+                            <button class="btn btn-sm btn-primary w-100">
+                                <i class="bi bi-unlock me-1"></i>Freischalten
+                            </button>
+                        </form>
+                    {% else %}
+                        {# Toggle enable/disable #}
+                        {% if plugin.plugin_enabled %}
+                        <form method="POST" action="/admin/marketplace/{{ plugin.id }}/toggle">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
+                            <input type="hidden" name="enabled" value="0">
+                            <input type="hidden" name="redirect" value="/admin/tenants/{{ tenant.id }}/plugins">
+                            <button class="btn btn-sm btn-warning w-100">
+                                <i class="bi bi-pause-circle me-1"></i>Deaktivieren
+                            </button>
+                        </form>
+                        {% else %}
+                        <form method="POST" action="/admin/marketplace/{{ plugin.id }}/toggle">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
+                            <input type="hidden" name="enabled" value="1">
+                            <input type="hidden" name="redirect" value="/admin/tenants/{{ tenant.id }}/plugins">
+                            <button class="btn btn-sm btn-success w-100">
+                                <i class="bi bi-play-circle me-1"></i>Aktivieren
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {# Revoke #}
+                        <form method="POST" action="/admin/marketplace/{{ plugin.id }}/revoke"
+                              onsubmit="return confirm('Zugang für {{ tenant.practice_name }} wirklich entziehen?')">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="tenant_id" value="{{ tenant.id }}">
+                            <input type="hidden" name="redirect" value="/admin/tenants/{{ tenant.id }}/plugins">
+                            <button class="btn btn-sm btn-outline-danger w-100">
+                                <i class="bi bi-x-circle me-1"></i>Zugang entziehen
+                            </button>
+                        </form>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

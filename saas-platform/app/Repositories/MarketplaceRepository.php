@@ -109,6 +109,48 @@ class MarketplaceRepository
         );
     }
 
+    public function togglePlugin(int $tenantId, int $pluginId, bool $enabled): void
+    {
+        $this->db->execute(
+            "UPDATE marketplace_purchases SET plugin_enabled = ? WHERE tenant_id = ? AND plugin_id = ?",
+            [(int)$enabled, $tenantId, $pluginId]
+        );
+    }
+
+    public function isPluginEnabled(int $tenantId, int $pluginId): bool
+    {
+        return (bool)$this->db->fetchColumn(
+            "SELECT plugin_enabled FROM marketplace_purchases
+             WHERE tenant_id = ? AND plugin_id = ? AND status = 'active'",
+            [$tenantId, $pluginId]
+        );
+    }
+
+    public function getActiveEnabledPluginSlugs(int $tenantId): array
+    {
+        $rows = $this->db->fetchAll(
+            "SELECT p.slug FROM marketplace_purchases mp
+             JOIN marketplace_plugins p ON p.id = mp.plugin_id
+             WHERE mp.tenant_id = ? AND mp.status = 'active' AND mp.plugin_enabled = 1
+             AND (mp.expires_at IS NULL OR mp.expires_at > NOW())",
+            [$tenantId]
+        );
+        return array_column($rows, 'slug');
+    }
+
+    public function getPurchasesForTenantWithDetails(int $tenantId): array
+    {
+        return $this->db->fetchAll(
+            "SELECT mp.*, p.slug AS plugin_slug, p.name AS plugin_name,
+                    p.icon AS plugin_icon, p.category, p.price, p.price_type
+             FROM marketplace_purchases mp
+             JOIN marketplace_plugins p ON p.id = mp.plugin_id
+             WHERE mp.tenant_id = ?
+             ORDER BY p.sort_order ASC",
+            [$tenantId]
+        );
+    }
+
     public function tenantHasPlugin(int $tenantId, int $pluginId): bool
     {
         return (bool)$this->db->fetchColumn(

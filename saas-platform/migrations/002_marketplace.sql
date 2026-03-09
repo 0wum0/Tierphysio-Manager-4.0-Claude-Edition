@@ -35,6 +35,7 @@ CREATE TABLE IF NOT EXISTS `marketplace_purchases` (
   `payment_method` ENUM('stripe','paypal','manual') NOT NULL DEFAULT 'manual',
   `payment_ref`    VARCHAR(200) COMMENT 'Stripe/PayPal Transaction ID',
   `amount_paid`    DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+  `plugin_enabled` TINYINT(1) NOT NULL DEFAULT 1 COMMENT 'Tenant can toggle plugin on/off',
   `activated_at`   DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `expires_at`     DATETIME COMMENT 'NULL = lifetime',
   `created_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
