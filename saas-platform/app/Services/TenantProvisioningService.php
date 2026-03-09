@@ -129,23 +129,35 @@ class TenantProvisioningService
 
     /**
      * Create a fresh tenant database with the Tierphysio schema.
+     *
+     * On shared hosting (TENANT_DB_SHARED_HOSTING=true) the database must be
+     * pre-created in cPanel. We skip CREATE DATABASE and connect directly.
      */
     private function createTenantDatabase(string $dbName, string $tenantUuid): void
     {
-        $host     = $this->config->get('tenant_db.host');
-        $port     = (int)$this->config->get('tenant_db.port');
-        $username = $this->config->get('tenant_db.username');
-        $password = $this->config->get('tenant_db.password');
+        $host       = $this->config->get('tenant_db.host');
+        $port       = (int)$this->config->get('tenant_db.port', 3306);
+        $username   = $this->config->get('tenant_db.username');
+        $password   = $this->config->get('tenant_db.password');
+        $shared     = (bool)$this->config->get('tenant_db.shared_hosting', false);
 
-        $dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
-        $pdo = new PDO($dsn, $username, $password, [
+        $pdoOptions = [
             PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
+        ];
 
-        $safe = '`' . str_replace('`', '``', $dbName) . '`';
-        $pdo->exec("CREATE DATABASE IF NOT EXISTS {$safe} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-        $pdo->exec("USE {$safe}");
+        if ($shared) {
+            // Shared hosting: DB must already exist, connect directly
+            $dsn = "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4";
+            $pdo = new PDO($dsn, $username, $password, $pdoOptions);
+        } else {
+            // Dedicated/VPS: create DB automatically
+            $dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
+            $pdo = new PDO($dsn, $username, $password, $pdoOptions);
+            $safe = '`' . str_replace('`', '``', $dbName) . '`';
+            $pdo->exec("CREATE DATABASE IF NOT EXISTS {$safe} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+            $pdo->exec("USE {$safe}");
+        }
 
         // Run Tierphysio schema
         $schemaPath = $this->config->getRootPath() . '/provisioning/tenant_schema.sql';
@@ -153,7 +165,14 @@ class TenantProvisioningService
             $sql = file_get_contents($schemaPath);
             foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
                 if ($stmt !== '') {
-                    $pdo->exec($stmt);
+                    try {
+                        $pdo->exec($stmt);
+                    } catch (\PDOException $e) {
+                        // Skip "table already exists" errors on re-provisioning
+                        if ($e->getCode() !== '42S01') {
+                            throw $e;
+                        }
+                    }
                 }
             }
         }
