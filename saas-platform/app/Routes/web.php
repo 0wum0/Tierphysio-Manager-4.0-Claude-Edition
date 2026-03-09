@@ -81,8 +81,9 @@ $router->post('/admin/marketplace/{id}/toggle',            [AdminMarketplaceCont
 $router->get('/admin/tenants/{id}/plugins',                [AdminMarketplaceController::class, 'tenantPlugins']);
 
 // ── Updater ──────────────────────────────────────────────────────────────
-$router->get('/admin/updater',     [UpdaterController::class, 'index']);
-$router->post('/admin/updater/run',[UpdaterController::class, 'run']);
+$router->get('/admin/updater',        [UpdaterController::class, 'index']);
+$router->post('/admin/updater/run',   [UpdaterController::class, 'run']);
+$router->post('/admin/updater/reset', [UpdaterController::class, 'reset']);
 
 // ── Settings ──────────────────────────────────────────────────────────────
 $router->get('/admin/settings',  [SettingsController::class, 'index']);

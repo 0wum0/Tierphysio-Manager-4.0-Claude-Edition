@@ -49,4 +49,22 @@ class UpdaterController extends Controller
         $this->session->flash('migration_results', $results);
         $this->redirect('/admin/updater');
     }
+
+    public function reset(array $params = []): void
+    {
+        $this->requireAuth();
+        $this->verifyCsrf();
+
+        $name = trim($this->post('migration', ''));
+        if ($name) {
+            $this->migrationRunner->ensureTrackingTable();
+            $this->migrationRunner->resetMigration($name);
+            $this->session->flash('migration_results', [[
+                'name'    => $name,
+                'status'  => 'success',
+                'message' => 'Migration zurückgesetzt — wird beim nächsten Run erneut ausgeführt.',
+            ]]);
+        }
+        $this->redirect('/admin/updater');
+    }
 }

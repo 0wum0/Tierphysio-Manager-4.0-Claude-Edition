@@ -42,12 +42,14 @@ class AdminMarketplaceController extends Controller
                 $p['revenue']        = $this->marketplaceRepo->getRevenueForPlugin((int)$p['id']);
             }
             unset($p);
-        } catch (\Throwable) {
+        } catch (\Throwable $e) {
             $needsUpdate = true;
+            $needsUpdateReason = $e->getMessage();
         }
 
         $this->render('admin/marketplace/index.twig', [
-            'needs_update' => $needsUpdate,
+            'needs_update'        => $needsUpdate,
+            'needs_update_reason' => $needsUpdateReason ?? null,
             'page_title' => 'Marktplatz verwalten',
             'active_nav' => 'marketplace_admin',
             'plugins'    => $plugins,

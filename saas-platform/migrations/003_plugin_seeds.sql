@@ -1,11 +1,6 @@
 -- Migration: 003_plugin_seeds
 -- Seeds all available Tierphysio Manager plugins into the marketplace
 
--- Add plugin_enabled toggle column to marketplace_purchases if not exists
-ALTER TABLE `marketplace_purchases`
-  ADD COLUMN IF NOT EXISTS `plugin_enabled` TINYINT(1) NOT NULL DEFAULT 1
-  COMMENT 'Tenant can toggle plugin on/off after purchase';
-
 -- Seed all known plugins
 INSERT IGNORE INTO `marketplace_plugins`
   (`slug`, `name`, `description`, `long_desc`, `category`, `icon`, `price`, `price_type`, `is_active`, `is_featured`, `version`, `sort_order`)

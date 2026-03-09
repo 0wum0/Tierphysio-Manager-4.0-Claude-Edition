@@ -136,10 +136,19 @@ class MigrationRunner
             ];
         }
 
-        // Split on semicolons, skip comments-only lines
+        // Strip -- line comments, then split on ; and execute non-empty statements
+        $lines = explode("\n", $sql);
+        $cleaned = [];
+        foreach ($lines as $line) {
+            $trimmed = ltrim($line);
+            if (str_starts_with($trimmed, '--')) continue;
+            $cleaned[] = $line;
+        }
+        $cleanSql = implode("\n", $cleaned);
+
         $statements = array_filter(
-            array_map('trim', explode(';', $sql)),
-            fn(string $s) => $s !== '' && !str_starts_with(ltrim($s), '--')
+            array_map('trim', explode(';', $cleanSql)),
+            fn(string $s) => $s !== ''
         );
 
         try {
@@ -181,6 +190,14 @@ class MigrationRunner
               `ran_at`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci
         ");
+    }
+
+    /**
+     * Remove a migration from the tracking table so it can be re-run.
+     */
+    public function resetMigration(string $name): void
+    {
+        $this->db->execute("DELETE FROM saas_migrations WHERE migration = ?", [$name]);
     }
 
     private function getNextBatch(): int
