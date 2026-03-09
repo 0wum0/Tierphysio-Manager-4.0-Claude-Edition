@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use PDO;
+use App\Core\Config;
 
 /**
  * Resolves the current tenant from the subdomain and sets the
@@ -13,12 +13,12 @@ use PDO;
  * How it works:
  *  - Request comes in for e.g. mustermann.tp.makeit.uno
  *  - We extract the subdomain "mustermann"
- *  - We look it up in the SaaS DB (tenants table, using saas_ DB credentials)
+ *  - We look it up in the shared DB (tenants table — same DB as Praxissoftware)
  *  - We get the table_prefix e.g. "tpm3_"
  *  - We call $db->setPrefix("tpm3_") so all queries use the right tables
  *
- * If no subdomain / base domain / env TABLE_PREFIX is set, we use
- * whatever TABLE_PREFIX is in the .env (fallback for single-tenant installs).
+ * No extra SAAS_DB_* credentials needed — SaaS and Praxissoftware share one DB.
+ * If TABLE_PREFIX is set in .env, that is used directly (single-tenant fallback).
  */
 class TenantResolver
 {
@@ -116,39 +116,19 @@ class TenantResolver
     }
 
     /**
-     * Connects to the SaaS DB and looks up the table prefix for a tenant slug.
-     * Returns null if not found.
+     * Looks up the table prefix for a tenant slug.
+     * Uses the existing DB connection — no extra credentials needed
+     * since SaaS and Praxissoftware share the same database.
      */
     private function lookupPrefixForSlug(string $slug): ?string
     {
-        // SaaS DB credentials (may differ from tenant DB)
-        $saasHost = $_ENV['SAAS_DB_HOST']     ?? $_ENV['DB_HOST']     ?? 'localhost';
-        $saasPort = (int)($_ENV['SAAS_DB_PORT']     ?? $_ENV['DB_PORT']     ?? 3306);
-        $saasDb   = $_ENV['SAAS_DB_DATABASE'] ?? $_ENV['DB_DATABASE'] ?? '';
-        $saasUser = $_ENV['SAAS_DB_USERNAME'] ?? $_ENV['DB_USERNAME'] ?? '';
-        $saasPass = $_ENV['SAAS_DB_PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '';
-
-        if ($saasDb === '') return null;
-
         try {
-            $pdo = new PDO(
-                "mysql:host={$saasHost};port={$saasPort};dbname={$saasDb};charset=utf8mb4",
-                $saasUser,
-                $saasPass,
-                [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION, PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC]
-            );
-
-            // Look for tenant where uuid or a "subdomain" column matches the slug
-            // We use uuid prefix convention: tenant with table_prefix "tpm3_" has slug "tpm3"
-            // OR we store slug explicitly in tenants table
-            // Primary lookup: by subdomain column
-            $stmt = $pdo->prepare(
+            $row = $this->db->fetch(
                 "SELECT table_prefix FROM tenants
                  WHERE subdomain = ? AND status = 'active'
-                 LIMIT 1"
+                 LIMIT 1",
+                [$slug]
             );
-            $stmt->execute([$slug]);
-            $row = $stmt->fetch();
 
             if ($row && !empty($row['table_prefix'])) {
                 return $row['table_prefix'];
