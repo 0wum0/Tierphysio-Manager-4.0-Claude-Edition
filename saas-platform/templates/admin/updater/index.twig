@@ -1,0 +1,100 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">System-Updater</h4>
+        <p class="text-secondary mb-0" style="font-size:.875rem;">Datenbank-Migrationen prüfen und ausführen.</p>
+    </div>
+    {% if pending_count > 0 %}
+    <form method="POST" action="/admin/updater/run">
+        <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-arrow-repeat me-2"></i>{{ pending_count }} Migration{{ pending_count != 1 ? 'en' : '' }} ausführen
+        </button>
+    </form>
+    {% else %}
+    <span class="badge bg-success px-3 py-2" style="font-size:.875rem;">
+        <i class="bi bi-check-circle-fill me-1"></i>Alles aktuell
+    </span>
+    {% endif %}
+</div>
+
+{# Migration results after running #}
+{% if results %}
+<div class="card mb-4">
+    <div class="card-header py-3">
+        <h6 class="mb-0 fw-semibold"><i class="bi bi-terminal me-2"></i>Migrations-Ergebnis</h6>
+    </div>
+    <div class="card-body p-0">
+        {% for result in results %}
+        <div class="d-flex align-items-start gap-3 px-4 py-3" style="border-bottom:1px solid #1e293b;">
+            {% if result.status == 'success' %}
+                <i class="bi bi-check-circle-fill text-success mt-1"></i>
+            {% elseif result.status == 'nothing' %}
+                <i class="bi bi-info-circle-fill text-info mt-1"></i>
+            {% else %}
+                <i class="bi bi-x-circle-fill text-danger mt-1"></i>
+            {% endif %}
+            <div>
+                {% if result.name %}
+                <div class="fw-semibold font-monospace" style="font-size:.875rem;">{{ result.name }}</div>
+                {% endif %}
+                <div class="text-secondary" style="font-size:.8rem;">{{ result.message }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+
+{# Status overview #}
+<div class="card">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Migrationen</span>
+        <span class="badge bg-secondary bg-opacity-25 text-secondary">{{ migrations|length }} gesamt</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Migration</th>
+                    <th>Batch</th>
+                    <th>Ausgeführt am</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in migrations %}
+                <tr>
+                    <td class="px-4 font-monospace" style="font-size:.85rem;">{{ m.name }}</td>
+                    <td>{{ m.batch ?? '–' }}</td>
+                    <td style="font-size:.8rem;color:#64748b;">
+                        {{ m.ran_at ? m.ran_at|date('d.m.Y H:i') : '–' }}
+                    </td>
+                    <td>
+                        {% if m.ran %}
+                            <span class="badge badge-active"><i class="bi bi-check me-1"></i>Ausgeführt</span>
+                        {% else %}
+                            <span class="badge badge-pending"><i class="bi bi-clock me-1"></i>Ausstehend</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="text-center text-secondary py-4">Keine Migrations-Dateien gefunden.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% if pending_count > 0 %}
+<div class="alert alert-warning mt-4" role="alert">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>{{ pending_count }} ausstehende Migration{{ pending_count != 1 ? 'en' : '' }}.</strong>
+    Bitte führen Sie diese aus, um neue Funktionen zu aktivieren.
+</div>
+{% endif %}
+{% endblock %}

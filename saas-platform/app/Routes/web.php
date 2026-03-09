@@ -12,6 +12,7 @@ use Saas\Controllers\RegistrationController;
 use Saas\Controllers\SettingsController;
 use Saas\Controllers\MarketplaceController;
 use Saas\Controllers\AdminMarketplaceController;
+use Saas\Controllers\UpdaterController;
 
 // ── Public Registration ────────────────────────────────────────────────────
 $router->get('/register',          [RegistrationController::class, 'index']);
@@ -76,6 +77,10 @@ $router->post('/admin/marketplace/{id}/edit',              [AdminMarketplaceCont
 $router->post('/admin/marketplace/{id}/delete',            [AdminMarketplaceController::class, 'delete']);
 $router->post('/admin/marketplace/{id}/grant',             [AdminMarketplaceController::class, 'grantManual']);
 $router->post('/admin/marketplace/{id}/revoke',            [AdminMarketplaceController::class, 'revokeManual']);
+
+// ── Updater ──────────────────────────────────────────────────────────────
+$router->get('/admin/updater',     [UpdaterController::class, 'index']);
+$router->post('/admin/updater/run',[UpdaterController::class, 'run']);
 
 // ── Settings ──────────────────────────────────────────────────────────────
 $router->get('/admin/settings',  [SettingsController::class, 'index']);

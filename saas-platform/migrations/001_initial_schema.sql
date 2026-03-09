@@ -167,6 +167,19 @@ CREATE TABLE IF NOT EXISTS `activity_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ------------------------------------------------------------
+-- Migration-Tracking
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS `saas_migrations` (
+  `id`         INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  `migration`  VARCHAR(200) NOT NULL UNIQUE,
+  `batch`      INT NOT NULL DEFAULT 1,
+  `ran_at`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- Mark initial migration as already run
+INSERT IGNORE INTO `saas_migrations` (`migration`, `batch`) VALUES ('001_initial_schema', 1);
+
+-- ------------------------------------------------------------
 -- Einstellungen der SaaS-Plattform
 -- ------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS `saas_settings` (
