@@ -2,210 +2,164 @@
 
 {% block content %}
 
-{# ── Page Header ── #}
-<div class="subheader">
-    <h1 class="subheader-title">
-        <i class="sa sa-users me-2 text-primary"></i>
-        {{ t('owners.title') }}
-        <small>{{ pagination.total }} {{ t('common.entries') }}</small>
-    </h1>
-    <div class="subheader-action">
-        <button class="btn btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
-            <i class="sa sa-plus me-1"></i>
-            {{ t('owners.new_owner') }}
-        </button>
+{# ── Page Header (page-header class is visible in bridge.css) ── #}
+<div class="page-header">
+    <div>
+        <h1 class="page-title">{{ t('owners.title') }}</h1>
+        <p class="page-subtitle">{{ pagination.total }} {{ t('common.entries') }}</p>
     </div>
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
+        <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        {{ t('owners.new_owner') }}
+    </button>
 </div>
 
 {# ── Panel ── #}
-<div class="row">
-    <div class="col-xl-12">
-        <div id="panel-owners" class="panel">
+<div class="panel">
 
-            {# Panel Toolbar #}
-            <div class="panel-hdr">
-                <h2>Tierhalter <span class="fw-300"><i>Übersicht</i></span></h2>
-                <div class="panel-toolbar ms-auto d-flex align-items-center gap-2">
-                    <form method="GET" action="/tierhalter" class="d-flex align-items-center gap-2 mb-0">
-                        <div class="input-group input-group-sm" style="width:260px;">
-                            <span class="input-group-text bg-transparent border-end-0">
-                                <i class="sa sa-search text-muted" style="font-size:0.8rem;"></i>
-                            </span>
-                            <input type="text" name="search" class="form-control form-control-sm border-start-0 ps-0"
-                                   placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
-                            {% if search %}
-                            <a href="/tierhalter" class="btn btn-sm btn-outline-secondary">
-                                <i class="sa sa-x"></i>
-                            </a>
-                            {% endif %}
-                        </div>
-                        <button type="submit" class="btn btn-sm btn-secondary waves-effect">
-                            {{ t('common.search') }}
-                        </button>
-                    </form>
-                    <button class="btn btn-sm btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
-                        <i class="sa sa-plus me-1"></i> Neu
-                    </button>
+    {# Panel Header mit Suche #}
+    <div class="panel-hdr">
+        <h2>{{ t('owners.title') }} <span class="fw-300"><i>{{ pagination.total }} Einträge</i></span></h2>
+        <div class="panel-toolbar">
+            <form method="GET" action="/tierhalter" class="d-flex align-items-center gap-2 mb-0">
+                <div class="input-group input-group-sm" style="width:240px;">
+                    <span class="input-group-text">
+                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    </span>
+                    <input type="text" name="search" class="form-control form-control-sm"
+                           placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
                 </div>
-            </div>
-
-            <div class="panel-container show">
-                <div class="panel-content p-0">
-
-                {% if owners %}
-                    <table class="table table-hover table-striped mb-0">
-                        <thead class="thead-themed">
-                            <tr>
-                                <th class="ps-4">Tierhalter</th>
-                                <th>E-Mail</th>
-                                <th>Telefon</th>
-                                <th>Ort</th>
-                                <th class="text-center">Tiere</th>
-                                <th class="text-end pe-4">Aktionen</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for owner in owners %}
-                            <tr class="odd:bg-transparent even:bg-faded" style="vertical-align:middle;">
-                                <td class="ps-4">
-                                    <a href="/tierhalter/{{ owner.id }}" class="d-flex align-items-center gap-3 text-decoration-none">
-                                        {# Avatar #}
-                                        <span class="profile-image rounded-circle d-flex align-items-center justify-content-center flex-shrink-0 fw-700 fs-sm"
-                                              style="width:38px;height:38px;background:linear-gradient(135deg,var(--theme-primary,#4f7cff),var(--theme-secondary,#8b5cf6));color:#fff;font-size:0.8rem;">
-                                            {{ owner.first_name|first|upper }}{{ owner.last_name|first|upper }}
-                                        </span>
-                                        <div class="d-flex flex-column">
-                                            <span class="fw-500 fs-md text-body d-flex align-items-center gap-2">
-                                                {{ owner.last_name }}, {{ owner.first_name }}
-                                                <span class="badge bg-primary-500 badge-pill fs-nano fw-700">#{{ '%04d'|format(owner.id) }}</span>
-                                            </span>
-                                            {% if owner.street %}
-                                            <span class="fs-nano text-muted">{{ owner.street }}</span>
-                                            {% endif %}
-                                        </div>
-                                    </a>
-                                </td>
-                                <td>
-                                    {% if owner.email %}
-                                        <a href="mailto:{{ owner.email }}" class="text-primary fs-sm">
-                                            <i class="sa sa-mail me-1 opacity-50"></i>{{ owner.email }}
-                                        </a>
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                                <td class="fs-sm">
-                                    {% if owner.phone %}
-                                        <i class="sa sa-phone me-1 opacity-50"></i>{{ owner.phone }}
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                                <td class="fs-sm">
-                                    {% if owner.city %}
-                                        <i class="sa sa-map-pin me-1 opacity-50"></i>
-                                        {{ owner.zip ? owner.zip ~ ' ' ~ owner.city : owner.city }}
-                                    {% else %}
-                                        <span class="text-muted">—</span>
-                                    {% endif %}
-                                </td>
-                                <td class="text-center">
-                                    {% set cnt = owner.animal_count ?? 0 %}
-                                    <span class="badge {% if cnt > 0 %}bg-success{% else %}bg-secondary{% endif %} rounded-pill">
-                                        {{ cnt }}
-                                    </span>
-                                </td>
-                                <td class="text-end pe-4">
-                                    <div class="d-flex align-items-center justify-content-end gap-1">
-                                        <a href="/tierhalter/{{ owner.id }}" class="btn btn-sm btn-outline-secondary waves-effect" title="Ansehen">
-                                            <i class="sa sa-eye"></i>
-                                        </a>
-                                        <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-sm btn-outline-primary waves-effect" title="Rechnung erstellen">
-                                            <i class="sa sa-file-text"></i>
-                                        </a>
-                                        <div class="dropdown d-inline-block">
-                                            <button class="btn btn-sm btn-outline-secondary waves-effect dropdown-toggle no-arrow" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Mehr">
-                                                <i class="sa sa-more-vertical"></i>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animated">
-                                                <li>
-                                                    <a class="dropdown-item" href="/tierhalter/{{ owner.id }}">
-                                                        <i class="sa sa-eye me-2 text-muted"></i> Profil anzeigen
-                                                    </a>
-                                                </li>
-                                                <li>
-                                                    <a class="dropdown-item" href="/rechnungen/erstellen?owner_id={{ owner.id }}">
-                                                        <i class="sa sa-file-text me-2 text-muted"></i> Rechnung erstellen
-                                                    </a>
-                                                </li>
-                                                <li><hr class="dropdown-divider"></li>
-                                                <li>
-                                                    <a class="dropdown-item text-danger" href="/einladungen?prefill_owner={{ owner.id }}" title="Einladen">
-                                                        <i class="sa sa-send me-2"></i> Einladung senden
-                                                    </a>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-
-                    {# Pagination #}
-                    {% if pagination.last_page > 1 %}
-                    <div class="d-flex align-items-center justify-content-between px-4 py-3 border-top">
-                        <span class="fs-sm text-muted">
-                            Seite {{ pagination.page }} von {{ pagination.last_page }}
-                            &middot; {{ pagination.total }} Einträge
-                        </span>
-                        <nav>
-                            <ul class="pagination pagination-sm mb-0">
-                                <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ pagination.page - 1 }}&search={{ search }}">
-                                        <i class="sa sa-chevron-left"></i>
-                                    </a>
-                                </li>
-                                {% for p in 1..pagination.last_page %}
-                                    {% if p == pagination.page %}
-                                        <li class="page-item active"><span class="page-link">{{ p }}</span></li>
-                                    {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
-                                        <li class="page-item"><a class="page-link" href="?page={{ p }}&search={{ search }}">{{ p }}</a></li>
-                                    {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
-                                        <li class="page-item disabled"><span class="page-link">…</span></li>
-                                    {% endif %}
-                                {% endfor %}
-                                <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                                    <a class="page-link" href="?page={{ pagination.page + 1 }}&search={{ search }}">
-                                        <i class="sa sa-chevron-right"></i>
-                                    </a>
-                                </li>
-                            </ul>
-                        </nav>
-                    </div>
-                    {% endif %}
-
-                {% else %}
-                    {# Empty State #}
-                    <div class="d-flex flex-column align-items-center justify-content-center py-5 text-center">
-                        <i class="sa sa-users sa-5x text-muted mb-3" style="opacity:0.25;font-size:3.5rem;"></i>
-                        <h5 class="fw-400 text-muted">{{ t('owners.no_owners') }}</h5>
-                        <p class="text-muted fs-sm mb-4">
-                            {{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}
-                        </p>
-                        <button class="btn btn-primary waves-effect waves-themed" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
-                            <i class="sa sa-plus me-1"></i> {{ t('owners.new_owner') }}
-                        </button>
-                    </div>
-                {% endif %}
-
-                </div>
-            </div>{# end panel-container #}
-
-        </div>{# end panel #}
+                <button type="submit" class="btn btn-sm btn-secondary">Suchen</button>
+                {% if search %}<a href="/tierhalter" class="btn btn-sm btn-outline-secondary">✕</a>{% endif %}
+            </form>
+        </div>
     </div>
-</div>
+
+    <div class="panel-container show">
+        <div class="panel-content p-0">
+
+        {% if owners %}
+            <table class="table table-hover table-striped table-bordered mb-0">
+                <thead>
+                    <tr>
+                        <th style="width:35%;">{{ t('owners.last_name') }}, {{ t('owners.first_name') }}</th>
+                        <th>{{ t('owners.email') }}</th>
+                        <th>{{ t('owners.phone') }}</th>
+                        <th>{{ t('owners.city') }}</th>
+                        <th class="text-center" style="width:70px;">Tiere</th>
+                        <th class="text-end" style="width:130px;">{{ t('common.actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for owner in owners %}
+                    <tr style="vertical-align:middle;">
+                        <td>
+                            <a href="/tierhalter/{{ owner.id }}" class="d-flex align-items-center gap-3 text-decoration-none text-body">
+                                <span class="avatar-placeholder flex-shrink-0"
+                                      style="width:36px;height:36px;font-size:0.78rem;">
+                                    {{ owner.first_name|first|upper }}{{ owner.last_name|first|upper }}
+                                </span>
+                                <div>
+                                    <div class="fw-500 d-flex align-items-center gap-2">
+                                        {{ owner.last_name }}, {{ owner.first_name }}
+                                        <span class="badge bg-primary fs-nano">#{{ '%04d'|format(owner.id) }}</span>
+                                    </div>
+                                    {% if owner.street %}
+                                    <div class="fs-nano text-muted">{{ owner.street }}</div>
+                                    {% endif %}
+                                </div>
+                            </a>
+                        </td>
+                        <td class="fs-sm">
+                            {% if owner.email %}
+                                <a href="mailto:{{ owner.email }}" class="text-primary">{{ owner.email }}</a>
+                            {% else %}<span class="text-muted">—</span>{% endif %}
+                        </td>
+                        <td class="fs-sm">{{ owner.phone ?: '<span class="text-muted">—</span>' }}</td>
+                        <td class="fs-sm">
+                            {{ owner.zip ? owner.zip ~ ' ' ~ owner.city : (owner.city ?: '<span class="text-muted">—</span>') }}
+                        </td>
+                        <td class="text-center">
+                            {% set cnt = owner.animal_count ?? 0 %}
+                            <span class="badge {% if cnt > 0 %}bg-success{% else %}bg-secondary{% endif %}">{{ cnt }}</span>
+                        </td>
+                        <td class="text-end">
+                            <div class="d-flex align-items-center justify-content-end gap-1">
+                                <a href="/tierhalter/{{ owner.id }}" class="btn btn-xs btn-secondary" title="Ansehen">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                </a>
+                                <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-xs btn-primary" title="Rechnung erstellen">
+                                    <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                                </a>
+                                <div class="dropdown">
+                                    <button class="btn btn-xs btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animated">
+                                        <li><a class="dropdown-item" href="/tierhalter/{{ owner.id }}">
+                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
+                                            Profil anzeigen
+                                        </a></li>
+                                        <li><a class="dropdown-item" href="/rechnungen/erstellen?owner_id={{ owner.id }}">
+                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
+                                            Rechnung erstellen
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item" href="/einladungen?prefill_owner={{ owner.id }}">
+                                            <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
+                                            Einladung senden
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+
+            {# Pagination #}
+            {% if pagination.last_page > 1 %}
+            <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top">
+                <span class="fs-sm text-muted">Seite {{ pagination.page }} / {{ pagination.last_page }} &middot; {{ pagination.total }} Einträge</span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
+                            <a class="page-link" href="?page={{ pagination.page - 1 }}&search={{ search }}">‹</a>
+                        </li>
+                        {% for p in 1..pagination.last_page %}
+                            {% if p == pagination.page %}
+                                <li class="page-item active"><span class="page-link">{{ p }}</span></li>
+                            {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
+                                <li class="page-item"><a class="page-link" href="?page={{ p }}&search={{ search }}">{{ p }}</a></li>
+                            {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
+                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                            {% endif %}
+                        {% endfor %}
+                        <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
+                            <a class="page-link" href="?page={{ pagination.page + 1 }}&search={{ search }}">›</a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+            {% endif %}
+
+        {% else %}
+            <div class="text-center py-5">
+                <svg width="48" height="48" fill="none" viewBox="0 0 24 24" class="mb-3 text-muted" style="opacity:.3;"><path stroke="currentColor" stroke-width="1.5" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-width="1.5" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                <h5 class="text-muted fw-400">{{ t('owners.no_owners') }}</h5>
+                <p class="text-muted fs-sm mb-4">{{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}</p>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
+                    <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+                    {{ t('owners.new_owner') }}
+                </button>
+            </div>
+        {% endif %}
+
+        </div>
+    </div>
+
+</div>{# end panel #}
 
 {# New Owner Modal #}
 <div class="modal fade" id="modal-new-owner" tabindex="-1" aria-labelledby="modal-new-owner-label" aria-hidden="true">
@@ -214,7 +168,7 @@
 
             <div class="modal-header">
                 <h4 class="modal-title fw-500" id="modal-new-owner-label">
-                    <i class="sa sa-user-plus me-2 text-primary"></i>
+                    <svg width="16" height="16" fill="none" viewBox="0 0 24 24" class="me-2 text-primary" style="vertical-align:-2px;"><path stroke="currentColor" stroke-width="2" d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/><line x1="19" y1="8" x2="19" y2="14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="22" y1="11" x2="16" y2="11" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                     {{ t('owners.new_owner') }}
                 </h4>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>

@@ -67,6 +67,7 @@
    ═══════════════════════════════════════════ */
 .btn { display: inline-flex; align-items: center; gap: 0.4rem; }
 .btn-icon { padding: 0.35rem; width: 34px; height: 34px; justify-content: center; }
+.btn-xs { padding: 0.2rem 0.45rem; font-size: 0.75rem; line-height: 1.4; border-radius: 0.25rem; }
 
 /* ── Glow on primary buttons ── */
 .btn-primary {
