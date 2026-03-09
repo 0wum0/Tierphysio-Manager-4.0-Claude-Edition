@@ -55,6 +55,10 @@ class SettingsController extends Controller
             'LICENSE_SECRET',
             // Session
             'SESSION_SECURE',
+            // Stripe
+            'STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_WEBHOOK_SECRET',
+            // PayPal
+            'PAYPAL_CLIENT_ID', 'PAYPAL_CLIENT_SECRET', 'PAYPAL_MODE',
         ];
 
         $current = $this->readEnv();

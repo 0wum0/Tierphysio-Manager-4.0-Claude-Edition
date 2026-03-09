@@ -63,6 +63,14 @@ class Config
             'license' => [
                 'secret' => $_ENV['LICENSE_SECRET'] ?? '',
             ],
+            'payment' => [
+                'stripe_secret'       => $_ENV['STRIPE_SECRET_KEY']      ?? '',
+                'stripe_publishable'  => $_ENV['STRIPE_PUBLISHABLE_KEY'] ?? '',
+                'stripe_webhook_secret' => $_ENV['STRIPE_WEBHOOK_SECRET'] ?? '',
+                'paypal_client_id'    => $_ENV['PAYPAL_CLIENT_ID']       ?? '',
+                'paypal_client_secret'=> $_ENV['PAYPAL_CLIENT_SECRET']   ?? '',
+                'paypal_mode'         => $_ENV['PAYPAL_MODE']             ?? 'sandbox',
+            ],
         ];
     }
 

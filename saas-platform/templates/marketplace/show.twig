@@ -1,0 +1,127 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/marketplace" class="text-secondary text-decoration-none" style="font-size:.875rem;">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zum Marktplatz
+    </a>
+</div>
+
+<div class="row g-4">
+    {# Left: Details #}
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-body p-4">
+                <div class="d-flex align-items-center gap-3 mb-4">
+                    <div class="rounded-3 d-flex align-items-center justify-content-center"
+                         style="width:64px;height:64px;background:rgba(37,99,235,.15);flex-shrink:0;">
+                        <i class="{{ plugin.icon }} text-primary" style="font-size:2rem;"></i>
+                    </div>
+                    <div>
+                        <h4 class="mb-0 fw-bold">{{ plugin.name }}</h4>
+                        <div class="d-flex gap-2 mt-1">
+                            <span class="badge bg-secondary bg-opacity-25 text-secondary">{{ plugin.category }}</span>
+                            <span class="badge bg-primary bg-opacity-15 text-primary">v{{ plugin.version }}</span>
+                        </div>
+                    </div>
+                    {% if purchased %}
+                    <div class="ms-auto">
+                        <span class="badge bg-success px-3 py-2"><i class="bi bi-check-circle-fill me-1"></i>Aktiviert</span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <p class="text-secondary mb-4">{{ plugin.description }}</p>
+
+                {% if plugin.long_desc %}
+                <div style="color:#cbd5e1;line-height:1.7;">
+                    {{ plugin.long_desc|nl2br }}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if plugin.requirements is not empty %}
+        <div class="card mb-4">
+            <div class="card-header py-3">
+                <h6 class="mb-0 fw-semibold"><i class="bi bi-info-circle me-2 text-info"></i>Voraussetzungen</h6>
+            </div>
+            <div class="card-body px-4">
+                <ul class="mb-0" style="color:#94a3b8;">
+                    {% for req in plugin.requirements %}
+                    <li>{{ req }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    {# Right: Purchase card #}
+    <div class="col-lg-4">
+        <div class="card sticky-top" style="top:80px;">
+            <div class="card-body p-4">
+                <div class="text-center mb-4">
+                    {% if plugin.price_type == 'free' or plugin.price == 0 %}
+                        <div class="fw-bold text-success" style="font-size:2rem;">Kostenlos</div>
+                    {% elseif plugin.price_type == 'monthly' %}
+                        <div class="fw-bold" style="font-size:2rem;">{{ plugin.price|number_format(2,',','.') }} €</div>
+                        <div class="text-secondary" style="font-size:.8rem;">pro Monat</div>
+                    {% else %}
+                        <div class="fw-bold" style="font-size:2rem;">{{ plugin.price|number_format(2,',','.') }} €</div>
+                        <div class="text-secondary" style="font-size:.8rem;">einmalige Zahlung</div>
+                    {% endif %}
+                </div>
+
+                {% if purchased %}
+                    <div class="alert alert-success text-center py-2 mb-0">
+                        <i class="bi bi-check-circle-fill me-2"></i>Plugin ist aktiv
+                    </div>
+                {% elseif plugin.price_type == 'free' or plugin.price == 0 %}
+                    <form method="POST" action="/marketplace/{{ plugin.id }}/activate">
+                        <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                        <button class="btn btn-primary w-100">
+                            <i class="bi bi-download me-2"></i>Kostenlos aktivieren
+                        </button>
+                    </form>
+                {% else %}
+                    <div class="d-grid gap-2">
+                        {% if stripe_enabled %}
+                        <form method="POST" action="/marketplace/{{ plugin.id }}/buy/stripe">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <button class="btn btn-primary w-100">
+                                <i class="bi bi-credit-card me-2"></i>Mit Kreditkarte (Stripe)
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {% if paypal_enabled %}
+                        <form method="POST" action="/marketplace/{{ plugin.id }}/buy/paypal">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <button class="btn w-100" style="background:#FFC439;color:#003087;font-weight:600;">
+                                <i class="bi bi-paypal me-2"></i>Mit PayPal zahlen
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        {% if not stripe_enabled and not paypal_enabled %}
+                        <div class="alert alert-warning py-2 text-center" style="font-size:.8rem;">
+                            <i class="bi bi-exclamation-triangle me-1"></i>
+                            Keine Zahlungsmethode konfiguriert.<br>
+                            <a href="/admin/settings" class="alert-link">Einstellungen öffnen</a>
+                        </div>
+                        {% endif %}
+                    </div>
+                {% endif %}
+
+                <hr style="border-color:#334155;">
+                <ul class="list-unstyled mb-0" style="font-size:.8rem;color:#64748b;">
+                    <li class="mb-1"><i class="bi bi-shield-check me-2 text-success"></i>Sofortige Aktivierung nach Zahlung</li>
+                    <li class="mb-1"><i class="bi bi-arrow-repeat me-2 text-info"></i>Automatische Updates inklusive</li>
+                    <li><i class="bi bi-headset me-2 text-primary"></i>Support im Lieferumfang</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

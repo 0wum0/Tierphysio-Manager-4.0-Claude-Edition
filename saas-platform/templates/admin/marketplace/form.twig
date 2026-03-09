@@ -1,0 +1,131 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="/admin/marketplace" class="text-secondary text-decoration-none" style="font-size:.875rem;">
+        <i class="bi bi-arrow-left me-1"></i>Zurück zur Übersicht
+    </a>
+</div>
+
+<form method="POST" action="{{ plugin ? '/admin/marketplace/' ~ plugin.id ~ '/edit' : '/admin/marketplace/create' }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold">Basisinformationen</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-8">
+                            <label class="form-label">Plugin-Name *</label>
+                            <input type="text" name="name" class="form-control" required
+                                   value="{{ plugin.name ?? '' }}" placeholder="z.B. Terminkalender Pro">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Slug *</label>
+                            <input type="text" name="slug" class="form-control" required
+                                   value="{{ plugin.slug ?? '' }}" placeholder="calendar-pro">
+                            <div class="form-text">Eindeutiger Bezeichner (lowercase, Bindestriche)</div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Kurzbeschreibung</label>
+                            <input type="text" name="description" class="form-control"
+                                   value="{{ plugin.description ?? '' }}" placeholder="Kurze Beschreibung für die Übersicht" maxlength="300">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Ausführliche Beschreibung</label>
+                            <textarea name="long_desc" class="form-control" rows="6"
+                                      placeholder="Detaillierte Beschreibung, Features, Einsatzbereiche...">{{ plugin.long_desc ?? '' }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Kategorie</label>
+                            <select name="category" class="form-select">
+                                {% set cats = ['Allgemein','Abrechnung','Kommunikation','Terminverwaltung','Patienten','Berichte','Integration','Sicherheit'] %}
+                                {% for cat in cats %}
+                                <option value="{{ cat }}" {{ (plugin.category ?? 'Allgemein') == cat ? 'selected' : '' }}>{{ cat }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Icon <small class="text-secondary">(Bootstrap Icons Klasse)</small></label>
+                            <div class="input-group">
+                                <span class="input-group-text" id="iconPreview">
+                                    <i class="{{ plugin.icon ?? 'bi-puzzle' }}" id="iconEl"></i>
+                                </span>
+                                <input type="text" name="icon" id="iconInput" class="form-control"
+                                       value="{{ plugin.icon ?? 'bi-puzzle' }}" placeholder="bi-puzzle"
+                                       oninput="document.getElementById('iconEl').className=this.value">
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <label class="form-label">Version</label>
+                            <input type="text" name="version" class="form-control"
+                                   value="{{ plugin.version ?? '1.0.0' }}" placeholder="1.0.0">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Voraussetzungen <small class="text-secondary">(eine pro Zeile)</small></label>
+                            <textarea name="requirements" class="form-control" rows="3"
+                                      placeholder="PHP 8.3+&#10;Plan: Pro oder höher">{% set reqs = plugin.requirements|default('[]')|json_decode|default([]) %}{{ reqs|join('\n') }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold">Preis & Status</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12">
+                            <label class="form-label">Preistyp</label>
+                            <select name="price_type" id="priceType" class="form-select"
+                                    onchange="document.getElementById('priceGroup').style.display=this.value==='free'?'none':'block'">
+                                <option value="one_time" {{ (plugin.price_type ?? '') == 'one_time' ? 'selected' : '' }}>Einmalig</option>
+                                <option value="monthly"  {{ (plugin.price_type ?? '') == 'monthly'  ? 'selected' : '' }}>Monatlich</option>
+                                <option value="free"     {{ (plugin.price_type ?? '') == 'free'     ? 'selected' : '' }}>Kostenlos</option>
+                            </select>
+                        </div>
+                        <div class="col-12" id="priceGroup" style="{{ (plugin.price_type ?? '') == 'free' ? 'display:none' : '' }}">
+                            <label class="form-label">Preis (€)</label>
+                            <div class="input-group">
+                                <input type="number" name="price" class="form-control" step="0.01" min="0"
+                                       value="{{ plugin.price ?? '0.00' }}">
+                                <span class="input-group-text">€</span>
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Reihenfolge</label>
+                            <input type="number" name="sort_order" class="form-control"
+                                   value="{{ plugin.sort_order ?? '0' }}">
+                        </div>
+                        <div class="col-12">
+                            <div class="form-check form-switch mb-2">
+                                <input class="form-check-input" type="checkbox" name="is_active" id="isActive"
+                                    {{ (plugin.is_active ?? 1) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isActive">Im Marktplatz sichtbar</label>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="is_featured" id="isFeatured"
+                                    {{ (plugin.is_featured ?? 0) ? 'checked' : '' }}>
+                                <label class="form-check-label" for="isFeatured">Als Featured markieren</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-grid gap-2">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-floppy me-2"></i>{{ plugin ? 'Speichern' : 'Plugin erstellen' }}
+                </button>
+                <a href="/admin/marketplace" class="btn btn-outline-secondary">Abbrechen</a>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock %}

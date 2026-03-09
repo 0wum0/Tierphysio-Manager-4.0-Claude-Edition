@@ -10,6 +10,8 @@ use Saas\Controllers\LegalController;
 use Saas\Controllers\LicenseApiController;
 use Saas\Controllers\RegistrationController;
 use Saas\Controllers\SettingsController;
+use Saas\Controllers\MarketplaceController;
+use Saas\Controllers\AdminMarketplaceController;
 
 // ── Public Registration ────────────────────────────────────────────────────
 $router->get('/register',          [RegistrationController::class, 'index']);
@@ -55,6 +57,25 @@ $router->post('/admin/plans/{id}/edit', [PlansController::class, 'update']);
 $router->get('/admin/legal',            [LegalController::class, 'index']);
 $router->get('/admin/legal/{id}/edit',  [LegalController::class, 'edit']);
 $router->post('/admin/legal/{id}/edit', [LegalController::class, 'update']);
+
+// ── Marketplace (Tenant) ──────────────────────────────────────────
+$router->get('/marketplace',                               [MarketplaceController::class, 'index']);
+$router->get('/marketplace/{id}',                          [MarketplaceController::class, 'show']);
+$router->post('/marketplace/{id}/activate',                [MarketplaceController::class, 'activateManual']);
+$router->post('/marketplace/{id}/buy/stripe',              [MarketplaceController::class, 'buyStripe']);
+$router->get('/marketplace/{id}/stripe/success',           [MarketplaceController::class, 'stripeSuccess']);
+$router->post('/marketplace/{id}/buy/paypal',              [MarketplaceController::class, 'buyPaypal']);
+$router->get('/marketplace/{id}/paypal/capture',           [MarketplaceController::class, 'paypalCapture']);
+
+// ── Admin Marketplace ────────────────────────────────────────────
+$router->get('/admin/marketplace',                         [AdminMarketplaceController::class, 'index']);
+$router->get('/admin/marketplace/create',                  [AdminMarketplaceController::class, 'createForm']);
+$router->post('/admin/marketplace/create',                 [AdminMarketplaceController::class, 'create']);
+$router->get('/admin/marketplace/{id}/edit',               [AdminMarketplaceController::class, 'editForm']);
+$router->post('/admin/marketplace/{id}/edit',              [AdminMarketplaceController::class, 'update']);
+$router->post('/admin/marketplace/{id}/delete',            [AdminMarketplaceController::class, 'delete']);
+$router->post('/admin/marketplace/{id}/grant',             [AdminMarketplaceController::class, 'grantManual']);
+$router->post('/admin/marketplace/{id}/revoke',            [AdminMarketplaceController::class, 'revokeManual']);
 
 // ── Settings ──────────────────────────────────────────────────────────────
 $router->get('/admin/settings',  [SettingsController::class, 'index']);

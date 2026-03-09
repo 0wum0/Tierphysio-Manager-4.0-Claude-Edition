@@ -1,0 +1,172 @@
+{% extends 'layouts/base.twig' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1 fw-bold">Marktplatz verwalten</h4>
+        <p class="text-secondary mb-0" style="font-size:.875rem;">Plugins anlegen, bearbeiten und Käufe verwalten.</p>
+    </div>
+    <a href="/admin/marketplace/create" class="btn btn-primary">
+        <i class="bi bi-plus-lg me-2"></i>Plugin hinzufügen
+    </a>
+</div>
+
+{# Revenue stat #}
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value text-success">{{ revenue|number_format(2,',','.') }} €</div>
+            <div class="stat-label">Gesamtumsatz Marktplatz</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ plugins|length }}</div>
+            <div class="stat-label">Plugins gesamt</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card stat-card">
+            <div class="stat-value">{{ purchases|length }}</div>
+            <div class="stat-label">Aktive Käufe</div>
+        </div>
+    </div>
+</div>
+
+{# Plugin list #}
+<div class="card mb-4">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+        <span class="fw-semibold">Plugin-Angebote</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Plugin</th>
+                    <th>Preis</th>
+                    <th>Typ</th>
+                    <th>Käufe</th>
+                    <th>Umsatz</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for plugin in plugins %}
+                <tr>
+                    <td class="px-4">
+                        <div class="d-flex align-items-center gap-2">
+                            <i class="{{ plugin.icon }} text-primary"></i>
+                            <div>
+                                <div class="fw-semibold">{{ plugin.name }}</div>
+                                <div style="font-size:.75rem;color:#64748b;">{{ plugin.slug }} · {{ plugin.category }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="fw-medium">
+                        {% if plugin.price == 0 %}
+                            <span class="text-success">Kostenlos</span>
+                        {% else %}
+                            {{ plugin.price|number_format(2,',','.') }} €
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if plugin.price_type == 'free' %}<span class="badge bg-success bg-opacity-25 text-success">Kostenlos</span>
+                        {% elseif plugin.price_type == 'monthly' %}<span class="badge bg-info bg-opacity-25 text-info">Monatlich</span>
+                        {% else %}<span class="badge bg-primary bg-opacity-25 text-primary">Einmalig</span>{% endif %}
+                    </td>
+                    <td>{{ plugin.purchase_count }}</td>
+                    <td>{{ plugin.revenue|number_format(2,',','.') }} €</td>
+                    <td>
+                        {% if plugin.is_active %}
+                            <span class="badge badge-active">Aktiv</span>
+                        {% else %}
+                            <span class="badge badge-cancelled">Inaktiv</span>
+                        {% endif %}
+                        {% if plugin.is_featured %}
+                            <span class="badge bg-warning text-dark ms-1">Featured</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="/admin/marketplace/{{ plugin.id }}/edit" class="btn btn-sm btn-outline-secondary">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form method="POST" action="/admin/marketplace/{{ plugin.id }}/delete" class="d-inline"
+                                  onsubmit="return confirm('Plugin wirklich löschen?')">
+                                <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                                <button class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-secondary py-4">Noch keine Plugins angelegt.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{# Recent purchases #}
+<div class="card">
+    <div class="card-header py-3">
+        <span class="fw-semibold">Letzte Käufe / Aktivierungen</span>
+    </div>
+    <div class="table-responsive">
+        <table class="table mb-0">
+            <thead>
+                <tr>
+                    <th class="px-4">Praxis</th>
+                    <th>Plugin</th>
+                    <th>Betrag</th>
+                    <th>Methode</th>
+                    <th>Datum</th>
+                    <th>Status</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in purchases %}
+                <tr>
+                    <td class="px-4">
+                        <div class="fw-semibold">{{ p.practice_name }}</div>
+                        <div style="font-size:.75rem;color:#64748b;">{{ p.tenant_email }}</div>
+                    </td>
+                    <td>{{ p.plugin_name }}</td>
+                    <td>
+                        {% if p.amount_paid == 0 %}
+                            <span class="text-success">Kostenlos</span>
+                        {% else %}
+                            {{ p.amount_paid|number_format(2,',','.') }} €
+                        {% endif %}
+                    </td>
+                    <td>
+                        {% if p.payment_method == 'stripe' %}<span class="badge bg-primary bg-opacity-25 text-primary">Stripe</span>
+                        {% elseif p.payment_method == 'paypal' %}<span class="badge bg-warning text-dark">PayPal</span>
+                        {% else %}<span class="badge bg-secondary bg-opacity-25 text-secondary">Manuell</span>{% endif %}
+                    </td>
+                    <td style="font-size:.8rem;">{{ p.activated_at|date('d.m.Y H:i') }}</td>
+                    <td>
+                        {% if p.status == 'active' %}<span class="badge badge-active">Aktiv</span>
+                        {% else %}<span class="badge badge-cancelled">{{ p.status }}</span>{% endif %}
+                    </td>
+                    <td>
+                        <form method="POST" action="/admin/marketplace/{{ p.plugin_id }}/revoke">
+                            <input type="hidden" name="_csrf" value="{{ csrf_token }}">
+                            <input type="hidden" name="tenant_id" value="{{ p.tenant_id }}">
+                            <button class="btn btn-sm btn-outline-danger" title="Zugang entziehen"
+                                    onclick="return confirm('Zugang wirklich entziehen?')">
+                                <i class="bi bi-x-lg"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="text-center text-secondary py-4">Noch keine Käufe.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

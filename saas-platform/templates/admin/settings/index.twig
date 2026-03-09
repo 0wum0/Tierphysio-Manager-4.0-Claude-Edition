@@ -203,6 +203,65 @@
             </div>
         </div>
 
+        {# ── Stripe ────────────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-credit-card me-2 text-primary"></i>Stripe (Marktplatz-Zahlungen)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Secret Key <small class="text-secondary">(sk_live_... oder sk_test_...)</small></label>
+                            <input type="password" name="STRIPE_SECRET_KEY" class="form-control font-monospace"
+                                   value="{{ env.STRIPE_SECRET_KEY ?? '' }}" autocomplete="new-password">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Publishable Key <small class="text-secondary">(pk_live_... oder pk_test_...)</small></label>
+                            <input type="text" name="STRIPE_PUBLISHABLE_KEY" class="form-control font-monospace"
+                                   value="{{ env.STRIPE_PUBLISHABLE_KEY ?? '' }}">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">Webhook Secret <small class="text-secondary">(whsec_...)</small></label>
+                            <input type="password" name="STRIPE_WEBHOOK_SECRET" class="form-control font-monospace"
+                                   value="{{ env.STRIPE_WEBHOOK_SECRET ?? '' }}" autocomplete="new-password">
+                            <div class="form-text">Webhook-URL für Stripe: <code>{{ env.APP_URL ?? '' }}/api/stripe/webhook</code></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {# ── PayPal ────────────────────────────────────────────────────── #}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header py-3">
+                    <h6 class="mb-0 fw-semibold"><i class="bi bi-paypal me-2 text-warning"></i>PayPal (Marktplatz-Zahlungen)</h6>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Client ID</label>
+                            <input type="text" name="PAYPAL_CLIENT_ID" class="form-control font-monospace"
+                                   value="{{ env.PAYPAL_CLIENT_ID ?? '' }}">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Client Secret</label>
+                            <input type="password" name="PAYPAL_CLIENT_SECRET" class="form-control font-monospace"
+                                   value="{{ env.PAYPAL_CLIENT_SECRET ?? '' }}" autocomplete="new-password">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">Modus</label>
+                            <select name="PAYPAL_MODE" class="form-select">
+                                <option value="sandbox" {{ (env.PAYPAL_MODE ?? 'sandbox') == 'sandbox' ? 'selected' : '' }}>Sandbox (Test)</option>
+                                <option value="live"    {{ (env.PAYPAL_MODE ?? '') == 'live'    ? 'selected' : '' }}>Live (Produktion)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="mt-4 d-flex gap-2">
