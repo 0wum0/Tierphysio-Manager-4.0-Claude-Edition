@@ -83,4 +83,18 @@ class View
     {
         $this->twig->addGlobal($key, $value);
     }
+
+    public function addTemplatePath(string $path, string $namespace = '__main__'): void
+    {
+        /** @var FilesystemLoader $loader */
+        $loader = $this->twig->getLoader();
+        if ($loader instanceof FilesystemLoader) {
+            $loader->addPath($path, $namespace);
+        }
+    }
+
+    public function getTwig(): Environment
+    {
+        return $this->twig;
+    }
 }

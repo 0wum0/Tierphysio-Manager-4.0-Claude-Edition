@@ -60,15 +60,12 @@ class InstallerController extends Controller
             return;
         }
 
-        // Test DB connection
+        // Test DB connection — database must already exist on shared hosting
         try {
-            $dsn = "mysql:host={$dbHost};port={$dbPort};charset=utf8mb4";
+            $dsn = "mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4";
             $pdo = new PDO($dsn, $dbUser, $dbPass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
             ]);
-            $safe = '`' . str_replace('`', '``', $dbName) . '`';
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS {$safe} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            $pdo->exec("USE {$safe}");
         } catch (\Throwable $e) {
             $this->render('installer/index.twig', [
                 'page_title' => 'Tierphysio SaaS – Installation',
@@ -124,9 +121,10 @@ DB_PASSWORD={$dbPass}
 
 TENANT_DB_HOST={$dbHost}
 TENANT_DB_PORT={$dbPort}
+TENANT_DB_DATABASE={$dbName}
 TENANT_DB_USERNAME={$dbUser}
 TENANT_DB_PASSWORD={$dbPass}
-TENANT_DB_PREFIX=tierphysio_tenant_
+TENANT_TABLE_PREFIX=tpm
 
 PRACTICE_SOFTWARE_PATH=
 PRACTICE_SOFTWARE_URL=
