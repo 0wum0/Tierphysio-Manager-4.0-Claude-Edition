@@ -8,7 +8,14 @@
     </div>
 </div>
 
-{% if plugins is empty %}
+{% if needs_update %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Datenbank-Update erforderlich.</strong>
+    Die Marktplatz-Tabellen wurden noch nicht angelegt.
+    <a href="/admin/updater" class="alert-link ms-2">Jetzt updaten →</a>
+</div>
+{% elseif plugins is empty %}
 <div class="card text-center py-5">
     <div class="card-body">
         <i class="bi bi-shop" style="font-size:3rem;color:#334155;"></i>

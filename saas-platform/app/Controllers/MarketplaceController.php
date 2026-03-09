@@ -31,19 +31,25 @@ class MarketplaceController extends Controller
     {
         $this->requireAuth();
 
-        $tenantId = (int)$this->session->get('saas_tenant_id');
-        $plugins  = $this->marketplaceRepo->allPlugins(true);
+        $tenantId     = (int)($this->session->get('saas_tenant_id') ?? 0);
+        $plugins      = [];
+        $needsUpdate  = false;
 
-        // Mark which plugins are already purchased
-        foreach ($plugins as &$plugin) {
-            $plugin['purchased'] = $tenantId
-                ? $this->marketplaceRepo->tenantHasPlugin($tenantId, (int)$plugin['id'])
-                : false;
-            $plugin['screenshots'] = json_decode($plugin['screenshots'] ?? '[]', true) ?: [];
+        try {
+            $plugins = $this->marketplaceRepo->allPlugins(true);
+            foreach ($plugins as &$plugin) {
+                $plugin['purchased'] = ($tenantId > 0)
+                    ? $this->marketplaceRepo->tenantHasPlugin($tenantId, (int)$plugin['id'])
+                    : false;
+                $plugin['screenshots'] = json_decode($plugin['screenshots'] ?? '[]', true) ?: [];
+            }
+            unset($plugin);
+        } catch (\Throwable) {
+            $needsUpdate = true;
         }
-        unset($plugin);
 
         $this->render('marketplace/index.twig', [
+            'needs_update' => $needsUpdate,
             'page_title'      => 'Plugin-Marktplatz',
             'active_nav'      => 'marketplace',
             'plugins'         => $plugins,
@@ -62,8 +68,8 @@ class MarketplaceController extends Controller
             $this->notFound();
         }
 
-        $tenantId  = (int)$this->session->get('saas_tenant_id');
-        $purchased = $tenantId
+        $tenantId  = (int)($this->session->get('saas_tenant_id') ?? 0);
+        $purchased = ($tenantId > 0)
             ? $this->marketplaceRepo->tenantHasPlugin($tenantId, (int)$plugin['id'])
             : false;
 
@@ -89,9 +95,13 @@ class MarketplaceController extends Controller
         $this->verifyCsrf();
 
         $plugin   = $this->marketplaceRepo->findPlugin((int)($params['id'] ?? 0));
-        $tenantId = (int)$this->session->get('saas_tenant_id');
+        $tenantId = (int)($this->session->get('saas_tenant_id') ?? 0);
 
-        if (!$plugin || !$tenantId) { $this->notFound(); }
+        if (!$plugin) { $this->notFound(); }
+        if (!$tenantId) {
+            $this->session->flash('error', 'Kein Tenant-Konto verknüpft.');
+            $this->redirect('/marketplace');
+        }
 
         if ($this->marketplaceRepo->tenantHasPlugin($tenantId, (int)$plugin['id'])) {
             $this->session->flash('info', 'Plugin bereits aktiviert.');
@@ -169,9 +179,13 @@ class MarketplaceController extends Controller
         $this->verifyCsrf();
 
         $plugin   = $this->marketplaceRepo->findPlugin((int)($params['id'] ?? 0));
-        $tenantId = (int)$this->session->get('saas_tenant_id');
+        $tenantId = (int)($this->session->get('saas_tenant_id') ?? 0);
 
-        if (!$plugin || !$tenantId) { $this->notFound(); }
+        if (!$plugin) { $this->notFound(); }
+        if (!$tenantId) {
+            $this->session->flash('error', 'Kein Tenant-Konto verknüpft.');
+            $this->redirect('/marketplace');
+        }
 
         if ($this->marketplaceRepo->tenantHasPlugin($tenantId, (int)$plugin['id'])) {
             $this->session->flash('info', 'Plugin bereits aktiviert.');

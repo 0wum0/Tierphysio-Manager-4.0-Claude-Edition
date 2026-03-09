@@ -123,7 +123,7 @@ class Application
             exit;
         }
 
-        $debug = true; // TEMP
+        $debug = $config->get('app.debug', false);
         if ($debug) {
             echo '<pre style="background:#1a1a2e;color:#e94560;padding:20px;font-family:monospace;white-space:pre-wrap;">';
             echo '<strong>' . get_class($e) . '</strong>: ' . htmlspecialchars($e->getMessage()) . "\n\n";

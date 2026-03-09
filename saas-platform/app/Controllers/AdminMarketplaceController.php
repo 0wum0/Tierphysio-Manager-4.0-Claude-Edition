@@ -25,17 +25,27 @@ class AdminMarketplaceController extends Controller
     {
         $this->requireAuth();
 
-        $plugins  = $this->marketplaceRepo->allPlugins(false);
-        $purchases = $this->marketplaceRepo->getAllPurchases(50);
-        $revenue  = $this->marketplaceRepo->getTotalRevenue();
+        $plugins     = [];
+        $purchases   = [];
+        $revenue     = 0.0;
+        $needsUpdate = false;
 
-        foreach ($plugins as &$p) {
-            $p['purchase_count'] = $this->marketplaceRepo->countPurchasesForPlugin((int)$p['id']);
-            $p['revenue']        = $this->marketplaceRepo->getRevenueForPlugin((int)$p['id']);
+        try {
+            $plugins   = $this->marketplaceRepo->allPlugins(false);
+            $purchases = $this->marketplaceRepo->getAllPurchases(50);
+            $revenue   = $this->marketplaceRepo->getTotalRevenue();
+
+            foreach ($plugins as &$p) {
+                $p['purchase_count'] = $this->marketplaceRepo->countPurchasesForPlugin((int)$p['id']);
+                $p['revenue']        = $this->marketplaceRepo->getRevenueForPlugin((int)$p['id']);
+            }
+            unset($p);
+        } catch (\Throwable) {
+            $needsUpdate = true;
         }
-        unset($p);
 
         $this->render('admin/marketplace/index.twig', [
+            'needs_update' => $needsUpdate,
             'page_title' => 'Marktplatz verwalten',
             'active_nav' => 'marketplace_admin',
             'plugins'    => $plugins,

@@ -11,6 +11,15 @@
     </a>
 </div>
 
+{% if needs_update %}
+<div class="alert alert-warning mb-4">
+    <i class="bi bi-exclamation-triangle-fill me-2"></i>
+    <strong>Datenbank-Update erforderlich.</strong>
+    Die Marktplatz-Tabellen existieren noch nicht.
+    <a href="/admin/updater" class="alert-link ms-2"><strong>Jetzt updaten →</strong></a>
+</div>
+{% endif %}
+
 {# Revenue stat #}
 <div class="row g-3 mb-4">
     <div class="col-md-3">
