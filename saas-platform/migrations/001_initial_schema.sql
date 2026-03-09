@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS `tenants` (
   `country`       CHAR(2) NOT NULL DEFAULT 'DE',
   `plan_id`       INT UNSIGNED NOT NULL,
   `status`        ENUM('pending','active','paused','cancelled','suspended') NOT NULL DEFAULT 'pending',
-  `db_name`       VARCHAR(100) COMMENT 'Name der Tenant-Datenbank',
+  `table_prefix`  VARCHAR(30)  COMMENT 'Tabellen-Präfix in der gemeinsamen DB, z.B. tpm1_',
   `db_created`    TINYINT(1) NOT NULL DEFAULT 0,
   `admin_created` TINYINT(1) NOT NULL DEFAULT 0,
   `trial_ends_at` DATETIME,

@@ -91,11 +91,11 @@ class TenantRepository
         $this->db->execute("UPDATE tenants SET status = ? WHERE id = ?", [$status, $id]);
     }
 
-    public function setDbCreated(int $id, string $dbName): void
+    public function setTablePrefix(int $id, string $tablePrefix): void
     {
         $this->db->execute(
-            "UPDATE tenants SET db_name = ?, db_created = 1 WHERE id = ?",
-            [$dbName, $id]
+            "UPDATE tenants SET table_prefix = ?, db_created = 1 WHERE id = ?",
+            [$tablePrefix, $id]
         );
     }
 

@@ -33,12 +33,12 @@ class Config
                 'password' => $_ENV['DB_PASSWORD'] ?? '',
             ],
             'tenant_db' => [
-                'host'          => $_ENV['TENANT_DB_HOST']     ?? $_ENV['DB_HOST']     ?? 'localhost',
-                'port'          => (int)($_ENV['TENANT_DB_PORT'] ?? $_ENV['DB_PORT'] ?? 3306),
-                'username'      => $_ENV['TENANT_DB_USERNAME'] ?? $_ENV['DB_USERNAME'] ?? '',
-                'password'      => $_ENV['TENANT_DB_PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '',
-                'prefix'        => $_ENV['TENANT_DB_PREFIX']   ?? 'tierphysio_tenant_',
-                'shared_hosting'=> filter_var($_ENV['TENANT_DB_SHARED_HOSTING'] ?? false, FILTER_VALIDATE_BOOLEAN),
+                'host'        => $_ENV['TENANT_DB_HOST']     ?? $_ENV['DB_HOST']     ?? 'localhost',
+                'port'        => (int)($_ENV['TENANT_DB_PORT'] ?? $_ENV['DB_PORT'] ?? 3306),
+                'database'    => $_ENV['TENANT_DB_DATABASE'] ?? $_ENV['DB_DATABASE'] ?? '',
+                'username'    => $_ENV['TENANT_DB_USERNAME'] ?? $_ENV['DB_USERNAME'] ?? '',
+                'password'    => $_ENV['TENANT_DB_PASSWORD'] ?? $_ENV['DB_PASSWORD'] ?? '',
+                'prefix_base' => $_ENV['TENANT_TABLE_PREFIX'] ?? 'tpm',
             ],
             'practice' => [
                 'path' => $_ENV['PRACTICE_SOFTWARE_PATH'] ?? '',

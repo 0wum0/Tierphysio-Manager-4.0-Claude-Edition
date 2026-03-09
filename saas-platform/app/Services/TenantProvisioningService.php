@@ -36,10 +36,8 @@ class TenantProvisioningService
 
         return $this->db->transaction(function (Database $db) use ($data, $plan): array {
 
-            // 1. Create tenant record
-            $uuid    = Uuid::uuid4()->toString();
-            $dbName  = $this->config->get('tenant_db.prefix') . preg_replace('/[^a-z0-9_]/', '_', strtolower($data['email']));
-            $dbName  = substr($dbName, 0, 64);
+            // 1. Create tenant record (no DB/prefix yet)
+            $uuid = Uuid::uuid4()->toString();
 
             $tenantId = $this->tenantRepo->create([
                 'uuid'          => $uuid,
@@ -56,16 +54,18 @@ class TenantProvisioningService
                 'trial_ends_at' => null,
             ]);
 
-            // 2. Create tenant database
-            $tempPassword = bin2hex(random_bytes(12));
-            $dbResult = $this->createTenantDatabase($dbName, $uuid);
+            // 2. Generate unique table prefix: e.g. tpm1_, tpm2_, ...
+            $base        = $this->config->get('tenant_db.prefix_base', 'tpm');
+            $tablePrefix = $base . $tenantId . '_';
 
-            $this->tenantRepo->setDbCreated($tenantId, $dbName);
+            // 3. Create tenant tables in shared DB with prefix
+            $this->createTenantTables($tablePrefix, $uuid);
+            $this->tenantRepo->setTablePrefix($tenantId, $tablePrefix);
 
-            // 3. Create admin user in tenant DB
+            // 4. Create admin user in tenant tables
             $adminPassword = $data['admin_password'] ?? bin2hex(random_bytes(8));
             $this->createTenantAdmin(
-                $dbName,
+                $tablePrefix,
                 $data['practice_name'],
                 $data['owner_name'],
                 $data['email'],
@@ -118,7 +118,7 @@ class TenantProvisioningService
             return [
                 'tenant_id'      => $tenantId,
                 'tenant_uuid'    => $uuid,
-                'db_name'        => $dbName,
+                'table_prefix'   => $tablePrefix,
                 'admin_email'    => $data['email'],
                 'admin_password' => $adminPassword,
                 'license_token'  => $licenseToken,
@@ -128,95 +128,90 @@ class TenantProvisioningService
     }
 
     /**
-     * Create a fresh tenant database with the Tierphysio schema.
-     *
-     * On shared hosting (TENANT_DB_SHARED_HOSTING=true) the database must be
-     * pre-created in cPanel. We skip CREATE DATABASE and connect directly.
+     * Create all tenant tables in the shared database using a unique table prefix.
+     * The schema SQL uses {{PREFIX}} as a placeholder which is replaced at runtime.
      */
-    private function createTenantDatabase(string $dbName, string $tenantUuid): void
+    private function createTenantTables(string $tablePrefix, string $tenantUuid): void
     {
-        $host       = $this->config->get('tenant_db.host');
-        $port       = (int)$this->config->get('tenant_db.port', 3306);
-        $username   = $this->config->get('tenant_db.username');
-        $password   = $this->config->get('tenant_db.password');
-        $shared     = (bool)$this->config->get('tenant_db.shared_hosting', false);
-
-        $pdoOptions = [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ];
-
-        if ($shared) {
-            // Shared hosting: DB must already exist, connect directly
-            $dsn = "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4";
-            $pdo = new PDO($dsn, $username, $password, $pdoOptions);
-        } else {
-            // Dedicated/VPS: create DB automatically
-            $dsn = "mysql:host={$host};port={$port};charset=utf8mb4";
-            $pdo = new PDO($dsn, $username, $password, $pdoOptions);
-            $safe = '`' . str_replace('`', '``', $dbName) . '`';
-            $pdo->exec("CREATE DATABASE IF NOT EXISTS {$safe} CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
-            $pdo->exec("USE {$safe}");
+        $schemaPath = $this->config->getRootPath() . '/provisioning/tenant_schema.sql';
+        if (!file_exists($schemaPath)) {
+            throw new \RuntimeException('tenant_schema.sql nicht gefunden: ' . $schemaPath);
         }
 
-        // Run Tierphysio schema
-        $schemaPath = $this->config->getRootPath() . '/provisioning/tenant_schema.sql';
-        if (file_exists($schemaPath)) {
-            $sql = file_get_contents($schemaPath);
-            foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
-                if ($stmt !== '') {
-                    try {
-                        $pdo->exec($stmt);
-                    } catch (\PDOException $e) {
-                        // Skip "table already exists" errors on re-provisioning
-                        if ($e->getCode() !== '42S01') {
-                            throw $e;
-                        }
+        $sql = file_get_contents($schemaPath);
+        $sql = str_replace('{{PREFIX}}', $tablePrefix, $sql);
+
+        $pdo = $this->getTenantPdo();
+
+        foreach (array_filter(array_map('trim', explode(';', $sql))) as $stmt) {
+            if ($stmt !== '') {
+                try {
+                    $pdo->exec($stmt);
+                } catch (\PDOException $e) {
+                    // Skip "table already exists" on re-provisioning
+                    if ($e->getCode() !== '42S01') {
+                        throw $e;
                     }
                 }
             }
         }
 
-        // Write tenant identity
-        $pdo->exec("INSERT IGNORE INTO settings (`key`, `value`) VALUES ('tenant_uuid', " . $pdo->quote($tenantUuid) . ")");
+        // Write tenant identity into the prefix'd settings table
+        $pdo->exec(
+            "INSERT IGNORE INTO `{$tablePrefix}settings` (`key`, `value`) "
+            . "VALUES ('tenant_uuid', " . $pdo->quote($tenantUuid) . ")"
+        );
     }
 
     /**
-     * Create the initial admin user in the tenant database.
+     * Create the initial admin user in the tenant's prefixed tables.
      */
     private function createTenantAdmin(
-        string $dbName,
+        string $tablePrefix,
         string $practiceName,
         string $ownerName,
         string $email,
         string $password
     ): void {
-        $host     = $this->config->get('tenant_db.host');
-        $port     = (int)$this->config->get('tenant_db.port');
-        $username = $this->config->get('tenant_db.username');
-        $passwd   = $this->config->get('tenant_db.password');
-
-        $safe = '`' . str_replace('`', '``', $dbName) . '`';
-        $dsn  = "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4";
-        $pdo  = new PDO($dsn, $username, $passwd, [
-            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        ]);
-
+        $pdo   = $this->getTenantPdo();
         $hash  = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
         $parts = explode(' ', trim($ownerName), 2);
         $first = $parts[0];
         $last  = $parts[1] ?? '';
 
-        $stmt = $pdo->prepare(
-            "INSERT INTO users (first_name, last_name, email, password, role, is_active, created_at)
+        $pdo->prepare(
+            "INSERT INTO `{$tablePrefix}users`
+             (first_name, last_name, email, password, role, is_active, created_at)
              VALUES (?, ?, ?, ?, 'admin', 1, NOW())"
-        );
-        $stmt->execute([$first, $last, $email, $hash]);
+        )->execute([$first, $last, $email, $hash]);
 
-        // Set practice name in settings
-        $pdo->prepare("INSERT INTO settings (`key`, `value`) VALUES ('company_name', ?) ON DUPLICATE KEY UPDATE `value` = ?")
-            ->execute([$practiceName, $practiceName]);
+        $pdo->prepare(
+            "INSERT INTO `{$tablePrefix}settings` (`key`, `value`)
+             VALUES ('company_name', ?)
+             ON DUPLICATE KEY UPDATE `value` = ?"
+        )->execute([$practiceName, $practiceName]);
+    }
+
+    /**
+     * Returns a PDO connection to the shared tenant database.
+     */
+    private function getTenantPdo(): PDO
+    {
+        $host     = $this->config->get('tenant_db.host');
+        $port     = (int)$this->config->get('tenant_db.port', 3306);
+        $dbName   = $this->config->get('tenant_db.database');
+        $username = $this->config->get('tenant_db.username');
+        $password = $this->config->get('tenant_db.password');
+
+        return new PDO(
+            "mysql:host={$host};port={$port};dbname={$dbName};charset=utf8mb4",
+            $username,
+            $password,
+            [
+                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            ]
+        );
     }
 
     /**
