@@ -173,17 +173,14 @@ class TenantProvisioningService
         string $email,
         string $password
     ): void {
-        $pdo   = $this->getTenantPdo();
-        $hash  = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-        $parts = explode(' ', trim($ownerName), 2);
-        $first = $parts[0];
-        $last  = $parts[1] ?? '';
+        $pdo  = $this->getTenantPdo();
+        $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
 
         $pdo->prepare(
             "INSERT INTO `{$tablePrefix}users`
-             (first_name, last_name, email, password, role, is_active, created_at)
-             VALUES (?, ?, ?, ?, 'admin', 1, NOW())"
-        )->execute([$first, $last, $email, $hash]);
+             (name, email, password, role, active, created_at)
+             VALUES (?, ?, ?, 'admin', 1, NOW())"
+        )->execute([$ownerName, $email, $hash]);
 
         $pdo->prepare(
             "INSERT INTO `{$tablePrefix}settings` (`key`, `value`)

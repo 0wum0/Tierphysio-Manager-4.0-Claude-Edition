@@ -93,9 +93,10 @@ class TenantRepository
 
     public function setTablePrefix(int $id, string $tablePrefix): void
     {
+        $subdomain = rtrim($tablePrefix, '_');
         $this->db->execute(
-            "UPDATE tenants SET table_prefix = ?, db_created = 1 WHERE id = ?",
-            [$tablePrefix, $id]
+            "UPDATE tenants SET table_prefix = ?, db_created = 1, subdomain = ? WHERE id = ?",
+            [$tablePrefix, $subdomain, $id]
         );
     }
 
