@@ -21,7 +21,7 @@
             </thead>
             <tbody>
                 {% for plan in plans %}
-                {% set features = plan.features|json_decode ?? [] %}
+                {% set features = plan.features|json_decode|default([]) %}
                 <tr>
                     <td class="px-4">
                         <div class="fw-semibold">{{ plan.name }}</div>

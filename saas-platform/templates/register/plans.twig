@@ -12,7 +12,7 @@
 
         <div class="row g-4 justify-content-center">
             {% for plan in plans %}
-            {% set features = plan.features|json_decode ?? [] %}
+            {% set features = plan.features|json_decode|default([]) %}
             {% set isPro = plan.slug == 'pro' %}
             <div class="col-md-4">
                 <div class="card h-100 position-relative {{ isPro ? 'border-primary' : '' }}" style="{{ isPro ? 'border-color:#2563eb!important;' : '' }}">
