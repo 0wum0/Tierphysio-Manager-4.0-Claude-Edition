@@ -12,7 +12,8 @@ abstract class Repository
 
     public function __construct(Database $db)
     {
-        $this->db = $db;
+        $this->db    = $db;
+        $this->table = $db->getPrefix() . $this->table;
     }
 
     public function findById(int|string $id): array|false

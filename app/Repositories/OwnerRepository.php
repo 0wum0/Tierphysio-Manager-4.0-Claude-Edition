@@ -26,13 +26,15 @@ class OwnerRepository extends Repository
             $params = ["%{$search}%", "%{$search}%", "%{$search}%", "%{$search}%"];
         }
 
-        $total  = (int)$this->db->fetchColumn("SELECT COUNT(*) FROM owners {$where}", $params);
+        $t_owners   = $this->db->t('owners');
+        $t_patients = $this->db->t('patients');
+        $total  = (int)$this->db->fetchColumn("SELECT COUNT(*) FROM {$t_owners} {$where}", $params);
         $offset = ($page - 1) * $perPage;
 
         $items = $this->db->fetchAll(
             "SELECT o.*, COUNT(p.id) AS animal_count
-             FROM owners o
-             LEFT JOIN patients p ON p.owner_id = o.id
+             FROM {$t_owners} o
+             LEFT JOIN {$t_patients} p ON p.owner_id = o.id
              {$where}
              GROUP BY o.id
              ORDER BY o.last_name ASC, o.first_name ASC
@@ -54,7 +56,7 @@ class OwnerRepository extends Repository
     public function findAll(string $orderBy = 'last_name', string $direction = 'ASC'): array
     {
         return $this->db->fetchAll(
-            "SELECT * FROM owners ORDER BY `{$orderBy}` {$direction}, first_name {$direction}"
+            "SELECT * FROM {$this->db->t('owners')} ORDER BY `{$orderBy}` {$direction}, first_name {$direction}"
         );
     }
 }

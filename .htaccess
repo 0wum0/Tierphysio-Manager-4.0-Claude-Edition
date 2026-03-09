@@ -1,9 +1,15 @@
 Options -Indexes
 RewriteEngine On
 
+# ── Wildcard subdomain support ─────────────────────────────────────────────
+# All subdomains (e.g. mustermann.tp.makeit.uno) are served by the same
+# installation. The TenantResolver reads HTTP_HOST and sets the DB prefix.
+# No special rewrite needed — just pass everything through to the router.
+# NOTE: On Hostinger, add a Wildcard DNS record: *.tp.makeit.uno → same IP
+
 # Block direct access to sensitive files and directories
 RewriteRule ^(\.env|composer\.(json|lock)|\.git) - [F,L]
-RewriteRule ^(app|lang|migrations|templates|plugins)/ - [F,L]
+RewriteRule ^(app|lang|migrations|templates|plugins|saas-platform)/ - [F,L]
 
 # Serve storage/uploads/ and storage/patients/ directly (images, logos)
 RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f

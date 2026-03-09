@@ -13,11 +13,32 @@ class Database
 {
     private PDO $pdo;
     private Config $config;
+    private string $prefix = '';
 
     public function __construct(Config $config)
     {
         $this->config = $config;
+        $this->prefix = $config->get('db.prefix', '');
         $this->connect();
+    }
+
+    /**
+     * Returns the prefixed table name. Use in all SQL queries.
+     * e.g. $this->db->t('users') => 'tpm3_users'
+     */
+    public function t(string $table): string
+    {
+        return $this->prefix . $table;
+    }
+
+    public function getPrefix(): string
+    {
+        return $this->prefix;
+    }
+
+    public function setPrefix(string $prefix): void
+    {
+        $this->prefix = $prefix;
     }
 
     private function connect(): void

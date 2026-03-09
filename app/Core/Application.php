@@ -11,6 +11,7 @@ use App\Core\Session;
 use App\Core\View;
 use App\Core\PluginManager;
 use App\Core\Translator;
+use App\Core\TenantResolver;
 use Dotenv\Dotenv;
 
 class Application
@@ -58,7 +59,11 @@ class Application
 
         if ($config->get('app.installed', false)) {
             $db = new Database($config);
+            // Resolve tenant from subdomain (sets table prefix on $db)
+            $tenantResolver = new TenantResolver($config, $db);
+            $tenantResolver->resolve();
             $this->container->singleton(Database::class, fn() => $db);
+            $this->container->instance(TenantResolver::class, $tenantResolver);
         }
 
         $view = new View($this->rootPath . '/templates', $config, $session, $translator);

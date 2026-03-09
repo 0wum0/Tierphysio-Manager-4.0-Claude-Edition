@@ -35,6 +35,7 @@ class Config
                 'username' => $_ENV['DB_USERNAME'] ?? 'root',
                 'password' => $_ENV['DB_PASSWORD'] ?? '',
                 'version'  => (int)($_ENV['DB_VERSION'] ?? 0),
+                'prefix'   => $_ENV['TABLE_PREFIX'] ?? '',
             ],
             'session' => [
                 'lifetime' => (int)($_ENV['SESSION_LIFETIME'] ?? 10080),

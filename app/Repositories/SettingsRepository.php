@@ -19,21 +19,21 @@ class SettingsRepository extends Repository
 
     public function get(string $key, mixed $default = null): mixed
     {
-        $row = $this->db->fetch("SELECT value FROM settings WHERE `key` = ?", [$key]);
+        $row = $this->db->fetch("SELECT value FROM {$this->db->t('settings')} WHERE `key` = ?", [$key]);
         return $row !== false ? $row['value'] : $default;
     }
 
     public function set(string $key, string $value): void
     {
         $this->db->execute(
-            "INSERT INTO settings (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)",
+            "INSERT INTO {$this->db->t('settings')} (`key`, value) VALUES (?, ?) ON DUPLICATE KEY UPDATE value = VALUES(value)",
             [$key, $value]
         );
     }
 
     public function all(): array
     {
-        $rows   = $this->db->fetchAll("SELECT `key`, value FROM settings");
+        $rows   = $this->db->fetchAll("SELECT `key`, value FROM {$this->db->t('settings')}");
         $result = [];
         foreach ($rows as $row) {
             $result[$row['key']] = $row['value'];

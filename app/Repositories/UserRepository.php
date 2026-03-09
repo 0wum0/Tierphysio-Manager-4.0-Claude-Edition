@@ -24,7 +24,7 @@ class UserRepository extends Repository
     public function updateLastLogin(int|string $id): void
     {
         $this->db->execute(
-            "UPDATE users SET last_login = NOW() WHERE id = ?",
+            "UPDATE {$this->db->t('users')} SET last_login = NOW() WHERE id = ?",
             [$id]
         );
     }
@@ -32,7 +32,7 @@ class UserRepository extends Repository
     public function findAll(string $orderBy = 'name', string $direction = 'ASC'): array
     {
         return $this->db->fetchAll(
-            "SELECT id, name, email, role, active, last_login, created_at FROM users ORDER BY `{$orderBy}` {$direction}"
+            "SELECT id, name, email, role, active, last_login, created_at FROM {$this->db->t('users')} ORDER BY `{$orderBy}` {$direction}"
         );
     }
 }
