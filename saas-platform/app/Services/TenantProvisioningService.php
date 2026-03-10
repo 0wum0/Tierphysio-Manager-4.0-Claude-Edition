@@ -101,16 +101,11 @@ class TenantProvisioningService
             // 6. Issue license token
             $licenseToken = $this->licenseService->issueToken($tenantId);
 
-            // 7. Send welcome email with tenant-specific subdomain login URL
+            // 7. Send welcome email with tenant-specific path-based login URL
             try {
-                $subdomain = rtrim($tablePrefix, '_');
-                $appUrl    = $this->config->get('app.url', '');
-                $scheme    = parse_url($appUrl, PHP_URL_SCHEME) ?? 'https';
-                $appHost   = parse_url($appUrl, PHP_URL_HOST) ?? '';
-                // Strip saas subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
-                $parts     = explode('.', $appHost);
-                $baseHost  = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
-                $loginUrl  = $scheme . '://' . $subdomain . '.' . $baseHost;
+                $subdomain       = rtrim($tablePrefix, '_');
+                $practiceBaseUrl = rtrim($this->config->get('practice.url', ''), '/');
+                $loginUrl        = $practiceBaseUrl !== '' ? $practiceBaseUrl . '/' . $subdomain : '';
 
                 $this->mailService->sendWelcome(
                     $data['email'],

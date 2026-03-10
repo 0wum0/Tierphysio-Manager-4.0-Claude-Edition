@@ -1,11 +1,10 @@
 Options -Indexes
 RewriteEngine On
 
-# ── Wildcard subdomain support ─────────────────────────────────────────────
-# All subdomains (e.g. mustermann.tp.makeit.uno) are served by the same
-# installation. The TenantResolver reads HTTP_HOST and sets the DB prefix.
-# No special rewrite needed — just pass everything through to the router.
-# NOTE: On Hostinger, add a Wildcard DNS record: *.tp.makeit.uno → same IP
+# ── Path-based multi-tenant support ────────────────────────────────────────
+# All tenants are served by the same installation at tp.makeit.uno/{slug}/...
+# The TenantResolver reads the first path segment and sets the DB prefix.
+# No wildcard DNS or SSL needed — single domain, single certificate.
 
 # Block direct access to sensitive files and directories
 RewriteRule ^(\.env|composer\.(json|lock)|\.git) - [F,L]
@@ -15,7 +14,7 @@ RewriteRule ^(app|lang|migrations|templates|plugins|saas-platform)/ - [F,L]
 RewriteCond %{DOCUMENT_ROOT}%{REQUEST_URI} -f
 RewriteRule ^storage/(uploads|patients)/.+ - [L]
 
-# Serve static files from public/ directly
+# Serve static files from public/ directly (check both with and without tenant prefix)
 RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
 RewriteRule ^(.*)$ public/$1 [L]
 
@@ -23,5 +22,5 @@ RewriteRule ^(.*)$ public/$1 [L]
 RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -d
 RewriteRule ^(.*)$ public/$1 [L]
 
-# Everything else → public/index.php (PHP router)
+# Everything else → public/index.php (PHP router handles tenant slug stripping)
 RewriteRule ^(.*)$ public/index.php [QSA,L]

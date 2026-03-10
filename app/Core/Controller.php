@@ -10,6 +10,7 @@ abstract class Controller
     protected Session $session;
     protected Config $config;
     protected Translator $translator;
+    protected string $tenantBasePath = '';
 
     public function __construct(
         View $view,
@@ -21,6 +22,12 @@ abstract class Controller
         $this->session    = $session;
         $this->config     = $config;
         $this->translator = $translator;
+
+        // Tenant base path — set by TenantResolver before controllers are instantiated
+        $slug = $_SESSION['_tenant_slug'] ?? '';
+        if ($slug !== '') {
+            $this->tenantBasePath = '/' . $slug;
+        }
     }
 
     protected function render(string $template, array $data = []): void
@@ -30,8 +37,17 @@ abstract class Controller
 
     protected function redirect(string $url): void
     {
+        // Prepend tenant base path for relative URLs
+        if ($this->tenantBasePath !== '' && str_starts_with($url, '/') && !str_starts_with($url, $this->tenantBasePath)) {
+            $url = $this->tenantBasePath . $url;
+        }
         header('Location: ' . $url);
         exit;
+    }
+
+    protected function tenantPath(string $path = ''): string
+    {
+        return $this->tenantBasePath . '/' . ltrim($path, '/');
     }
 
     protected function redirectBack(string $fallback = '/'): void

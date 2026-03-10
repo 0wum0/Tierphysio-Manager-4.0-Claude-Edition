@@ -79,6 +79,19 @@ class Router
             $method = strtoupper($_POST['_method']);
         }
 
+        // Strip tenant slug prefix from URI for path-based multi-tenancy
+        // e.g. /tpm6/dashboard → /dashboard
+        if (isset($this->container)) {
+            try {
+                $resolver = $this->container->get(\App\Core\TenantResolver::class);
+                $slug     = $resolver->getSlug();
+                if ($slug !== '' && str_starts_with($uri, '/' . $slug)) {
+                    $stripped = substr($uri, strlen('/' . $slug));
+                    $uri      = $stripped === '' ? '/' : $stripped;
+                }
+            } catch (\Throwable) {}
+        }
+
         foreach ($this->routes as $route) {
             if ($route['method'] !== $method) {
                 continue;

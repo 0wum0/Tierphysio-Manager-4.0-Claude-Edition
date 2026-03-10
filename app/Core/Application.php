@@ -57,17 +57,25 @@ class Application
         $translator = new Translator($config->get('app.locale', 'de'), $this->rootPath . '/lang');
         $this->container->singleton(Translator::class, fn() => $translator);
 
+        $view = new View($this->rootPath . '/templates', $config, $session, $translator);
+        $this->container->singleton(View::class, fn() => $view);
+
         if ($config->get('app.installed', false)) {
             $db = new Database($config);
-            // Resolve tenant from subdomain (sets table prefix on $db)
+            // Resolve tenant from URL path segment (sets table prefix on $db)
             $tenantResolver = new TenantResolver($config, $db);
             $tenantResolver->resolve();
             $this->container->singleton(Database::class, fn() => $db);
             $this->container->instance(TenantResolver::class, $tenantResolver);
-        }
 
-        $view = new View($this->rootPath . '/templates', $config, $session, $translator);
-        $this->container->singleton(View::class, fn() => $view);
+            // Expose tenant base path to all Twig templates as {{ base_path }}
+            $slug = $tenantResolver->getSlug();
+            $view->addGlobal('base_path', $slug !== '' ? '/' . $slug : '');
+            $view->addGlobal('tenant_slug', $slug);
+        } else {
+            $view->addGlobal('base_path', '');
+            $view->addGlobal('tenant_slug', '');
+        }
 
         $pluginManager = new PluginManager($this->rootPath . '/plugins', $this->container);
         $this->container->singleton(PluginManager::class, fn() => $pluginManager);

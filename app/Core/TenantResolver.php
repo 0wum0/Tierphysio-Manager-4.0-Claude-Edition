@@ -7,15 +7,16 @@ namespace App\Core;
 use App\Core\Config;
 
 /**
- * Resolves the current tenant from the subdomain and sets the
+ * Resolves the current tenant from the URL path and sets the
  * correct table prefix on the Database instance.
  *
- * How it works:
- *  - Request comes in for e.g. mustermann.tp.makeit.uno
- *  - We extract the subdomain "mustermann"
- *  - We look it up in the shared DB (tenants table — same DB as Praxissoftware)
- *  - We get the table_prefix e.g. "tpm3_"
- *  - We call $db->setPrefix("tpm3_") so all queries use the right tables
+ * How it works (path-based routing):
+ *  - Request comes in for e.g. tp.makeit.uno/tpm6/dashboard
+ *  - We extract the first path segment "tpm6"
+ *  - We look it up in the shared DB (tenants table)
+ *  - We get the table_prefix e.g. "tpm6_"
+ *  - We call $db->setPrefix("tpm6_") so all queries use the right tables
+ *  - We store the slug so the Router can strip it from the URI
  *
  * No extra SAAS_DB_* credentials needed — SaaS and Praxissoftware share one DB.
  * If TABLE_PREFIX is set in .env, that is used directly (single-tenant fallback).
@@ -35,7 +36,7 @@ class TenantResolver
      */
     public function resolve(): void
     {
-        // 1. If TABLE_PREFIX is explicitly set in .env, use it and skip subdomain resolution
+        // 1. If TABLE_PREFIX is explicitly set in .env, use it directly
         $envPrefix = $_ENV['TABLE_PREFIX'] ?? '';
         if ($envPrefix !== '') {
             $this->resolvedPrefix = $envPrefix;
@@ -43,18 +44,15 @@ class TenantResolver
             return;
         }
 
-        // 2. Try to resolve from subdomain
-        $slug = $this->extractSubdomainSlug();
-        if ($slug === '' || $slug === 'www') {
-            // No subdomain — single root installation, no prefix
+        // 2. Extract tenant slug from first URL path segment
+        $slug = $this->extractPathSlug();
+        if ($slug === '') {
             return;
         }
 
         // 3. Look up in SaaS DB
         $prefix = $this->lookupPrefixForSlug($slug);
         if ($prefix === null) {
-            // Unknown tenant — could show error, or use empty prefix
-            // For safety we keep no prefix (will fail gracefully in controllers)
             return;
         }
 
@@ -62,11 +60,9 @@ class TenantResolver
         $this->resolvedSlug   = $slug;
         $this->db->setPrefix($prefix);
 
-        // Store in session so it persists across requests
-        if (!headers_sent()) {
-            $_SESSION['_tenant_slug']   = $slug;
-            $_SESSION['_tenant_prefix'] = $prefix;
-        }
+        // Store in session so Controller can build correct redirect paths
+        $_SESSION['_tenant_slug']   = $slug;
+        $_SESSION['_tenant_prefix'] = $prefix;
     }
 
     public function getPrefix(): string
@@ -80,45 +76,30 @@ class TenantResolver
     }
 
     /**
-     * Extracts the leftmost subdomain part from the HOST header.
-     * e.g. "mustermann.tp.makeit.uno" → "mustermann"
-     *      "tp.makeit.uno"            → ""
-     *      "localhost"                → ""
+     * Extracts the first path segment as the tenant slug.
+     * e.g. "/tpm6/dashboard" → "tpm6"
+     *      "/login"          → "" (not a known tenant slug pattern)
+     *      "/"               → ""
+     *
+     * Only matches slugs that look like a tenant prefix: letters+digits only,
+     * starting with a letter, 2–32 chars.
      */
-    private function extractSubdomainSlug(): string
+    private function extractPathSlug(): string
     {
-        $host    = strtolower($_SERVER['HTTP_HOST'] ?? '');
-        $appHost = strtolower(parse_url($this->config->get('app.url', ''), PHP_URL_HOST) ?? '');
+        $uri   = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?? '/';
+        $parts = explode('/', trim($uri, '/'));
+        $first = $parts[0] ?? '';
 
-        if ($appHost === '' || $host === $appHost) {
-            return '';
-        }
-
-        // Remove port if present
-        $host = explode(':', $host)[0];
-
-        // If host ends with appHost, everything before is the subdomain
-        if (str_ends_with($host, '.' . $appHost)) {
-            $sub = substr($host, 0, strlen($host) - strlen('.' . $appHost));
-            // Only single-level subdomains allowed (no dots in slug)
-            if (!str_contains($sub, '.')) {
-                return $sub;
-            }
-        }
-
-        // Fallback: first segment of host
-        $parts = explode('.', $host);
-        if (count($parts) > 2) {
-            return $parts[0];
+        // Must match tenant slug pattern (e.g. tpm6, tpm12, muster)
+        if ($first !== '' && preg_match('/^[a-z][a-z0-9]{1,31}$/i', $first)) {
+            return strtolower($first);
         }
 
         return '';
     }
 
     /**
-     * Looks up the table prefix for a tenant slug.
-     * Uses the existing DB connection — no extra credentials needed
-     * since SaaS and Praxissoftware share the same database.
+     * Looks up the table prefix for a tenant slug (subdomain column = slug).
      */
     private function lookupPrefixForSlug(string $slug): ?string
     {

@@ -309,14 +309,13 @@ class TenantController extends Controller
             return '';
         }
 
-        $appUrl   = $this->config->get('app.url', '');
-        $scheme   = parse_url($appUrl, PHP_URL_SCHEME) ?? 'https';
-        $appHost  = parse_url($appUrl, PHP_URL_HOST) ?? '';
-        $parts    = explode('.', $appHost);
-        // Strip the SaaS subdomain (e.g. "manager.tp.makeit.uno" → "tp.makeit.uno")
-        $baseHost = count($parts) > 2 ? implode('.', array_slice($parts, 1)) : $appHost;
+        // Path-based URL: https://tp.makeit.uno/tpm6
+        $practiceBaseUrl = rtrim($this->config->get('practice.url', ''), '/');
+        if ($practiceBaseUrl === '') {
+            return '';
+        }
 
-        return $scheme . '://' . $tenant['subdomain'] . '.' . $baseHost;
+        return $practiceBaseUrl . '/' . $tenant['subdomain'];
     }
 
     private function validateTenantData(array $data): array
