@@ -197,7 +197,7 @@
 
             <div class="inst-actions">
                 {% if all_ok %}
-                    <a href="/install/schritt/2" class="inst-btn inst-btn-primary">
+                    <a href="{{ base_path }}/install/schritt/2" class="inst-btn inst-btn-primary">
                         Weiter
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="9 18 15 12 9 6"/></svg>
                     </a>
@@ -205,7 +205,7 @@
                     <button class="inst-btn inst-btn-primary" disabled>
                         Voraussetzungen nicht erfüllt
                     </button>
-                    <a href="/install" class="inst-btn inst-btn-ghost">
+                    <a href="{{ base_path }}/install" class="inst-btn inst-btn-ghost">
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="1 4 1 10 7 10"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.51 15a9 9 0 1 0 .49-3.63"/></svg>
                         Erneut prüfen
                     </a>
@@ -223,7 +223,7 @@
                 <p class="inst-step-desc">Geben Sie die Zugangsdaten Ihrer MySQL/MariaDB-Datenbank ein. Die Datenbank muss bereits vorhanden sein oder der Benutzer muss die Berechtigung haben, sie anzulegen.</p>
             </div>
 
-            <form action="/install/schritt/2" method="POST" id="install-form" novalidate>
+            <form action="{{ base_path }}/install/schritt/2" method="POST" id="install-form" novalidate>
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
                 <div class="inst-form-card">
@@ -275,7 +275,7 @@
                 </div>
 
                 <div class="inst-actions">
-                    <a href="/install/schritt/1" class="inst-btn inst-btn-ghost">
+                    <a href="{{ base_path }}/install/schritt/1" class="inst-btn inst-btn-ghost">
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
                         Zurück
                     </a>
@@ -297,7 +297,7 @@
                 <p class="inst-step-desc">Erstellen Sie Ihr Administrator-Konto und konfigurieren Sie die grundlegenden Einstellungen der Anwendung.</p>
             </div>
 
-            <form action="/install/schritt/3" method="POST" id="admin-form" novalidate>
+            <form action="{{ base_path }}/install/schritt/3" method="POST" id="admin-form" novalidate>
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
                 <div class="inst-form-card">
@@ -366,7 +366,7 @@
                 </div>
 
                 <div class="inst-actions">
-                    <a href="/install/schritt/2" class="inst-btn inst-btn-ghost">
+                    <a href="{{ base_path }}/install/schritt/2" class="inst-btn inst-btn-ghost">
                         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
                         Zurück
                     </a>
@@ -412,7 +412,7 @@
                     <span>Aus Sicherheitsgründen empfehlen wir, den <code>/install</code>-Pfad nach der Installation zu sperren oder den Installer-Ordner zu löschen.</span>
                 </div>
 
-                <form action="/install/finalize" method="POST" style="width:100%;margin-top:2rem;">
+                <form action="{{ base_path }}/install/finalize" method="POST" style="width:100%;margin-top:2rem;">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                     <button type="submit" class="inst-btn inst-btn-primary inst-btn-lg" style="width:100%;justify-content:center;">
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>

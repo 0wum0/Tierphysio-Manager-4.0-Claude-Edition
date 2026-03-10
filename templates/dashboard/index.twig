@@ -11,11 +11,11 @@
         <p class="page-subtitle">{{ 'now'|date('l, d. F Y') }}</p>
     </div>
     <div class="d-flex gap-2 flex-wrap align-items-center">
-        <a href="/patienten" class="btn btn-outline-secondary btn-sm">
+        <a href="{{ base_path }}/patienten" class="btn btn-outline-secondary btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
             {{ t('dashboard.new_patient') }}
         </a>
-        <a href="/rechnungen/erstellen" class="btn btn-primary btn-sm">
+        <a href="{{ base_path }}/rechnungen/erstellen" class="btn btn-primary btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             {{ t('dashboard.new_invoice') }}
         </a>
@@ -57,7 +57,7 @@
                         <small class="text-muted fw-normal ms-2" style="font-size:.75rem;">kommende Termine</small>
                     </h2>
                     <div class="panel-toolbar ms-auto d-flex align-items-center gap-2">
-                        <a href="/kalender" class="btn btn-outline-primary btn-sm">Kalender öffnen</a>
+                        <a href="{{ base_path }}/kalender" class="btn btn-outline-primary btn-sm">Kalender öffnen</a>
                         <button class="btn btn-panel" data-action="panel-collapse" title="Einklappen"><svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#minus"></use></svg></button>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                             {% set is_today = appt_date == today_str %}
                             {% set appt_color = appt.treatment_color ?? '#4f7cff' %}
                             <div class="col-12 col-sm-6 col-xl-3">
-                                <a href="/kalender" class="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none border-bottom border-end"
+                                <a href="{{ base_path }}/kalender" class="d-flex align-items-center gap-3 px-3 py-2 text-decoration-none border-bottom border-end"
                                    style="{% if is_today %}background:rgba(79,124,255,0.05);{% endif %}min-height:64px;">
                                     <div class="flex-shrink-0 d-flex flex-column align-items-center justify-content-center rounded-2"
                                          style="width:44px;height:44px;background:{{ appt_color }}18;border:1px solid {{ appt_color }}40;">
@@ -216,7 +216,7 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-800 fs-4" style="color:#06b6d4;">{{ stats.open_count }}</span>
-                                    <a href="/rechnungen?status=open" class="btn btn-outline-info btn-sm">→</a>
+                                    <a href="{{ base_path }}/rechnungen?status=open" class="btn btn-outline-info btn-sm">→</a>
                                 </div>
                             </div>
                             <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3{% if stats.overdue_count > 0 %} border-start border-danger border-3{% endif %}">
@@ -226,7 +226,7 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-800 fs-4" style="color:{% if stats.overdue_count > 0 %}#ef4444{% else %}var(--bs-secondary-color){% endif %};">{{ stats.overdue_count }}</span>
-                                    <a href="/rechnungen?status=overdue" class="btn btn-outline-danger btn-sm">→</a>
+                                    <a href="{{ base_path }}/rechnungen?status=overdue" class="btn btn-outline-danger btn-sm">→</a>
                                 </div>
                             </div>
                             <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
@@ -246,7 +246,7 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-800 fs-4" style="color:#4f7cff;">{{ stats.total_patients }}</span>
-                                    <a href="/patienten" class="btn btn-outline-primary btn-sm">→</a>
+                                    <a href="{{ base_path }}/patienten" class="btn btn-outline-primary btn-sm">→</a>
                                 </div>
                             </div>
                             <div class="list-group-item d-flex align-items-center justify-content-between px-3 py-3">
@@ -256,7 +256,7 @@
                                 </div>
                                 <div class="d-flex align-items-center gap-2">
                                     <span class="fw-800 fs-4" style="color:#a855f7;">{{ stats.total_owners }}</span>
-                                    <a href="/tierhalter" class="btn btn-sm" style="background:rgba(168,85,247,0.12);color:#a855f7;border:1px solid rgba(168,85,247,0.25);">→</a>
+                                    <a href="{{ base_path }}/tierhalter" class="btn btn-sm" style="background:rgba(168,85,247,0.12);color:#a855f7;border:1px solid rgba(168,85,247,0.25);">→</a>
                                 </div>
                             </div>
                         </div>
@@ -353,20 +353,20 @@
                 </div>
                 <div class="panel-container">
                     <div class="panel-content d-flex flex-column gap-2">
-                        <a href="/patienten" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                        <a href="{{ base_path }}/patienten" class="btn btn-light d-flex align-items-center gap-2 text-start">
                             <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(239,68,68,0.12);color:#ef4444;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_patient') }}</span>
                         </a>
-                        <a href="/tierhalter" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                        <a href="{{ base_path }}/tierhalter" class="btn btn-light d-flex align-items-center gap-2 text-start">
                             <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(168,85,247,0.12);color:#a855f7;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_owner') }}</span>
                         </a>
-                        <a href="/rechnungen/erstellen" class="btn btn-light d-flex align-items-center gap-2 text-start">
+                        <a href="{{ base_path }}/rechnungen/erstellen" class="btn btn-light d-flex align-items-center gap-2 text-start">
                             <span class="d-inline-flex align-items-center justify-content-center rounded-circle" style="width:32px;height:32px;background:rgba(79,124,255,0.12);color:#4f7cff;flex-shrink:0;"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" points="14 2 14 8 20 8"/></svg></span>
                             <span class="fw-500 fs-sm">{{ t('dashboard.new_invoice') }}</span>
                         </a>
                         {% if stats.overdue_count > 0 %}
-                        <a href="/rechnungen?status=overdue" class="btn btn-danger d-flex align-items-center gap-2">
+                        <a href="{{ base_path }}/rechnungen?status=overdue" class="btn btn-danger d-flex align-items-center gap-2">
                             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                             <span>{{ stats.overdue_count }} {{ t('dashboard.overdue_invoices') }}</span>
                         </a>

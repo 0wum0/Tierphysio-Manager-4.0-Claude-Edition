@@ -3,7 +3,7 @@
 {% block content %}
 <div class="page-header">
     <div class="flex items-center gap-3">
-        <a href="/rechnungen" class="btn btn-secondary btn-sm">
+        <a href="{{ base_path }}/rechnungen" class="btn btn-secondary btn-sm">
             <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
             {{ t('invoices.back_to_list') }}
         </a>
@@ -11,7 +11,7 @@
     </div>
 </div>
 
-<form action="/rechnungen" method="POST" id="invoice-form">
+<form action="{{ base_path }}/rechnungen" method="POST" id="invoice-form">
     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
     <input type="hidden" name="_send_email" id="invoice-send-email-flag" value="0">
 
@@ -184,7 +184,7 @@
                         Speichern &amp; E-Mail senden
                     </button>
                 </div>
-                <a href="/rechnungen" class="btn btn-secondary w-full mt-2">{{ t('common.cancel') }}</a>
+                <a href="{{ base_path }}/rechnungen" class="btn btn-secondary w-full mt-2">{{ t('common.cancel') }}</a>
             </div>
         </div>
     </div>

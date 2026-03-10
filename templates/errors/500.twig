@@ -24,7 +24,7 @@
                 <pre style="font-size:0.75rem;color:var(--text-secondary);white-space:pre-wrap;word-break:break-all;">{{ error_message }}</pre>
             </div>
         {% endif %}
-        <a href="/dashboard" class="btn btn-primary">
+        <a href="{{ base_path }}/dashboard" class="btn btn-primary">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 18 9 12 15 6"/></svg>
             {% if t is defined %}{{ t('errors.back_home') }}{% else %}Zur Startseite{% endif %}
         </a>

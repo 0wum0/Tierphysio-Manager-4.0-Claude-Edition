@@ -1,8 +1,8 @@
-﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
 
-{# ── Page Header (page-header class is visible in bridge.css) ── #}
+{# -- Page Header (page-header class is visible in bridge.css) -- #}
 <div class="page-header">
     <div>
         <h1 class="page-title">{{ t('owners.title') }}</h1>
@@ -14,14 +14,14 @@
     </button>
 </div>
 
-{# ── Panel ── #}
+{# -- Panel -- #}
 <div class="panel">
 
     {# Panel Header mit Suche #}
     <div class="panel-hdr">
-        <h2>{{ t('owners.title') }} <span class="fw-300"><i>{{ pagination.total }} Einträge</i></span></h2>
+        <h2>{{ t('owners.title') }} <span class="fw-300"><i>{{ pagination.total }} Eintr�ge</i></span></h2>
         <div class="panel-toolbar">
-            <form method="GET" action="/tierhalter" class="d-flex align-items-center gap-2 mb-0">
+            <form method="GET" action="{{ base_path }}/tierhalter" class="d-flex align-items-center gap-2 mb-0">
                 <div class="input-group input-group-sm" style="width:240px;">
                     <span class="input-group-text">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.65" y2="16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -30,7 +30,7 @@
                            placeholder="{{ t('owners.search_placeholder') }}" value="{{ search }}">
                 </div>
                 <button type="submit" class="btn btn-sm btn-secondary">Suchen</button>
-                {% if search %}<a href="/tierhalter" class="btn btn-sm btn-outline-secondary">✕</a>{% endif %}
+                {% if search %}<a href="{{ base_path }}/tierhalter" class="btn btn-sm btn-outline-secondary">?</a>{% endif %}
             </form>
         </div>
     </div>
@@ -54,7 +54,7 @@
                     {% for owner in owners %}
                     <tr style="vertical-align:middle;">
                         <td>
-                            <a href="/tierhalter/{{ owner.id }}" class="d-flex align-items-center gap-3 text-decoration-none text-body">
+                            <a href="{{ base_path }}/tierhalter/{{ owner.id }}" class="d-flex align-items-center gap-3 text-decoration-none text-body">
                                 <span class="avatar-placeholder flex-shrink-0"
                                       style="width:36px;height:36px;font-size:0.78rem;">
                                     {{ owner.first_name|first|upper }}{{ owner.last_name|first|upper }}
@@ -73,11 +73,11 @@
                         <td class="fs-sm">
                             {% if owner.email %}
                                 <a href="mailto:{{ owner.email }}" class="text-primary">{{ owner.email }}</a>
-                            {% else %}<span class="text-muted">—</span>{% endif %}
+                            {% else %}<span class="text-muted">�</span>{% endif %}
                         </td>
-                        <td class="fs-sm">{{ owner.phone ?: '<span class="text-muted">—</span>' }}</td>
+                        <td class="fs-sm">{{ owner.phone ?: '<span class="text-muted">�</span>' }}</td>
                         <td class="fs-sm">
-                            {{ owner.zip ? owner.zip ~ ' ' ~ owner.city : (owner.city ?: '<span class="text-muted">—</span>') }}
+                            {{ owner.zip ? owner.zip ~ ' ' ~ owner.city : (owner.city ?: '<span class="text-muted">�</span>') }}
                         </td>
                         <td class="text-center">
                             {% set cnt = owner.animal_count ?? 0 %}
@@ -85,10 +85,10 @@
                         </td>
                         <td class="text-end">
                             <div class="d-flex align-items-center justify-content-end gap-1">
-                                <a href="/tierhalter/{{ owner.id }}" class="btn btn-xs btn-secondary" title="Ansehen">
+                                <a href="{{ base_path }}/tierhalter/{{ owner.id }}" class="btn btn-xs btn-secondary" title="Ansehen">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
                                 </a>
-                                <a href="/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-xs btn-primary" title="Rechnung erstellen">
+                                <a href="{{ base_path }}/rechnungen/erstellen?owner_id={{ owner.id }}" class="btn btn-xs btn-primary" title="Rechnung erstellen">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
                                 </a>
                                 <div class="dropdown">
@@ -96,16 +96,16 @@
                                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.5" fill="currentColor"/><circle cx="12" cy="12" r="1.5" fill="currentColor"/><circle cx="12" cy="19" r="1.5" fill="currentColor"/></svg>
                                     </button>
                                     <ul class="dropdown-menu dropdown-menu-end dropdown-menu-animated">
-                                        <li><a class="dropdown-item" href="/tierhalter/{{ owner.id }}">
+                                        <li><a class="dropdown-item" href="{{ base_path }}/tierhalter/{{ owner.id }}">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><path stroke="currentColor" stroke-width="2" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/></svg>
                                             Profil anzeigen
                                         </a></li>
-                                        <li><a class="dropdown-item" href="/rechnungen/erstellen?owner_id={{ owner.id }}">
+                                        <li><a class="dropdown-item" href="{{ base_path }}/rechnungen/erstellen?owner_id={{ owner.id }}">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><path stroke="currentColor" stroke-width="2" d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" points="14 2 14 8 20 8"/></svg>
                                             Rechnung erstellen
                                         </a></li>
                                         <li><hr class="dropdown-divider"></li>
-                                        <li><a class="dropdown-item" href="/einladungen?prefill_owner={{ owner.id }}">
+                                        <li><a class="dropdown-item" href="{{ base_path }}/einladungen?prefill_owner={{ owner.id }}">
                                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24" class="me-2 text-muted"><line x1="22" y1="2" x2="11" y2="13" stroke="currentColor" stroke-width="2"/><polygon points="22 2 15 22 11 13 2 9 22 2" stroke="currentColor" stroke-width="2" fill="none"/></svg>
                                             Einladung senden
                                         </a></li>
@@ -121,11 +121,11 @@
             {# Pagination #}
             {% if pagination.last_page > 1 %}
             <div class="d-flex align-items-center justify-content-between px-3 py-2 border-top">
-                <span class="fs-sm text-muted">Seite {{ pagination.page }} / {{ pagination.last_page }} &middot; {{ pagination.total }} Einträge</span>
+                <span class="fs-sm text-muted">Seite {{ pagination.page }} / {{ pagination.last_page }} &middot; {{ pagination.total }} Eintr�ge</span>
                 <nav>
                     <ul class="pagination pagination-sm mb-0">
                         <li class="page-item {% if not pagination.has_prev %}disabled{% endif %}">
-                            <a class="page-link" href="?page={{ pagination.page - 1 }}&search={{ search }}">‹</a>
+                            <a class="page-link" href="?page={{ pagination.page - 1 }}&search={{ search }}">�</a>
                         </li>
                         {% for p in 1..pagination.last_page %}
                             {% if p == pagination.page %}
@@ -133,11 +133,11 @@
                             {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
                                 <li class="page-item"><a class="page-link" href="?page={{ p }}&search={{ search }}">{{ p }}</a></li>
                             {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
-                                <li class="page-item disabled"><span class="page-link">…</span></li>
+                                <li class="page-item disabled"><span class="page-link">�</span></li>
                             {% endif %}
                         {% endfor %}
                         <li class="page-item {% if not pagination.has_next %}disabled{% endif %}">
-                            <a class="page-link" href="?page={{ pagination.page + 1 }}&search={{ search }}">›</a>
+                            <a class="page-link" href="?page={{ pagination.page + 1 }}&search={{ search }}">�</a>
                         </li>
                     </ul>
                 </nav>
@@ -148,7 +148,7 @@
             <div class="text-center py-5">
                 <svg width="48" height="48" fill="none" viewBox="0 0 24 24" class="mb-3 text-muted" style="opacity:.3;"><path stroke="currentColor" stroke-width="1.5" d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4" stroke="currentColor" stroke-width="1.5"/><path stroke="currentColor" stroke-width="1.5" d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                 <h5 class="text-muted fw-400">{{ t('owners.no_owners') }}</h5>
-                <p class="text-muted fs-sm mb-4">{{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}</p>
+                <p class="text-muted fs-sm mb-4">{{ search ? 'Keine Ergebnisse f�r "' ~ search ~ '"' : 'Noch keine Tierhalter angelegt.' }}</p>
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-owner">
                     <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                     {{ t('owners.new_owner') }}
@@ -174,7 +174,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
 
-            <form action="/tierhalter" method="POST">
+            <form action="{{ base_path }}/tierhalter" method="POST">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
                 <div class="modal-body">

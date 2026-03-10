@@ -1,4 +1,4 @@
-﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block head %}
 <link href="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.snow.css" rel="stylesheet">
@@ -11,17 +11,17 @@
         <h1 class="page-title">{{ t('patients.title') }}</h1>
         <p class="page-subtitle">{{ pagination.total }} {{ t('common.entries') }}</p>
     </div>
-    <a href="/patienten/neu" class="btn btn-primary">
+    <a href="{{ base_path }}/patienten/neu" class="btn btn-primary">
         <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
         {{ t('patients.new_patient') }}
     </a>
 </div>
 
 
-{# Patient detail, timeline-edit, edit-patient-inline, fileviewer modals are global — see partials/patient-modal-global.twig #}
+{# Patient detail, timeline-edit, edit-patient-inline, fileviewer modals are global � see partials/patient-modal-global.twig #}
 
 {# Search & Filter #}
-<form method="GET" action="/patienten">
+<form method="GET" action="{{ base_path }}/patienten">
     <div class="glass-card" style="padding:1rem;">
         <div class="search-bar">
             <div class="search-input-wrapper" style="flex:1;">
@@ -41,7 +41,7 @@
                 {{ t('common.search') }}
             </button>
             {% if search or filter %}
-                <a href="/patienten" class="btn btn-secondary">{{ t('common.reset') }}</a>
+                <a href="{{ base_path }}/patienten" class="btn btn-secondary">{{ t('common.reset') }}</a>
             {% endif %}
         </div>
     </div>
@@ -69,7 +69,7 @@
                             </span>
                         {% elseif stats and stats.paid_count > 0 %}
                             <span style="background:rgba(25,135,84,0.15);color:#2dbe6c;border:1.5px solid #198754;border-radius:5px;font-size:0.62rem;font-weight:700;padding:0.15rem 0.4rem;white-space:nowrap;">
-                                ✓ bezahlt
+                                ? bezahlt
                             </span>
                         {% endif %}
                     </div>
@@ -77,12 +77,12 @@
                 <div class="patient-card-body">
                     <div class="patient-card-name">{{ patient.name }}</div>
                     <div class="patient-card-species">
-                        {{ patient.species }}{% if patient.breed %} · {{ patient.breed }}{% endif %}
+                        {{ patient.species }}{% if patient.breed %} � {{ patient.breed }}{% endif %}
                     </div>
                     <div class="patient-card-meta">
                         <div class="patient-card-owner">
                             <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4" stroke="currentColor" stroke-width="2"/></svg>
-                            {{ patient.owner_name ?? '—' }}
+                            {{ patient.owner_name ?? '�' }}
                         </div>
                         {% if patient.birth_date %}
                             <span class="text-muted text-xs">{{ patient.birth_date|date_de }}</span>
@@ -107,7 +107,7 @@
                 {% elseif p == 1 or p == pagination.last_page or (p >= pagination.page - 2 and p <= pagination.page + 2) %}
                     <a href="?page={{ p }}&search={{ search }}&filter={{ filter }}" class="page-link">{{ p }}</a>
                 {% elseif p == pagination.page - 3 or p == pagination.page + 3 %}
-                    <span class="page-link disabled">…</span>
+                    <span class="page-link disabled">�</span>
                 {% endif %}
             {% endfor %}
             {% if pagination.has_next %}
@@ -124,7 +124,7 @@
             <svg width="28" height="28" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
         </div>
         <div class="empty-state-title">{{ t('patients.no_patients') }}</div>
-        <div class="empty-state-text mb-4">{{ search ? 'Keine Ergebnisse für "' ~ search ~ '"' : 'Noch keine Patienten angelegt.' }}</div>
+        <div class="empty-state-text mb-4">{{ search ? 'Keine Ergebnisse f�r "' ~ search ~ '"' : 'Noch keine Patienten angelegt.' }}</div>
         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modal-new-patient">{{ t('patients.new_patient') }}</button>
     </div>
 {% endif %}
@@ -138,7 +138,7 @@
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
-        <form action="/patienten" method="POST" class="modal-body">
+        <form action="{{ base_path }}/patienten" method="POST" class="modal-body">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="form-grid form-grid-2">
                 <div class="form-group">
@@ -161,7 +161,7 @@
                     <label class="form-label" for="p-gender">{{ t('patients.gender') }}</label>
                     <select id="p-gender" name="gender" class="form-control">
                         <option value="unbekannt">{{ t('patients.unknown') }}</option>
-                        <option value="männlich">{{ t('patients.male') }}</option>
+                        <option value="m�nnlich">{{ t('patients.male') }}</option>
                         <option value="weiblich">{{ t('patients.female') }}</option>
                     </select>
                 </div>
@@ -187,10 +187,10 @@
             <div class="form-group mt-3">
                 <label class="form-label" for="p-owner">{{ t('patients.owner') }} *</label>
                 <select id="p-owner" name="owner_id" class="form-control" required>
-                    <option value="">— Tierhalter wählen —</option>
+                    <option value="">� Tierhalter w�hlen �</option>
                 </select>
                 <div class="form-hint">
-                    <a href="/tierhalter" target="_blank" style="color:var(--accent)">Neuen Tierhalter anlegen</a>
+                    <a href="{{ base_path }}/tierhalter" target="_blank" style="color:var(--accent)">Neuen Tierhalter anlegen</a>
                 </div>
             </div>
             <div class="form-group mt-3">
@@ -227,7 +227,7 @@
                         </div>
                         <div style="flex:1;">
                             <input type="file" name="photo" id="edit-photo-input" accept="image/*" class="form-control" style="font-size:0.8rem;padding:0.4rem;">
-                            <div class="form-hint">JPG, PNG, WEBP — max. 5 MB</div>
+                            <div class="form-hint">JPG, PNG, WEBP � max. 5 MB</div>
                         </div>
                     </div>
                 </div>
@@ -253,7 +253,7 @@
                         <label class="form-label">Geschlecht</label>
                         <select name="gender" id="edit-gender" class="form-control">
                             <option value="unbekannt">Unbekannt</option>
-                            <option value="männlich">Männlich</option>
+                            <option value="m�nnlich">M�nnlich</option>
                             <option value="weiblich">Weiblich</option>
                         </select>
                     </div>
@@ -297,7 +297,7 @@
     </div></div>
 </div>
 
-{# ── Create Invoice Modal (inline, no navigation) ─────────────────── #}
+{# -- Create Invoice Modal (inline, no navigation) ------------------- #}
 <div class="modal fade" id="modal-invoice-inline" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-xl modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header" style="flex-shrink:0;">
@@ -309,7 +309,7 @@
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
             </button>
         </div>
-        <form action="/rechnungen" method="POST" id="invoice-inline-form">
+        <form action="{{ base_path }}/rechnungen" method="POST" id="invoice-inline-form">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <input type="hidden" name="patient_id" id="inv-patient-id" value="">
         <input type="hidden" name="owner_id"   id="inv-owner-id"   value="">
@@ -334,7 +334,7 @@
                             <input type="date" name="issue_date" class="form-control" value="{{ 'now'|date('Y-m-d') }}">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Fälligkeitsdatum</label>
+                            <label class="form-label">F�lligkeitsdatum</label>
                             <input type="date" name="due_date" class="form-control" value="{{ 'now'|date_modify('+14 days')|date('Y-m-d') }}">
                         </div>
                     </div>
@@ -352,7 +352,7 @@
                     {% if kleinunternehmer %}
                     <div class="flex items-center gap-2" style="background:rgba(255,193,7,0.12);border:1px solid rgba(255,193,7,0.3);border-radius:var(--radius-sm);padding:0.5rem 0.75rem;">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24" style="color:#f59e0b;flex-shrink:0;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        <span class="text-xs"><strong>Kleinunternehmer §19 UStG</strong> — MwSt. 0%</span>
+                        <span class="text-xs"><strong>Kleinunternehmer �19 UStG</strong> � MwSt. 0%</span>
                     </div>
                     {% endif %}
                     <div style="display:grid;grid-template-columns:1fr 70px 100px {{ kleinunternehmer ? '0px' : '65px' }} auto;gap:0.4rem;">
@@ -375,12 +375,12 @@
                     </div>
                     <button type="button" id="inv-add-pos" class="btn btn-secondary btn-sm" style="align-self:flex-start;">
                         <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                        Position hinzufügen
+                        Position hinzuf�gen
                     </button>
                     <div style="border-top:1px solid var(--glass-border);padding-top:0.75rem;margin-top:0.25rem;">
                         <div class="flex justify-between text-sm">
                             <span class="text-muted">Gesamt (brutto)</span>
-                            <span id="inv-total" class="font-bold" style="color:var(--accent);font-size:1rem;">0,00 €</span>
+                            <span id="inv-total" class="font-bold" style="color:var(--accent);font-size:1rem;">0,00 �</span>
                         </div>
                     </div>
                 </div>
@@ -416,7 +416,7 @@
 (function () {
 'use strict';
 
-/* ── Owner dropdown for new-patient modal ─────────────────── */
+/* -- Owner dropdown for new-patient modal ------------------- */
 var ownerSelect = document.getElementById('p-owner');
 if (ownerSelect) {
     var owners = {{ owners is defined ? owners|json_encode|raw : '[]' }};
@@ -428,7 +428,7 @@ if (ownerSelect) {
     });
 }
 
-/* ── Invoice modal: positions + total ── */
+/* -- Invoice modal: positions + total -- */
 (function(){
     var cont  = document.getElementById('inv-positions-container');
     var addB  = document.getElementById('inv-add-pos');
@@ -443,7 +443,7 @@ if (ownerSelect) {
             var tx=parseFloat(r.querySelector('.inv-tax')?.value)||0;
             t+=qty*pr*(1+tx/100);
         });
-        if (totEl) totEl.textContent=t.toFixed(2).replace('.',',')+' €';
+        if (totEl) totEl.textContent=t.toFixed(2).replace('.',',')+' �';
     }
     function updRemove(){
         if (!cont) return;
@@ -469,7 +469,7 @@ if (ownerSelect) {
     }
 })();
 
-/* ── Card click listeners → global patient modal ─────────── */
+/* -- Card click listeners ? global patient modal ----------- */
 document.querySelectorAll('[data-patient-id]').forEach(function (card) {
     card.addEventListener('click', function () {
         if (window._gsOpenPatient) window._gsOpenPatient(card.dataset.patientId);
@@ -482,7 +482,7 @@ document.querySelectorAll('[data-patient-id]').forEach(function (card) {
     });
 });
 
-/* ── Escape closes file viewer ────────────────────────────── */
+/* -- Escape closes file viewer ------------------------------ */
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
         var fv = document.getElementById('fileviewer-overlay');

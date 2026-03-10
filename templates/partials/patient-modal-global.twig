@@ -326,7 +326,7 @@
         </div>
 
         <div id="im-body" class="modal-body" style="display:none;padding:1.25rem;overflow-y:auto;">
-            <form action="/rechnungen" method="POST" id="im-form" style="display:contents;">
+            <form action="{{ base_path }}/rechnungen" method="POST" id="im-form" style="display:contents;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                 <input type="hidden" name="_send_email" id="im-send-email-flag" value="0">
 
@@ -1131,13 +1131,13 @@ window.deletePatient = function() {
             || document.querySelector('input[name="_csrf_token"]')?.value || '';
     var fd = new FormData(); fd.append('_csrf_token', csrf);
     fetch('/patienten/'+p.id+'/loeschen', {method:'POST',body:fd})
-        .then(function(){ window.location.href='/patienten'; });
+        .then(function(){ window.location.href = '{{ base_path }}/patienten'; });
 };
 
 /* ── PDF Export ───────────────────────────────────────────── */
 window.exportPatientPDF = function() {
     if (!currentPatientData) return;
-    window.location.href = '/patienten/' + currentPatientData.patient.id + '/pdf';
+    window.location.href = '{{ base_path }}/patienten/' + currentPatientData.patient.id + '/pdf';
 };
 
 /* ── Open patient modal (global entry point) ──────────────── */
@@ -1178,7 +1178,7 @@ function openPatientModal(patientId) {
                 (p.notes ? '<div style="grid-column:1/-1;border-top:1px solid var(--glass-border);padding-top:0.5rem;margin-top:0.1rem;"><span>Notizen</span><div style="line-height:1.5;">'+esc(p.notes)+'</div></div>' : '');
             if (o) {
                 var kundenNr = 'Kunden-Nr. ' + String(o.id).padStart(4,'0');
-                pdOwner.innerHTML = '<a href="/tierhalter/'+o.id+'" class="pd-owner-link"><div class="pd-owner-avatar">'+esc((o.first_name||'').charAt(0)+(o.last_name||'').charAt(0))+'</div><div class="pd-owner-info"><div class="pd-owner-name">'+esc(o.first_name+' '+o.last_name)+' <span style="font-size:0.7rem;font-weight:600;color:var(--accent);background:var(--accent-soft,rgba(99,102,241,0.1));padding:0.1rem 0.45rem;border-radius:999px;margin-left:4px;">'+kundenNr+'</span></div>'+(o.phone?'<div class="pd-owner-meta">'+esc(o.phone)+'</div>':'')+(o.email?'<div class="pd-owner-meta">'+esc(o.email)+'</div>':'')+(o.street?'<div class="pd-owner-meta">'+esc(o.street)+(o.zip||o.city?', '+esc((o.zip||'')+' '+(o.city||'')).trim():'')+'</div>':'')+'</div></a>';
+                pdOwner.innerHTML = '<a href="{{ base_path }}/tierhalter/'+o.id+'" class="pd-owner-link"><div class="pd-owner-avatar">'+esc((o.first_name||'').charAt(0)+(o.last_name||'').charAt(0))+'</div><div class="pd-owner-info"><div class="pd-owner-name">'+esc(o.first_name+' '+o.last_name)+' <span style="font-size:0.7rem;font-weight:600;color:var(--accent);background:var(--accent-soft,rgba(99,102,241,0.1));padding:0.1rem 0.45rem;border-radius:999px;margin-left:4px;">'+kundenNr+'</span></div>'+(o.phone?'<div class="pd-owner-meta">'+esc(o.phone)+'</div>':'')+(o.email?'<div class="pd-owner-meta">'+esc(o.email)+'</div>':'')+(o.street?'<div class="pd-owner-meta">'+esc(o.street)+(o.zip||o.city?', '+esc((o.zip||'')+' '+(o.city||'')).trim():'')+'</div>':'')+'</div></a>';
             } else {
                 pdOwner.innerHTML = '<span style="color:var(--text-muted);font-size:0.82rem;">Kein Besitzer</span>';
             }

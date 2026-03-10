@@ -1,11 +1,11 @@
-﻿{% extends active_theme_layout ?? 'layouts/base.twig' %}
+{% extends active_theme_layout ?? 'layouts/base.twig' %}
 
 {% block content %}
 <div class="page-header">
     <h1 class="page-title">{{ t('settings.title') }}</h1>
 </div>
 
-{# ── Tab Navigation ── #}
+{# -- Tab Navigation -- #}
 <div class="settings-tabs" id="settingsTabs">
     <button class="settings-tab" data-tab="firma">
         <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2" stroke="currentColor" stroke-width="2"/><line x1="8" y1="21" x2="16" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="17" x2="12" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
@@ -50,19 +50,19 @@
     </button>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: FIRMA
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-firma">
 
-    {# Logo Upload — own form, completely separate #}
+    {# Logo Upload � own form, completely separate #}
     <div class="glass-card mb-4">
         <h3 class="section-title">{{ t('settings.company_logo') }}</h3>
         <div class="flex gap-4 items-center flex-wrap">
             {% if settings.company_logo %}
                 <img src="/storage/uploads/{{ settings.company_logo }}" alt="Logo" style="max-height:64px;border-radius:var(--radius-sm);border:1px solid var(--glass-border);">
             {% endif %}
-            <form action="/einstellungen/logo" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
+            <form action="{{ base_path }}/einstellungen/logo" method="POST" enctype="multipart/form-data" class="flex gap-2 items-center">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                 <input type="file" name="logo" class="form-control" accept="image/*" style="font-size:0.8rem;padding:0.4rem;max-width:280px;">
                 <button type="submit" class="btn btn-secondary btn-sm" style="flex-shrink:0;">{{ t('settings.upload_logo') }}</button>
@@ -70,8 +70,8 @@
         </div>
     </div>
 
-    {# Company Info — main settings form #}
-    <form action="/einstellungen" method="POST">
+    {# Company Info � main settings form #}
+    <form action="{{ base_path }}/einstellungen" method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <div class="glass-card">
             <h3 class="section-title">{{ t('settings.company') }}</h3>
@@ -115,11 +115,11 @@
     </form>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: FINANZEN & RECHNUNGEN
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-finanzen">
-    <form action="/einstellungen" method="POST">
+    <form action="{{ base_path }}/einstellungen" method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <div class="flex gap-4" style="align-items:flex-start;flex-wrap:wrap;">
 
@@ -160,7 +160,7 @@
                             <label class="flex items-center gap-2 mt-1" style="cursor:pointer;">
                                 <input type="hidden" name="kleinunternehmer" value="0">
                                 <input type="checkbox" name="kleinunternehmer" value="1" {{ (settings.kleinunternehmer ?? '0') == '1' ? 'checked' : '' }} style="width:16px;height:16px;accent-color:var(--accent);">
-                                <span class="text-sm">Kleinunternehmer §19 UStG — MwSt. wird automatisch auf 0% gesetzt und im PDF als steuerbefreit ausgewiesen</span>
+                                <span class="text-sm">Kleinunternehmer �19 UStG � MwSt. wird automatisch auf 0% gesetzt und im PDF als steuerbefreit ausgewiesen</span>
                             </label>
                         </div>
                     </div>
@@ -196,11 +196,11 @@
     </form>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: E-MAIL / SMTP
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-smtp">
-    <form action="/einstellungen" method="POST">
+    <form action="{{ base_path }}/einstellungen" method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <div class="glass-card">
             <h3 class="section-title">{{ t('settings.smtp') }}</h3>
@@ -224,9 +224,9 @@
                 <div class="form-group">
                     <label class="form-label">{{ t('settings.smtp_encryption') }}</label>
                     <select name="smtp_encryption" class="form-control">
-                        <option value="tls"  {{ (settings.smtp_encryption ?? 'tls') == 'tls'  ? 'selected' : '' }}>TLS (STARTTLS) — Port 587</option>
-                        <option value="ssl"  {{ (settings.smtp_encryption ?? 'tls') == 'ssl'  ? 'selected' : '' }}>SSL — Port 465</option>
-                        <option value="none" {{ (settings.smtp_encryption ?? 'tls') == 'none' ? 'selected' : '' }}>Keine Verschlüsselung</option>
+                        <option value="tls"  {{ (settings.smtp_encryption ?? 'tls') == 'tls'  ? 'selected' : '' }}>TLS (STARTTLS) � Port 587</option>
+                        <option value="ssl"  {{ (settings.smtp_encryption ?? 'tls') == 'ssl'  ? 'selected' : '' }}>SSL � Port 465</option>
+                        <option value="none" {{ (settings.smtp_encryption ?? 'tls') == 'none' ? 'selected' : '' }}>Keine Verschl�sselung</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -239,13 +239,13 @@
                 </div>
             </div>
         </div>
-        {# ── IMAP / Mailbox ── #}
+        {# -- IMAP / Mailbox -- #}
         <div class="glass-card mt-4">
             <h3 class="section-title">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="margin-right:6px;vertical-align:-2px;"><path stroke="currentColor" stroke-width="2" d="M22 12h-6l-2 3h-4l-2-3H2"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
-                IMAP — Posteingang (Mailbox Plugin)
+                IMAP � Posteingang (Mailbox Plugin)
             </h3>
-            <p class="text-muted mb-3" style="font-size:.82rem;">Für das Mailbox-Plugin zum Empfangen von E-Mails. Benutzername und Passwort werden vom SMTP-Bereich oben übernommen, wenn hier leer gelassen.</p>
+            <p class="text-muted mb-3" style="font-size:.82rem;">F�r das Mailbox-Plugin zum Empfangen von E-Mails. Benutzername und Passwort werden vom SMTP-Bereich oben �bernommen, wenn hier leer gelassen.</p>
             <div class="form-grid form-grid-2">
                 <div class="form-group">
                     <label class="form-label">IMAP-Host</label>
@@ -256,11 +256,11 @@
                     <input type="number" name="mail_imap_port" class="form-control" value="{{ settings.mail_imap_port ?? '993' }}">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Verschlüsselung</label>
+                    <label class="form-label">Verschl�sselung</label>
                     <select name="mail_imap_encrypt" class="form-control">
-                        <option value="ssl"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'ssl'  ? 'selected' : '' }}>SSL/TLS — Port 993</option>
-                        <option value="tls"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'tls'  ? 'selected' : '' }}>STARTTLS — Port 143</option>
-                        <option value="none" {{ (settings.mail_imap_encrypt ?? 'ssl') == 'none' ? 'selected' : '' }}>Keine Verschlüsselung</option>
+                        <option value="ssl"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'ssl'  ? 'selected' : '' }}>SSL/TLS � Port 993</option>
+                        <option value="tls"  {{ (settings.mail_imap_encrypt ?? 'ssl') == 'tls'  ? 'selected' : '' }}>STARTTLS � Port 143</option>
+                        <option value="none" {{ (settings.mail_imap_encrypt ?? 'ssl') == 'none' ? 'selected' : '' }}>Keine Verschl�sselung</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -279,11 +279,11 @@
     </form>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: DARSTELLUNG
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-darstellung">
-    <form action="/einstellungen" method="POST">
+    <form action="{{ base_path }}/einstellungen" method="POST">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         <div class="glass-card" style="max-width:480px;">
             <h3 class="section-title">{{ t('settings.appearance') }}</h3>
@@ -311,16 +311,16 @@
     </form>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: PDF-DESIGN
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-pdf">
-    <form action="/einstellungen" method="POST" id="pdf-settings-form">
+    <form action="{{ base_path }}/einstellungen" method="POST" id="pdf-settings-form">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
         <div class="flex gap-4" style="align-items:flex-start;flex-wrap:wrap;">
 
-            {# ── LEFT COLUMN ── #}
+            {# -- LEFT COLUMN -- #}
             <div style="flex:1.2;min-width:300px;display:flex;flex-direction:column;gap:1rem;">
 
                 {# 1. Farben #}
@@ -331,7 +331,7 @@
                     </h3>
                     <div class="form-grid form-grid-2">
                         <div class="form-group">
-                            <label class="form-label">Primärfarbe</label>
+                            <label class="form-label">Prim�rfarbe</label>
                             <p class="form-hint" style="margin-bottom:6px;">Tabellenheader, Trennlinie</p>
                             <div class="flex gap-2 items-center">
                                 <input type="color" id="pdf_primary_color_picker" value="{{ settings.pdf_primary_color ?? '#2962FF' }}"
@@ -364,13 +364,13 @@
                         </div>
                     </div>
 
-                    {# ── Erweiterte Farbeinstellungen ── #}
+                    {# -- Erweiterte Farbeinstellungen -- #}
                     <h4 style="font-size:0.8rem;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text-muted);margin:1.2rem 0 0.6rem;">Textelemente</h4>
                     <div class="form-grid form-grid-2">
                         {% set colorFields = [
                             {key: 'pdf_color_company_name',       label: 'Firmenname',             hint: 'Fetter Name oben rechts',         default: '#1E1E1E'},
                             {key: 'pdf_color_company_info',       label: 'Firmenadresse / Grautexte', hint: 'Adresse, Kunden-Nr., Patient',  default: '#6E6E6E'},
-                            {key: 'pdf_color_recipient',          label: 'Empfänger',              hint: 'Name und Adresse des Kunden',      default: '#1E1E1E'},
+                            {key: 'pdf_color_recipient',          label: 'Empf�nger',              hint: 'Name und Adresse des Kunden',      default: '#1E1E1E'},
                             {key: 'pdf_color_table_header_bg',    label: 'Tabellenkopf Hintergrund', hint: 'Hintergrundfarbe der Kopfzeile', default: '#8B9E8B'},
                             {key: 'pdf_color_table_header_text',  label: 'Tabellenkopf Text',      hint: 'Beschriftung Anzahl, Preis usw.',  default: '#FFFFFF'},
                             {key: 'pdf_color_table_text',         label: 'Tabellenzeilen Text',    hint: 'Positionen / Beschreibungen',      default: '#1E1E1E'},
@@ -394,13 +394,13 @@
                 </div>
 
                 {# 2. Schrift & Layout #}
-                {# ── Script-Bilder Upload ── #}
+                {# -- Script-Bilder Upload -- #}
                 <div class="glass-card">
                     <h3 class="section-title">
                         <svg width="14" height="14" fill="none" viewBox="0 0 24 24" style="margin-right:6px;vertical-align:-2px;"><rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><path d="M3 9l4-4 4 4 4-4 4 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
                         Script-Bilder (Rechnung, Quittung, Barzahlung &amp; Vielen Dank!)
                     </h3>
-                    <p class="form-hint" style="margin-bottom:1rem;">Diese Bilder ersetzen die Schriftzüge im PDF. PNG mit transparentem Hintergrund empfohlen.</p>
+                    <p class="form-hint" style="margin-bottom:1rem;">Diese Bilder ersetzen die Schriftz�ge im PDF. PNG mit transparentem Hintergrund empfohlen.</p>
 
                     <div class="form-grid form-grid-2">
                         <div class="form-group">
@@ -428,7 +428,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">"Quittung"-Schriftzug <span class="form-hint">(für Quittungs-PDF)</span></label>
+                            <label class="form-label">"Quittung"-Schriftzug <span class="form-hint">(f�r Quittungs-PDF)</span></label>
                             {% if settings.pdf_quittung_bild %}
                                 <img src="/assets/img/{{ settings.pdf_quittung_bild }}" alt="Quittung" style="max-height:50px;max-width:100%;margin-bottom:8px;border-radius:4px;background:#f5f5f5;padding:4px;">
                             {% else %}
@@ -440,7 +440,7 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">"Barzahlung"-Schriftzug <span class="form-hint">(für Quittungs-PDF)</span></label>
+                            <label class="form-label">"Barzahlung"-Schriftzug <span class="form-hint">(f�r Quittungs-PDF)</span></label>
                             {% if settings.pdf_barzahlung_bild %}
                                 <img src="/assets/img/{{ settings.pdf_barzahlung_bild }}" alt="Barzahlung" style="max-height:50px;max-width:100%;margin-bottom:8px;border-radius:4px;background:#f5f5f5;padding:4px;">
                             {% else %}
@@ -470,14 +470,14 @@
                             </select>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Basis-Schriftgröße (pt)</label>
+                            <label class="form-label">Basis-Schriftgr��e (pt)</label>
                             <input type="number" name="pdf_font_size" class="form-control" value="{{ settings.pdf_font_size ?? '9' }}" min="7" max="14" step="0.5">
                         </div>
                         <div class="form-group">
                             <label class="form-label">Kopfzeilen-Stil</label>
                             <select name="pdf_header_style" class="form-control" id="pdf_header_style_select">
-                                <option value="line"    {{ (settings.pdf_header_style ?? 'line') == 'line'    ? 'selected' : '' }}>Dünne Linie</option>
-                                <option value="band"    {{ (settings.pdf_header_style ?? 'line') == 'band'    ? 'selected' : '' }}>Farbband (kräftig)</option>
+                                <option value="line"    {{ (settings.pdf_header_style ?? 'line') == 'line'    ? 'selected' : '' }}>D�nne Linie</option>
+                                <option value="band"    {{ (settings.pdf_header_style ?? 'line') == 'band'    ? 'selected' : '' }}>Farbband (kr�ftig)</option>
                                 <option value="none"    {{ (settings.pdf_header_style ?? 'line') == 'none'    ? 'selected' : '' }}>Keiner</option>
                             </select>
                         </div>
@@ -494,7 +494,7 @@
                             <input type="number" name="pdf_logo_width" class="form-control" value="{{ settings.pdf_logo_width ?? '35' }}" min="10" max="80">
                         </div>
                         <div class="form-group">
-                            <label class="form-label">Seitenränder (mm)</label>
+                            <label class="form-label">Seitenr�nder (mm)</label>
                             <input type="number" name="pdf_margin" class="form-control" value="{{ settings.pdf_margin ?? '20' }}" min="5" max="40">
                         </div>
                     </div>
@@ -535,12 +535,12 @@
                         <label class="flex items-center gap-2" style="cursor:pointer;">
                             <input type="hidden" name="pdf_show_iban" value="0">
                             <input type="checkbox" name="pdf_show_iban" value="1" {{ (settings.pdf_show_iban ?? '1') == '1' ? 'checked' : '' }} style="width:16px;height:16px;accent-color:var(--accent);">
-                            <span class="text-sm">IBAN in Fußzeile anzeigen</span>
+                            <span class="text-sm">IBAN in Fu�zeile anzeigen</span>
                         </label>
                         <label class="flex items-center gap-2" style="cursor:pointer;">
                             <input type="hidden" name="pdf_show_tax_number" value="0">
                             <input type="checkbox" name="pdf_show_tax_number" value="1" {{ (settings.pdf_show_tax_number ?? '1') == '1' ? 'checked' : '' }} style="width:16px;height:16px;accent-color:var(--accent);">
-                            <span class="text-sm">Steuernummer in Fußzeile</span>
+                            <span class="text-sm">Steuernummer in Fu�zeile</span>
                         </label>
                         <label class="flex items-center gap-2" style="cursor:pointer;">
                             <input type="hidden" name="pdf_show_website" value="0">
@@ -557,36 +557,36 @@
                         Texte &amp; Inhalte
                     </h3>
                     <div class="form-group">
-                        <label class="form-label">Einleitungstext (unter Empfängeradresse)</label>
+                        <label class="form-label">Einleitungstext (unter Empf�ngeradresse)</label>
                         <textarea name="pdf_intro_text" class="form-control" rows="2" placeholder="z.B. Sehr geehrte Damen und Herren, hiermit stellen wir Ihnen folgende Leistungen in Rechnung:">{{ settings.pdf_intro_text ?? '' }}</textarea>
                         <span class="form-hint">Erscheint vor der Positionstabelle.</span>
                     </div>
                     <div class="form-group mt-3">
                         <label class="form-label">Schlusstext (unter den Summen)</label>
-                        <textarea name="pdf_closing_text" class="form-control" rows="2" placeholder="z.B. Vielen Dank für Ihr Vertrauen. Bei Fragen stehen wir Ihnen gerne zur Verfügung.">{{ settings.pdf_closing_text ?? '' }}</textarea>
+                        <textarea name="pdf_closing_text" class="form-control" rows="2" placeholder="z.B. Vielen Dank f�r Ihr Vertrauen. Bei Fragen stehen wir Ihnen gerne zur Verf�gung.">{{ settings.pdf_closing_text ?? '' }}</textarea>
                         <span class="form-hint">Erscheint nach den Summen, vor den Zahlungsbedingungen.</span>
                     </div>
                     <div class="form-group mt-3">
-                        <label class="form-label">Zusätzlicher Fußzeilentext</label>
-                        <input type="text" name="pdf_footer_text" class="form-control" value="{{ settings.pdf_footer_text ?? '' }}" placeholder="z.B. Umsatzsteuer nicht ausgewiesen (Kleinunternehmer §19 UStG)">
-                        <span class="form-hint">Wird unter den Bankdaten in der Fußzeile angezeigt.</span>
+                        <label class="form-label">Zus�tzlicher Fu�zeilentext</label>
+                        <input type="text" name="pdf_footer_text" class="form-control" value="{{ settings.pdf_footer_text ?? '' }}" placeholder="z.B. Umsatzsteuer nicht ausgewiesen (Kleinunternehmer �19 UStG)">
+                        <span class="form-hint">Wird unter den Bankdaten in der Fu�zeile angezeigt.</span>
                     </div>
                 </div>
 
             </div>
 
-            {# ── RIGHT COLUMN: Live Preview ── #}
+            {# -- RIGHT COLUMN: Live Preview -- #}
             <div style="flex:1;min-width:310px;position:sticky;top:1rem;">
                 <div class="glass-card">
                     <div class="flex items-center justify-between mb-3">
                         <h3 class="section-title" style="margin-bottom:0;">Live-Vorschau</h3>
-                        <a href="/rechnungen/1/pdf" target="_blank" class="btn btn-secondary btn-sm" style="font-size:0.75rem;">
+                        <a href="{{ base_path }}/rechnungen/1/pdf" target="_blank" class="btn btn-secondary btn-sm" style="font-size:0.75rem;">
                             <svg width="12" height="12" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                            Echte Vorschau öffnen
+                            Echte Vorschau �ffnen
                         </a>
                     </div>
 
-                    {# PDF Mock Preview — Sidebar Layout #}
+                    {# PDF Mock Preview � Sidebar Layout #}
                     <div id="pdf-preview" style="background:#fff;border-radius:6px;font-family:Helvetica,sans-serif;font-size:10px;color:#0f0f1a;min-height:440px;border:1px solid var(--glass-border);position:relative;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.08);display:flex;">
 
                         {# Watermark #}
@@ -606,7 +606,7 @@
                             <div style="font-size:7px;font-weight:700;color:#fff;margin-bottom:6px;text-align:center;">RE-2025-0042</div>
                             <div style="font-size:6px;color:rgba(220,235,220,0.9);margin-bottom:1px;text-align:center;">Rechnungsdatum</div>
                             <div style="font-size:7px;font-weight:700;color:#fff;margin-bottom:6px;text-align:center;">01.01.2025</div>
-                            <div style="font-size:6px;color:rgba(220,235,220,0.9);margin-bottom:1px;text-align:center;">Fällig am</div>
+                            <div style="font-size:6px;color:rgba(220,235,220,0.9);margin-bottom:1px;text-align:center;">F�llig am</div>
                             <div style="font-size:7px;font-weight:700;color:#fff;text-align:center;">15.01.2025</div>
                         </div>
 
@@ -616,7 +616,7 @@
                             {# Company info top right #}
                             <div style="text-align:right;margin-bottom:4px;">
                                 <div id="preview-company" style="font-weight:700;font-size:9px;color:#1E1E1E;">{{ settings.company_name ?? 'Tierphysio GmbH' }}</div>
-                                <div id="preview-company-info" style="font-size:7px;color:#6E6E6E;">{{ settings.company_street ?? 'Musterstraße 1' }}</div>
+                                <div id="preview-company-info" style="font-size:7px;color:#6E6E6E;">{{ settings.company_street ?? 'Musterstra�e 1' }}</div>
                                 <div style="font-size:7px;color:#6E6E6E;">{{ (settings.company_zip ?? '12345') ~ ' ' ~ (settings.company_city ?? 'Musterstadt') }}</div>
                                 {% if settings.company_phone %}<div style="font-size:7px;color:#6E6E6E;">Tel: {{ settings.company_phone }}</div>{% endif %}
                                 {% if settings.company_email %}<div style="font-size:7px;color:#6E6E6E;">{{ settings.company_email }}</div>{% endif %}
@@ -630,7 +630,7 @@
                             {# Recipient #}
                             <div style="margin-bottom:8px;">
                                 <div id="preview-recipient" style="font-size:8px;font-weight:700;color:#1E1E1E;">Max Mustermann</div>
-                                <div style="font-size:7px;color:#1E1E1E;">Beispielstraße 5</div>
+                                <div style="font-size:7px;color:#1E1E1E;">Beispielstra�e 5</div>
                                 <div style="font-size:7px;color:#1E1E1E;">12345 Musterstadt</div>
                                 <div style="font-size:7px;color:#6E6E6E;margin-top:2px;">Kunden-Nr. 0001</div>
                                 <div id="preview-patient-row" style="font-size:7px;color:#6E6E6E;">Patient: Bello (Hund)</div>
@@ -647,25 +647,25 @@
                                 <div style="display:flex;font-size:7px;padding:2px 4px;border-bottom:1px solid #e0e0e0;">
                                     <span id="preview-row-text" style="width:18px;">1</span>
                                     <span style="flex:1;">Physiotherapie</span>
-                                    <span style="width:36px;text-align:right;">65,00 €</span>
-                                    <span style="width:36px;text-align:right;">65,00 €</span>
+                                    <span style="width:36px;text-align:right;">65,00 �</span>
+                                    <span style="width:36px;text-align:right;">65,00 �</span>
                                 </div>
                                 <div style="display:flex;font-size:7px;padding:2px 4px;border-bottom:1px solid #e0e0e0;">
                                     <span style="width:18px;">2</span>
                                     <span style="flex:1;">Massage</span>
-                                    <span style="width:36px;text-align:right;">45,00 €</span>
-                                    <span style="width:36px;text-align:right;">90,00 €</span>
+                                    <span style="width:36px;text-align:right;">45,00 �</span>
+                                    <span style="width:36px;text-align:right;">90,00 �</span>
                                 </div>
                             </div>
 
                             {# Totals #}
                             <div style="display:flex;justify-content:flex-end;margin-bottom:6px;">
                                 <div style="font-size:7px;min-width:120px;">
-                                    <div style="display:flex;justify-content:space-between;"><span id="preview-total-label">Total exkl. MwSt.</span><span>155,00 €</span></div>
-                                    <div style="display:flex;justify-content:space-between;"><span id="preview-mwst-label">MwSt. 19%</span><span>29,45 €</span></div>
+                                    <div style="display:flex;justify-content:space-between;"><span id="preview-total-label">Total exkl. MwSt.</span><span>155,00 �</span></div>
+                                    <div style="display:flex;justify-content:space-between;"><span id="preview-mwst-label">MwSt. 19%</span><span>29,45 �</span></div>
                                     <div style="display:flex;justify-content:space-between;font-weight:700;border-top:1px solid #ccc;margin-top:2px;padding-top:2px;">
                                         <span>Total</span>
-                                        <span id="preview-total">184,45 €</span>
+                                        <span id="preview-total">184,45 �</span>
                                     </div>
                                 </div>
                             </div>
@@ -679,7 +679,7 @@
                             </div>
                         </div>
                     </div>
-                    <p class="form-hint mt-2">Die Vorschau zeigt das ungefähre Layout. Das endgültige PDF wird mit TCPDF erzeugt und kann minimal abweichen.</p>
+                    <p class="form-hint mt-2">Die Vorschau zeigt das ungef�hre Layout. Das endg�ltige PDF wird mit TCPDF erzeugt und kann minimal abweichen.</p>
                 </div>
 
                 {# PDF test download info #}
@@ -688,7 +688,7 @@
                         <svg width="18" height="18" fill="none" viewBox="0 0 24 24" style="color:var(--accent);flex-shrink:0;margin-top:1px;"><circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/><line x1="12" y1="8" x2="12" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="12" y1="16" x2="12.01" y2="16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                         <div>
                             <div style="font-size:0.82rem;font-weight:600;color:var(--text-primary);margin-bottom:3px;">Tipp: Echte PDF-Vorschau</div>
-                            <p class="form-hint">Speichere die Einstellungen und öffne dann eine bestehende Rechnung → <strong>PDF herunterladen</strong>, um das finale Ergebnis zu sehen.</p>
+                            <p class="form-hint">Speichere die Einstellungen und �ffne dann eine bestehende Rechnung ? <strong>PDF herunterladen</strong>, um das finale Ergebnis zu sehen.</p>
                         </div>
                     </div>
                 </div>
@@ -817,9 +817,9 @@
     </script>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: BENUTZER
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-benutzer">
     <div class="flex justify-between items-center mb-4">
         <p class="text-sm text-muted">Verwalte Benutzer und ihre Zugriffsrechte.</p>
@@ -855,7 +855,7 @@
                         {% if user.active %}<span class="badge badge-aktiv">Aktiv</span>
                         {% else %}<span class="badge badge-inaktiv">Inaktiv</span>{% endif %}
                     </td>
-                    <td class="text-sm text-muted">{{ user.last_login ? user.last_login|datetime_de : '—' }}</td>
+                    <td class="text-sm text-muted">{{ user.last_login ? user.last_login|datetime_de : '�' }}</td>
                     <td>
                         <div class="flex gap-2" style="justify-content:flex-end;">
                             <button type="button" class="btn btn-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#modal-edit-user-{{ user.id }}">
@@ -863,7 +863,7 @@
                                 {{ t('common.edit') }}
                             </button>
                             {% if user.id != current_user.id %}
-                            <form action="/einstellungen/benutzer/{{ user.id }}/loeschen" method="POST" style="margin:0;">
+                            <form action="{{ base_path }}/einstellungen/benutzer/{{ user.id }}/loeschen" method="POST" style="margin:0;">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                                 <button type="submit" class="btn btn-danger btn-sm" data-confirm="{{ t('common.confirm_delete') }}">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
@@ -882,9 +882,9 @@
     </div>
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: PLUGINS
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-plugins">
     {% if plugins %}
         <div class="table-container">
@@ -906,17 +906,17 @@
                             {% if plugin.manifest.description %}<div class="text-xs text-muted">{{ plugin.manifest.description }}</div>{% endif %}
                         </td>
                         <td><span class="badge badge-primary">v{{ plugin.manifest.version ?? '1.0.0' }}</span></td>
-                        <td class="text-sm text-muted">{{ plugin.manifest.author ?? '—' }}</td>
+                        <td class="text-sm text-muted">{{ plugin.manifest.author ?? '�' }}</td>
                         <td>{% if plugin.enabled %}<span class="badge badge-aktiv">Aktiv</span>{% else %}<span class="badge badge-inaktiv">Inaktiv</span>{% endif %}</td>
                         <td>
                             <div class="flex gap-2" style="justify-content:flex-end;">
                                 {% if plugin.enabled %}
-                                    <form action="/einstellungen/plugins/{{ slug }}/deaktivieren" method="POST" style="margin:0;">
+                                    <form action="{{ base_path }}/einstellungen/plugins/{{ slug }}/deaktivieren" method="POST" style="margin:0;">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                                         <button type="submit" class="btn btn-warning btn-sm">{{ t('settings.plugin_deactivate') }}</button>
                                     </form>
                                 {% else %}
-                                    <form action="/einstellungen/plugins/{{ slug }}/aktivieren" method="POST" style="margin:0;">
+                                    <form action="{{ base_path }}/einstellungen/plugins/{{ slug }}/aktivieren" method="POST" style="margin:0;">
                                         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                                         <button type="submit" class="btn btn-success btn-sm">{{ t('settings.plugin_activate') }}</button>
                                     </form>
@@ -939,22 +939,22 @@
         <h3 class="font-semibold mb-2" style="font-size:0.9rem;">Plugin-Entwicklung</h3>
         <p class="text-sm text-muted" style="line-height:1.6;">
             Plugins werden als Unterordner in <code style="color:var(--accent);">/plugins/[slug]/</code> abgelegt.<br>
-            Jedes Plugin benötigt eine <code style="color:var(--accent);">manifest.json</code> sowie eine optionale <code style="color:var(--accent);">ServiceProvider.php</code>.
+            Jedes Plugin ben�tigt eine <code style="color:var(--accent);">manifest.json</code> sowie eine optionale <code style="color:var(--accent);">ServiceProvider.php</code>.
         </p>
     </div>
 
-    {# ── Kalender Plugin: Cron-Konfiguration ── #}
+    {# -- Kalender Plugin: Cron-Konfiguration -- #}
     {% if plugins['calendar'] is defined and plugins['calendar'].enabled %}
     <div class="glass-card mt-4">
         <h3 class="section-title" style="display:flex;align-items:center;gap:0.5rem;">
             <svg width="15" height="15" fill="none" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" stroke="currentColor" stroke-width="2"/><line x1="16" y1="2" x2="16" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8" y1="2" x2="8" y2="6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="3" y1="10" x2="21" y2="10" stroke="currentColor" stroke-width="2"/></svg>
-            Terminkalender – Erinnerungen (Cron)
+            Terminkalender � Erinnerungen (Cron)
         </h3>
         <p class="text-sm text-muted mb-3" style="line-height:1.6;">
-            Automatische E-Mail-Erinnerungen werden über einen Cron-Job getriggert.<br>
+            Automatische E-Mail-Erinnerungen werden �ber einen Cron-Job getriggert.<br>
             Trage das Secret unten ein und richte dann den Cron-Job auf deinem Server ein.
         </p>
-        <form action="/einstellungen" method="POST">
+        <form action="{{ base_path }}/einstellungen" method="POST">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="flex gap-3 items-end" style="flex-wrap:wrap;">
                 <div class="form-group" style="flex:1;min-width:240px;margin:0;">
@@ -962,14 +962,14 @@
                     <div class="flex gap-2">
                         <input type="text" name="calendar_cron_secret" class="form-control"
                                value="{{ settings.calendar_cron_secret ?? '' }}"
-                               placeholder="Zufälliges Secret eingeben..."
+                               placeholder="Zuf�lliges Secret eingeben..."
                                style="font-family:monospace;font-size:0.82rem;">
                         <button type="button" class="btn btn-secondary btn-sm" onclick="
                             const chars='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                             let r='';
                             for(let i=0;i<40;i++) r+=chars[Math.floor(Math.random()*chars.length)];
                             this.closest('.flex').querySelector('input').value=r;
-                        " title="Zufälliges Secret generieren">
+                        " title="Zuf�lliges Secret generieren">
                             <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="23 4 23 10 17 10"/><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="1 20 1 14 7 14"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
                         </button>
                     </div>
@@ -978,17 +978,17 @@
             </div>
         </form>
 
-        {# Standalone upload forms — outside main form to avoid nesting #}
-        <form id="form-upload-rechnung" action="/einstellungen/pdf-rechnung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
+        {# Standalone upload forms � outside main form to avoid nesting #}
+        <form id="form-upload-rechnung" action="{{ base_path }}/einstellungen/pdf-rechnung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         </form>
-        <form id="form-upload-vielen-dank" action="/einstellungen/pdf-vielen-dank-bild" method="POST" enctype="multipart/form-data" style="display:none;">
+        <form id="form-upload-vielen-dank" action="{{ base_path }}/einstellungen/pdf-vielen-dank-bild" method="POST" enctype="multipart/form-data" style="display:none;">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         </form>
-        <form id="form-upload-quittung" action="/einstellungen/pdf-quittung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
+        <form id="form-upload-quittung" action="{{ base_path }}/einstellungen/pdf-quittung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         </form>
-        <form id="form-upload-barzahlung" action="/einstellungen/pdf-barzahlung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
+        <form id="form-upload-barzahlung" action="{{ base_path }}/einstellungen/pdf-barzahlung-bild" method="POST" enctype="multipart/form-data" style="display:none;">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
         </form>
 
@@ -999,10 +999,10 @@
                 <code id="cron-cmd" style="display:block;background:var(--glass-bg);border:1px solid var(--glass-border);border-radius:var(--radius-sm);padding:0.6rem 0.75rem;font-size:0.78rem;flex:1;overflow-x:auto;white-space:nowrap;">
                     */15 * * * * curl -s "{{ app_url ?? '' }}/kalender/cron/erinnerungen?token={{ settings.calendar_cron_secret }}" > /dev/null 2>&1
                 </code>
-                <button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('cron-cmd').textContent.trim()).then(()=>this.textContent='✓ Kopiert').catch(()=>{}); setTimeout(()=>this.textContent='Kopieren',2000);">Kopieren</button>
+                <button class="btn btn-secondary btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('cron-cmd').textContent.trim()).then(()=>this.textContent='? Kopiert').catch(()=>{}); setTimeout(()=>this.textContent='Kopieren',2000);">Kopieren</button>
             </div>
             <p class="text-xs text-muted mt-2">
-                Auf dem Server unter <code>crontab -e</code> eintragen. Der Endpunkt prüft ob Erinnerungen fällig sind und sendet E-Mails automatisch.
+                Auf dem Server unter <code>crontab -e</code> eintragen. Der Endpunkt pr�ft ob Erinnerungen f�llig sind und sendet E-Mails automatisch.
             </p>
         </div>
         {% endif %}
@@ -1010,15 +1010,15 @@
     {% endif %}
 </div>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: BEHANDLUNGSARTEN
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-behandlungsarten">
 
     {# Neue Behandlungsart #}
     <div class="glass-card mb-4">
         <h3 class="section-title">Neue Behandlungsart</h3>
-        <form action="/einstellungen/behandlungsarten" method="POST">
+        <form action="{{ base_path }}/einstellungen/behandlungsarten" method="POST">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="form-grid-2 mb-3">
                 <div class="form-group">
@@ -1033,7 +1033,7 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Standardpreis (€)</label>
+                    <label class="form-label">Standardpreis (�)</label>
                     <input type="number" name="price" class="form-control" step="0.01" min="0" placeholder="0.00">
                 </div>
                 <div class="form-group">
@@ -1047,7 +1047,7 @@
             </div>
             <button type="submit" class="btn btn-primary btn-sm">
                 <svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
-                Behandlungsart hinzufügen
+                Behandlungsart hinzuf�gen
             </button>
         </form>
     </div>
@@ -1056,7 +1056,7 @@
     <div class="glass-card">
         <h3 class="section-title">Vorhandene Behandlungsarten</h3>
         {% if treatment_types is empty %}
-            <p style="color:var(--text-muted);font-size:0.875rem;">Noch keine Behandlungsarten vorhanden. Migration ausführen falls nötig.</p>
+            <p style="color:var(--text-muted);font-size:0.875rem;">Noch keine Behandlungsarten vorhanden. Migration ausf�hren falls n�tig.</p>
         {% else %}
             <div style="display:flex;flex-direction:column;gap:0.75rem;">
                 {% for tt in treatment_types %}
@@ -1071,14 +1071,14 @@
                         {# Infos #}
                         <div style="flex:1;min-width:0;">
                             <div style="font-size:0.75rem;color:var(--text-muted);">
-                                {% if tt.price %}Preis: {{ tt.price|number_format(2, ',', '.') }} €{% else %}Kein Standardpreis{% endif %}
-                                &nbsp;·&nbsp;
+                                {% if tt.price %}Preis: {{ tt.price|number_format(2, ',', '.') }} �{% else %}Kein Standardpreis{% endif %}
+                                &nbsp;�&nbsp;
                                 {% if tt.active %}
                                     <span style="color:var(--success);">Aktiv</span>
                                 {% else %}
                                     <span style="color:var(--text-muted);">Inaktiv</span>
                                 {% endif %}
-                                &nbsp;·&nbsp; Reihenfolge: {{ tt.sort_order }}
+                                &nbsp;�&nbsp; Reihenfolge: {{ tt.sort_order }}
                             </div>
                             {% if tt.description %}
                                 <div style="font-size:0.78rem;color:var(--text-secondary);margin-top:0.2rem;">{{ tt.description }}</div>
@@ -1090,11 +1090,11 @@
                                 <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
                                 Bearbeiten
                             </button>
-                            <form action="/einstellungen/behandlungsarten/{{ tt.id }}/loeschen" method="POST" style="margin:0;" onsubmit="return confirm('Behandlungsart wirklich löschen?');">
+                            <form action="{{ base_path }}/einstellungen/behandlungsarten/{{ tt.id }}/loeschen" method="POST" style="margin:0;" onsubmit="return confirm('Behandlungsart wirklich l�schen?');">
                                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                                 <button type="submit" class="btn btn-sm" style="background:var(--danger-glow);color:var(--danger);border:1px solid var(--danger);">
                                     <svg width="13" height="13" fill="none" viewBox="0 0 24 24"><polyline stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" points="3 6 5 6 21 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10 11v6M14 11v6"/><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
-                                    Löschen
+                                    L�schen
                                 </button>
                             </form>
                         </div>
@@ -1106,7 +1106,7 @@
     </div>
 </div>
 
-{# Edit Modal für Behandlungsart #}
+{# Edit Modal f�r Behandlungsart #}
 <div class="modal fade" id="modal-edit-tt" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
@@ -1126,7 +1126,7 @@
                         <input type="color" id="ett-color" name="color" class="form-control" style="height:40px;padding:0.2rem;cursor:pointer;">
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Standardpreis (€)</label>
+                        <label class="form-label">Standardpreis (�)</label>
                         <input type="number" id="ett-price" name="price" class="form-control" step="0.01" min="0">
                     </div>
                     <div class="form-group">
@@ -1154,9 +1154,9 @@
     </div>
 </div>
 
-{# ═════════════════════════════════════════════════════
+{# -----------------------------------------------------
    TAB: UPDATES
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-updates">
     <div class="flex gap-4" style="align-items:flex-start;flex-wrap:wrap;">
         <div class="glass-card" style="flex:1;min-width:280px;">
@@ -1176,9 +1176,9 @@
                     <svg width="16" height="16" fill="none" viewBox="0 0 24 24"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
                     <span>{{ pending|length }} ausstehende Migration(en).</span>
                 </div>
-                <form action="/einstellungen/migrationen" method="POST" class="mt-3">
+                <form action="{{ base_path }}/einstellungen/migrationen" method="POST" class="mt-3">
                     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-                    <button type="submit" class="btn btn-warning" style="width:100%;" data-confirm="Migrationen wirklich ausführen? Erstellen Sie vorher ein Datenbankbackup.">
+                    <button type="submit" class="btn btn-warning" style="width:100%;" data-confirm="Migrationen wirklich ausf�hren? Erstellen Sie vorher ein Datenbankbackup.">
                         {{ t('settings.run_migrations') }}
                     </button>
                 </form>
@@ -1201,18 +1201,18 @@
     </div>
 </div>
 
-{# ═════════════════════════════════════════════════════
+{# -----------------------------------------------------
    MODALS: Benutzer anlegen / bearbeiten
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="modal fade" id="modal-new-user" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-scrollable"><div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title">{{ t('settings.new_user') }}</h3>
             <button class="modal-close" data-bs-dismiss="modal" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div>
-        <form action="/einstellungen/benutzer" method="POST" class="modal-body">
+        <form action="{{ base_path }}/einstellungen/benutzer" method="POST" class="modal-body">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
-            <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_name') }} *</label><input type="text" name="name" class="form-control" required placeholder="Vollständiger Name"></div>
+            <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_name') }} *</label><input type="text" name="name" class="form-control" required placeholder="Vollst�ndiger Name"></div>
             <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_email') }} *</label><input type="email" name="email" class="form-control" required placeholder="name@praxis.de"></div>
             <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_password') }} * <span class="form-hint">(min. 8 Zeichen)</span></label><input type="password" name="password" class="form-control" required minlength="8" autocomplete="new-password"></div>
             <div class="form-group mb-3">
@@ -1237,12 +1237,12 @@
             <h3 class="modal-title">Benutzer bearbeiten</h3>
             <button class="modal-close" data-bs-dismiss="modal" type="button"><svg width="14" height="14" fill="none" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="6" y1="6" x2="18" y2="18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button>
         </div>
-        <form action="/einstellungen/benutzer/{{ user.id }}" method="POST" class="modal-body">
+        <form action="{{ base_path }}/einstellungen/benutzer/{{ user.id }}" method="POST" class="modal-body">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
             <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_name') }} *</label><input type="text" name="name" class="form-control" required value="{{ user.name }}"></div>
             <div class="form-group mb-3"><label class="form-label">{{ t('settings.user_email') }} *</label><input type="email" name="email" class="form-control" required value="{{ user.email }}"></div>
             <div class="form-group mb-3">
-                <label class="form-label">{{ t('settings.user_password') }} <span class="form-hint">(leer = unverändert)</span></label>
+                <label class="form-label">{{ t('settings.user_password') }} <span class="form-hint">(leer = unver�ndert)</span></label>
                 <input type="password" name="password" class="form-control" minlength="8" autocomplete="new-password" placeholder="Neues Passwort (optional)">
             </div>
             <div class="form-group mb-3">
@@ -1316,7 +1316,7 @@
 
 <script>
 (function() {
-    // ── Tab Navigation ──────────────────────────────
+    // -- Tab Navigation ------------------------------
     const tabs   = document.querySelectorAll('#settingsTabs .settings-tab');
     const panels = document.querySelectorAll('.settings-tab-content');
 
@@ -1332,7 +1332,7 @@
     const saved   = (function(){ try { return localStorage.getItem('settingsTab'); } catch(e) { return null; } })();
     activate(hash || saved || 'firma');
 
-    // ── PDF Design Live Preview ──────────────────────
+    // -- PDF Design Live Preview ----------------------
     function syncColorPicker(pickerId, textId) {
         const picker = document.getElementById(pickerId);
         const text   = document.getElementById(textId);
@@ -1397,40 +1397,40 @@
 })();
 </script>
 
-{# ════════════════════════════════════════════════════
+{# ----------------------------------------------------
    TAB: E-MAIL TEMPLATES
-════════════════════════════════════════════════════ #}
+---------------------------------------------------- #}
 <div class="settings-tab-content" id="tab-email-templates">
 
 <div style="display:grid;grid-template-columns:1fr 380px;gap:1.5rem;align-items:start;" id="email-tpl-layout">
 
-    {# ── LEFT: Editor ── #}
+    {# -- LEFT: Editor -- #}
     <div>
 
     {# Template Switcher #}
     <div class="glass-card mb-4">
         <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
             <button type="button" class="btn btn-primary btn-sm email-tpl-tab active" data-tpl="invoice">
-                📄 Rechnung
+                ?? Rechnung
             </button>
             <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="receipt">
-                ✅ Quittung
+                ? Quittung
             </button>
             <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="reminder">
-                📅 Terminerinnerung
+                ?? Terminerinnerung
             </button>
             <button type="button" class="btn btn-secondary btn-sm email-tpl-tab" data-tpl="invite">
-                🐾 Einladung
+                ?? Einladung
             </button>
         </div>
     </div>
 
-    <form action="/einstellungen" method="POST" id="email-tpl-form">
+    <form action="{{ base_path }}/einstellungen" method="POST" id="email-tpl-form">
         <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
-        {# ── Rechnung ── #}
+        {# -- Rechnung -- #}
         <div class="email-tpl-panel glass-card mb-4" id="etpl-invoice">
-            <h3 class="section-title mb-3">📄 Rechnung per E-Mail</h3>
+            <h3 class="section-title mb-3">?? Rechnung per E-Mail</h3>
             <div class="form-group mb-3">
                 <label class="form-label fw-semibold">Betreff</label>
                 <input type="text" name="email_invoice_subject" id="etpl-invoice-subject" class="form-control"
@@ -1448,9 +1448,9 @@
             </div>
         </div>
 
-        {# ── Quittung ── #}
+        {# -- Quittung -- #}
         <div class="email-tpl-panel glass-card mb-4" id="etpl-receipt" style="display:none;">
-            <h3 class="section-title mb-3">✅ Quittung per E-Mail (Barzahlung)</h3>
+            <h3 class="section-title mb-3">? Quittung per E-Mail (Barzahlung)</h3>
             <div class="form-group mb-3">
                 <label class="form-label fw-semibold">Betreff</label>
                 <input type="text" name="email_receipt_subject" id="etpl-receipt-subject" class="form-control"
@@ -1468,9 +1468,9 @@
             </div>
         </div>
 
-        {# ── Terminerinnerung ── #}
+        {# -- Terminerinnerung -- #}
         <div class="email-tpl-panel glass-card mb-4" id="etpl-reminder" style="display:none;">
-            <h3 class="section-title mb-3">📅 Terminerinnerung</h3>
+            <h3 class="section-title mb-3">?? Terminerinnerung</h3>
             <div class="form-group mb-3">
                 <label class="form-label fw-semibold">Betreff</label>
                 <input type="text" name="email_reminder_subject" id="etpl-reminder-subject" class="form-control"
@@ -1488,9 +1488,9 @@
             </div>
         </div>
 
-        {# ── Einladung ── #}
+        {# -- Einladung -- #}
         <div class="email-tpl-panel glass-card mb-4" id="etpl-invite" style="display:none;">
-            <h3 class="section-title mb-3">🐾 Einladung zur Anmeldung</h3>
+            <h3 class="section-title mb-3">?? Einladung zur Anmeldung</h3>
             <div class="form-group mb-3">
                 <label class="form-label fw-semibold">Betreff</label>
                 <input type="text" name="email_invite_subject" id="etpl-invite-subject" class="form-control"
@@ -1516,7 +1516,7 @@
 
     </div>{# end left #}
 
-    {# ── RIGHT: Live Preview ── #}
+    {# -- RIGHT: Live Preview -- #}
     <div style="position:sticky;top:80px;">
         <div class="glass-card">
             <h3 class="section-title mb-3" style="font-size:0.875rem;">
@@ -1526,7 +1526,7 @@
             <div id="email-preview-wrap" style="border-radius:8px;overflow:hidden;border:1px solid var(--bs-border-color);">
                 <iframe id="email-preview-frame" style="width:100%;height:500px;border:none;background:#0f0f1a;" srcdoc=""></iframe>
             </div>
-            <p class="text-muted mt-2" style="font-size:0.75rem;">Vorschau mit Beispieldaten. Sieht in echten E-Mail-Clients ähnlich aus.</p>
+            <p class="text-muted mt-2" style="font-size:0.75rem;">Vorschau mit Beispieldaten. Sieht in echten E-Mail-Clients �hnlich aus.</p>
         </div>
     </div>
 
@@ -1536,7 +1536,7 @@
 
 <script>
 (function() {
-/* ── E-Mail Template: Tab Switcher ── */
+/* -- E-Mail Template: Tab Switcher -- */
 var tplTabs = document.querySelectorAll('.email-tpl-tab');
 var tplPanels = document.querySelectorAll('.email-tpl-panel');
 
@@ -1556,10 +1556,10 @@ tplTabs.forEach(function(b) {
     b.addEventListener('click', function() { switchTpl(b.getAttribute('data-tpl')); });
 });
 
-/* ── Live Preview ── */
+/* -- Live Preview -- */
 var companyName = {{ settings.company_name is defined ? ('"' ~ settings.company_name|e('js') ~ '"') : '"Tierphysio Praxis"' }};
 
-var previewIcons = { invoice:'📄', receipt:'✅', reminder:'📅', invite:'🐾' };
+var previewIcons = { invoice:'??', receipt:'?', reminder:'??', invite:'??' };
 
 function buildPreviewHtml(title, bodyText, icon) {
     var escaped = bodyText
@@ -1596,7 +1596,7 @@ function updateEmailPreview(tplName) {
     if (!subjectEl || !bodyEl) return;
     var subject = subjectEl.value || '(Kein Betreff)';
     var body    = bodyEl.value   || '';
-    var icon    = previewIcons[tplName] || '📧';
+    var icon    = previewIcons[tplName] || '??';
     frame.srcdoc = buildPreviewHtml(subject, body, icon);
 }
 
@@ -1611,14 +1611,14 @@ function updateEmailPreview(tplName) {
 /* init */
 switchTpl('invoice');
 
-/* ── Platzhalter Clipboard ── */
+/* -- Platzhalter Clipboard -- */
 document.addEventListener('click', function(e) {
     var el = e.target.closest('[data-ph]');
     if (!el) return;
     var ph = el.getAttribute('data-ph');
     navigator.clipboard?.writeText(ph).then(function() {
         var orig = el.textContent;
-        el.textContent = '✓';
+        el.textContent = '?';
         setTimeout(function(){ el.textContent = orig; }, 1000);
     });
 });

@@ -171,7 +171,7 @@
         </div>
         {% endif %}
 
-        <form action="/login" method="POST" autocomplete="on">
+        <form action="{{ base_path }}/login" method="POST" autocomplete="on">
             <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
 
             <div class="form-floating mb-3">
