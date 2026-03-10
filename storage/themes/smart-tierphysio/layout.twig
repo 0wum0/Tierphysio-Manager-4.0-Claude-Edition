@@ -58,7 +58,7 @@
                     </div>
                 </div>
             {%- endset %}
-            <a href="/dashboard" class="app-logo flex-shrink-0">
+            <a href="{{ base_path }}/dashboard" class="app-logo flex-shrink-0">
                 {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
                     <img src="/storage/uploads/{{ global_settings.company_logo }}" alt="{{ app_name }}" class="custom-logo">
                 {% else %}
@@ -197,7 +197,7 @@
                             if(type === 'patient'){
                                 openPatientFromSearch(id);
                             } else {
-                                window.location.href = '/tierhalter/' + id;
+                                window.location.href = '{{ base_path }}/tierhalter/' + id;
                             }
                         });
                     });
@@ -207,7 +207,7 @@
                     if(typeof window._gsOpenPatient === 'function'){
                         window._gsOpenPatient(id);
                     } else {
-                        window.location.href = '/patienten/' + id;
+                        window.location.href = '{{ base_path }}/patienten/' + id;
                     }
                 }
 
@@ -221,7 +221,7 @@
                     var q = inp.value.trim();
                     if(q.length < 2){ closeDropdown(); return; }
                     timer = setTimeout(function(){
-                        fetch('/api/global-search?q=' + encodeURIComponent(q))
+                        fetch('{{ base_path }}/api/global-search?q=' + encodeURIComponent(q))
                             .then(function(r){ return r.json(); })
                             .then(function(data){
                                 drop.style.display = 'block';
@@ -307,7 +307,7 @@
                 <ul class="notification">
                     {% for item in intake_latest %}
                     <li class="unread alert alert-dismissable">
-                        <a href="/eingangsmeldungen/{{ item.id }}" class="d-flex align-items-center text-decoration-none">
+                        <a href="{{ base_path }}/eingangsmeldungen/{{ item.id }}" class="d-flex align-items-center text-decoration-none">
                             <span class="d-flex flex-column flex-1 ms-1">
                                 <span class="name">🐾 {{ item.patient_name }}</span>
                                 <span class="msg-a fs-sm">{{ item.owner_first_name }} {{ item.owner_last_name }}</span>
@@ -322,7 +322,7 @@
                 {% endif %}
             </div>
             <div class="py-2 px-3 d-block rounded-bottom text-end border-light border-bottom-0 border-end-0 border-start-0">
-                <a href="/eingangsmeldungen" class="fs-xs fw-500">Alle anzeigen →</a>
+                <a href="{{ base_path }}/eingangsmeldungen" class="fs-xs fw-500">Alle anzeigen →</a>
             </div>
         </div>
         {% endif %}
@@ -355,16 +355,16 @@
                 </div>
             </div>
             <div class="dropdown-divider m-0"></div>
-            <a href="/einstellungen" class="dropdown-item" role="button">
+            <a href="{{ base_path }}/einstellungen" class="dropdown-item" role="button">
                 <svg class="sa-icon me-1"><use href="/themes/smart-tierphysio/icons/sprite.svg#settings"></use></svg>
                 Einstellungen
             </a>
-            <a href="/profil" class="dropdown-item" role="button">
+            <a href="{{ base_path }}/profil" class="dropdown-item" role="button">
                 <svg class="sa-icon me-1"><use href="/themes/smart-tierphysio/icons/sprite.svg#user"></use></svg>
                 Profil
             </a>
             <div class="dropdown-divider m-0"></div>
-            <form action="/logout" method="POST" style="margin:0;">
+            <form action="{{ base_path }}/logout" method="POST" style="margin:0;">
                 <input type="hidden" name="_csrf_token" value="{{ csrf_token }}">
                 <button type="submit" class="dropdown-item d-flex justify-content-between align-items-center py-3 fw-500">
                     <span class="text-danger">Abmelden</span>
@@ -380,7 +380,7 @@
     <aside class="app-sidebar d-flex flex-column">
 
         {# Logo in Sidebar — SmartAdmin CSS shows/hides based on layout class #}
-        <a href="/dashboard" class="app-logo flex-shrink-0">
+        <a href="{{ base_path }}/dashboard" class="app-logo flex-shrink-0">
             {% if global_settings is defined and global_settings.company_logo is defined and global_settings.company_logo %}
                 <img src="/storage/uploads/{{ global_settings.company_logo }}" alt="{{ app_name }}" class="custom-logo">
             {% else %}
@@ -443,7 +443,7 @@
                 <li class="nav-title"><span>Tierphysio</span></li>
 
                 <li class="{{ is_active('/dashboard') == 'active' ? 'active' : '' }}">
-                    <a href="/dashboard" data-filter-tags="dashboard übersicht">
+                    <a href="{{ base_path }}/dashboard" data-filter-tags="dashboard übersicht">
                         <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#trello"></use></svg>
                         <span class="nav-link-text">Dashboard</span>
                     </a>
@@ -452,21 +452,21 @@
                 <li class="nav-title"><span>Verwaltung</span></li>
 
                 <li class="{{ is_active('/patienten') == 'active' ? 'active' : '' }}">
-                    <a href="/patienten" data-filter-tags="patienten tiere">
+                    <a href="{{ base_path }}/patienten" data-filter-tags="patienten tiere">
                         <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#heart"></use></svg>
                         <span class="nav-link-text">Patienten</span>
                     </a>
                 </li>
 
                 <li class="{{ is_active('/tierhalter') == 'active' ? 'active' : '' }}">
-                    <a href="/tierhalter" data-filter-tags="tierhalter besitzer kunden">
+                    <a href="{{ base_path }}/tierhalter" data-filter-tags="tierhalter besitzer kunden">
                         <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#users"></use></svg>
                         <span class="nav-link-text">Tierhalter</span>
                     </a>
                 </li>
 
                 <li class="{{ is_active('/rechnungen') == 'active' ? 'active' : '' }}">
-                    <a href="/rechnungen" data-filter-tags="rechnungen faktura">
+                    <a href="{{ base_path }}/rechnungen" data-filter-tags="rechnungen faktura">
                         <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#file-text"></use></svg>
                         <span class="nav-link-text">Rechnungen</span>
                     </a>
@@ -488,7 +488,7 @@
                 <li class="nav-title"><span>Administration</span></li>
 
                 <li class="{{ is_active('/einstellungen') == 'active' ? 'active' : '' }}">
-                    <a href="/einstellungen" data-filter-tags="einstellungen konfiguration">
+                    <a href="{{ base_path }}/einstellungen" data-filter-tags="einstellungen konfiguration">
                         <svg class="sa-icon"><use href="/themes/smart-tierphysio/icons/sprite.svg#settings"></use></svg>
                         <span class="nav-link-text">Einstellungen</span>
                     </a>
